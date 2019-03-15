@@ -105,6 +105,10 @@ public class PathFinderModel {
 				target = map.numVertices() - 1;
 			}
 		}
+		
+		if (source == 0 && target == 0) {
+			target = map.numVertices() - 1;
+		}
 
 		setTile(source, Tile.BLANK);
 		setTile(target, Tile.BLANK);

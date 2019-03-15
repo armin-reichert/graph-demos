@@ -422,12 +422,9 @@ public class CanvasView extends GridCanvas {
 			r.fnCellBgColor = this::getCellBackground;
 			r.fnCellSize = () -> cellSize;
 			r.fnPassageWidth = (u, v) -> Math.max(cellSize * 5 / 100, 1);
-			r.fnPassageColor = (cell, dir) -> {
-				if (partOfSolution(cell) && partOfSolution(grid.neighbor(cell, dir).getAsInt())) {
-					return getCellBackground(cell);
-				}
-				return Color.WHITE; 
-			};
+			r.fnPassageColor = (cell, dir) -> partOfSolution(cell)
+					&& partOfSolution(grid.neighbor(cell, dir).getAsInt()) ? Color.RED.brighter() : Color.WHITE;
+			;
 		} else {
 			throw new IllegalArgumentException();
 		}
