@@ -26,7 +26,7 @@ public class HilbertLCurveApp extends SwingGridSampleApp {
 			setCellSize(cellSize);
 			HilbertLCurve curve = new HilbertLCurve(log(2, getGrid().numCols()));
 			traverse(curve, getGrid(), getGrid().cell(BOTTOM_LEFT), this::addEdge);
-			floodfill(BOTTOM_LEFT);
+			floodFill(BOTTOM_LEFT);
 			sleep(1000);
 		});
 	}

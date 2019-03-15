@@ -32,7 +32,7 @@ public class MooreCurveApp extends SwingGridSampleApp {
 			int startCol = n / 2, startRow = n - 1;
 			int startCell = getGrid().cell(startCol, startRow);
 			traverse(new MooreLCurve(log(2, n)), getGrid(), startCell, this::addEdge);
-			floodfill(startCell);
+			floodFill(startCell);
 			sleep(1000);
 		});
 	}

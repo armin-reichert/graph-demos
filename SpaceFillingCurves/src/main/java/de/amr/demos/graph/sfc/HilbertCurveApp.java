@@ -56,7 +56,7 @@ public class HilbertCurveApp extends SwingGridSampleApp {
 				HilbertCurve hilbert = new HilbertCurve(log(2, getGrid().numCols()), dir.get(0), dir.get(1),
 						dir.get(2), dir.get(3));
 				traverse(hilbert, getGrid(), getGrid().cell(start), this::addEdge);
-				floodfill(start);
+				floodFill(start);
 				sleep(1000);
 			});
 		});
