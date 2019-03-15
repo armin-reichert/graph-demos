@@ -414,17 +414,24 @@ public class CanvasView extends GridCanvas {
 		ConfigurableGridRenderer r;
 		if (style == RenderingStyle.BLOCKS) {
 			r = new WallPassageGridRenderer(new BlockCellRenderer(cellSize));
+			r.fnCellSize = () -> cellSize;
 			r.fnPassageWidth = (u, v) -> cellSize - 1;
+			r.fnPassageColor = (cell, dir) -> Color.WHITE;
 		} else if (style == RenderingStyle.PEARLS) {
 			r = new PearlsGridRenderer();
 			r.fnCellBgColor = this::getCellBackground;
-			r.fnPassageWidth = (u, v) -> 1;
+			r.fnCellSize = () -> cellSize;
+			r.fnPassageWidth = (u, v) -> Math.max(cellSize * 5 / 100, 1);
+			r.fnPassageColor = (cell, dir) -> {
+				if (partOfSolution(cell) && partOfSolution(grid.neighbor(cell, dir).getAsInt())) {
+					return getCellBackground(cell);
+				}
+				return Color.WHITE; 
+			};
 		} else {
 			throw new IllegalArgumentException();
 		}
 		r.fnGridBgColor = () -> new Color(160, 160, 160);
-		r.fnCellSize = () -> cellSize;
-		r.fnPassageColor = (cell, dir) -> Color.WHITE;
 		return r;
 	}
 }
