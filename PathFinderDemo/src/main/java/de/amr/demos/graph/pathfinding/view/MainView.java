@@ -52,6 +52,8 @@ public class MainView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			PathFinderAlgorithm algorithm = comboAlgorithm.getItemAt(comboAlgorithm.getSelectedIndex());
 			controller.selectAlgorithm(algorithm);
+			actionStepThroughSelectedPathFinder.setEnabled(true);
+			actionFinishSelectedPathFinder.setEnabled(true);
 		}
 	};
 

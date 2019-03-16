@@ -290,12 +290,11 @@ public class CanvasView extends GridCanvas {
 			GraphSearch<Tile, Double, ?> pf = model.getPathFinder(controller.getSelectedAlgorithm());
 
 			// cell text color
+			Color textColor = Color.BLUE;
 			if (cell == model.getSource() || cell == model.getTarget() || partOfSolution(cell)) {
-				g.setColor(Color.WHITE);
+				textColor = Color.WHITE;
 			} else if (pf.getState(cell) == TraversalState.UNVISITED) {
-				g.setColor(Color.LIGHT_GRAY);
-			} else {
-				g.setColor(Color.BLUE);
+				textColor = Color.LIGHT_GRAY;
 			}
 
 			g.translate(cellX, cellY);
@@ -304,39 +303,59 @@ public class CanvasView extends GridCanvas {
 			g.setFont(font);
 			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			Rectangle2D box;
+
 			if (pf.getClass() == AStarSearch.class) {
+				
 				// G-value
 				String gCost = formatValue(pf.getCost(cell));
 				textSizePct(g, 30);
 				box = box(g, gCost);
+				g.setColor(textColor);
 				g.drawString(gCost, inset, (int) box.getHeight());
+				
 				// H-value
 				String hCost = formatValue(model.distance(cell, model.getTarget()));
 				textSizePct(g, 30);
 				box = box(g, hCost);
+				g.setColor(textColor);
 				g.drawString(hCost, (int) (cellSize - box.getWidth() - inset), (int) box.getHeight());
+				
 				// F-value
 				AStarSearch<Tile, Double> astar = (AStarSearch<Tile, Double>) pf;
 				String fCost = formatValue(astar.getScore(cell));
 				textSizePct(g, 50);
 				box = box(g, fCost);
+				if (!partOfSolution(cell)) {
+					g.setColor(Color.MAGENTA);
+				}
 				g.drawString(fCost, (int) (cellSize - box.getWidth()) / 2, cellSize - inset);
-			} else if (pf.getClass() == BestFirstSearch.class) {
+			}
+
+			else if (pf.getClass() == BestFirstSearch.class) {
+				
 				// H-value
 				String hCost = formatValue(model.distance(cell, model.getTarget()));
 				textSizePct(g, 30);
 				box = box(g, hCost);
+				if (pf.getState(cell) != TraversalState.UNVISITED && !partOfSolution(cell)) {
+					g.setColor(Color.MAGENTA);
+				}
 				g.drawString(hCost, inset, (int) box.getHeight());
+				
 				// G-value
 				String gCost = formatValue(pf.getCost(cell));
 				textSizePct(g, 50);
 				box = box(g, gCost);
+				g.setColor(textColor);
 				g.drawString(gCost, (int) (cellSize - box.getWidth()) / 2, cellSize - inset);
-			} else {
+			}
+
+			else {
 				// G-value
 				String gCost = formatValue(pf.getCost(cell));
 				textSizePct(g, 50);
 				box = box(g, gCost);
+				g.setColor(textColor);
 				g.drawString(gCost, (int) (cellSize - box.getWidth()) / 2,
 						(int) (cellSize + box.getHeight() - g.getFontMetrics().getDescent()) / 2);
 			}
