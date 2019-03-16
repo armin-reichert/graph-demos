@@ -20,10 +20,8 @@ import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.controller.Controller;
-import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.graph.grid.api.GridGraph2D;
@@ -65,25 +63,6 @@ public class CanvasView extends GridCanvas {
 					drawGridCell(other);
 				}
 			});
-		}
-	}
-
-	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
-
-		@Override
-		protected Void doInBackground() throws Exception {
-			PathFinderAlgorithm algorithm = controller.getSelectedAlgorithm();
-			model.newRun(algorithm);
-			drawGrid();
-			model.getPathFinder(algorithm).addObserver(animation);
-			model.runPathFinder(algorithm);
-			model.getPathFinder(algorithm).removeObserver(animation);
-			return null;
-		}
-
-		@Override
-		protected void done() {
-			drawGrid(); // redraw to highlight solution
 		}
 	}
 
@@ -229,10 +208,6 @@ public class CanvasView extends GridCanvas {
 
 	public PathFinderAnimation getAnimation() {
 		return animation;
-	}
-
-	public void runPathFinderAnimation() {
-		new PathFinderAnimationTask().execute();
 	}
 
 	public void fixHeight(int fixedHeight) {

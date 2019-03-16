@@ -3,6 +3,8 @@ package de.amr.demos.graph.pathfinding.controller;
 import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
+import javax.swing.SwingWorker;
+
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
@@ -21,6 +23,24 @@ public class Controller {
 
 	private PathFinderAlgorithm selectedAlgorithm;
 	private boolean autoRunPathFinders;
+
+	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			model.newRun(selectedAlgorithm);
+			view.getCanvasView().drawGrid();
+			model.getPathFinder(selectedAlgorithm).addObserver(view.getCanvasView().getAnimation());
+			model.runPathFinder(selectedAlgorithm);
+			model.getPathFinder(selectedAlgorithm).removeObserver(view.getCanvasView().getAnimation());
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			view.getCanvasView().drawGrid(); // redraw to highlight solution
+		}
+	}
 
 	public Controller(PathFinderModel model) {
 		this.model = model;
@@ -45,6 +65,10 @@ public class Controller {
 	public void runAllPathFinders() {
 		model.runAllPathFinders();
 		view.updateView();
+	}
+
+	public void runPathFinderAnimation() {
+		new PathFinderAnimationTask().execute();
 	}
 
 	public void resetScene() {

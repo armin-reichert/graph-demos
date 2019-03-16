@@ -26,8 +26,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.amr.demos.graph.pathfinding.controller.Controller;
-import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
+import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import net.miginfocom.swing.MigLayout;
@@ -41,23 +41,6 @@ public class MainView extends JPanel {
 
 	private static final String _4_NEIGHBORS = "4 Neighbors";
 	private static final String _8_NEIGHBORS = "8 Neighbors";
-
-	private Action actionRunSelectedPathFinder = new AbstractAction("Run Selected Path Finder") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			canvasView.runPathFinderAnimation();
-		}
-	};
-
-	private Action actionClear = new AbstractAction("Clear") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			model.newRun(controller.getSelectedAlgorithm());
-			canvasView.drawGrid();
-		}
-	};
 
 	private Action actionSelectAlgorithm = new AbstractAction("Select Algorithm") {
 
@@ -110,6 +93,23 @@ public class MainView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			canvasView.setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
+		}
+	};
+
+	private Action actionRunSelectedPathFinder = new AbstractAction("Run Selected Path Finder") {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			controller.runPathFinderAnimation();
+		}
+	};
+
+	private Action actionClear = new AbstractAction("Clear") {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			model.newRun(controller.getSelectedAlgorithm());
+			canvasView.drawGrid();
 		}
 	};
 
@@ -283,6 +283,10 @@ public class MainView extends JPanel {
 
 		actionClear.setEnabled(!controller.isAutoRunPathFinders());
 		actionRunSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
+	}
+
+	public CanvasView getCanvasView() {
+		return canvasView;
 	}
 
 	public void updateView() {
