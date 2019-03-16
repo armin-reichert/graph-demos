@@ -49,7 +49,7 @@ public class CanvasView extends GridCanvas {
 		private int draggedCell;
 
 		// grid cell index associated with event
-		private int getEventLocation(MouseEvent e) {
+		private int getCellForEvent(MouseEvent e) {
 			int col = max(0, min(e.getX() / getCellSize(), model.getMap().numCols() - 1));
 			int row = max(0, min(e.getY() / getCellSize(), model.getMap().numRows() - 1));
 			return model.getMap().cell(col, row);
@@ -62,7 +62,7 @@ public class CanvasView extends GridCanvas {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			if (e.getButton() == MouseEvent.BUTTON1) {
-				int cell = getEventLocation(e);
+				int cell = getCellForEvent(e);
 				controller.flipTileAt(cell);
 			}
 		}
@@ -77,7 +77,7 @@ public class CanvasView extends GridCanvas {
 				}
 			} else if (e.isPopupTrigger()) {
 				// open popup menu
-				selectedCell = getEventLocation(e);
+				selectedCell = getCellForEvent(e);
 				boolean blankCellSelected = model.getMap().get(selectedCell) == Tile.BLANK;
 				actionSetSource.setEnabled(blankCellSelected);
 				actionSetTarget.setEnabled(blankCellSelected);
@@ -87,19 +87,23 @@ public class CanvasView extends GridCanvas {
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			int cell = getEventLocation(e);
+			int cell = getCellForEvent(e);
 			if (cell != draggedCell) {
 				// dragging into new cell
 				draggedCell = cell;
 				controller.setTileAt(cell, e.isShiftDown() ? Tile.BLANK : Tile.WALL);
 			}
 		}
-		
+
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			if (e.isAltDown()) {
-				model.setTarget(getEventLocation(e));
-				controller.runSelectedPathFinder();
+				int cell = getCellForEvent(e);
+				if (cell != selectedCell) {
+					selectedCell = cell;
+					model.setTarget(cell);
+					controller.runSelectedPathFinder();
+				}
 			}
 		}
 	}
@@ -148,7 +152,7 @@ public class CanvasView extends GridCanvas {
 	private JPopupMenu contextMenu;
 	private int selectedCell;
 	private int fixedHeight;
-	
+
 	public CanvasView(GridGraph2D<?, ?> grid, int initialHeight) {
 		super(grid);
 		this.fixedHeight = initialHeight;
@@ -313,21 +317,21 @@ public class CanvasView extends GridCanvas {
 			Rectangle2D box;
 
 			if (pf.getClass() == AStarSearch.class) {
-				
+
 				// G-value
 				String gCost = formatValue(pf.getCost(cell));
 				textSizePct(g, 30);
 				box = box(g, gCost);
 				g.setColor(textColor);
 				g.drawString(gCost, inset, (int) box.getHeight());
-				
+
 				// H-value
 				String hCost = formatValue(model.distance(cell, model.getTarget()));
 				textSizePct(g, 30);
 				box = box(g, hCost);
 				g.setColor(textColor);
 				g.drawString(hCost, (int) (cellSize - box.getWidth() - inset), (int) box.getHeight());
-				
+
 				// F-value
 				AStarSearch<Tile, Double> astar = (AStarSearch<Tile, Double>) pf;
 				String fCost = formatValue(astar.getScore(cell));
@@ -340,7 +344,7 @@ public class CanvasView extends GridCanvas {
 			}
 
 			else if (pf.getClass() == BestFirstSearch.class) {
-				
+
 				// H-value
 				String hCost = formatValue(model.distance(cell, model.getTarget()));
 				textSizePct(g, 30);
@@ -349,7 +353,7 @@ public class CanvasView extends GridCanvas {
 					g.setColor(Color.MAGENTA);
 				}
 				g.drawString(hCost, inset, (int) box.getHeight());
-				
+
 				// G-value
 				String gCost = formatValue(pf.getCost(cell));
 				textSizePct(g, 50);
