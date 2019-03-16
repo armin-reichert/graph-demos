@@ -94,6 +94,14 @@ public class CanvasView extends GridCanvas {
 				controller.setTileAt(cell, e.isShiftDown() ? Tile.BLANK : Tile.WALL);
 			}
 		}
+		
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			if (e.isAltDown()) {
+				model.setTarget(getEventLocation(e));
+				controller.runSelectedPathFinder();
+			}
+		}
 	}
 
 	private Action actionSetSource = new AbstractAction("Search From Here") {
@@ -140,7 +148,7 @@ public class CanvasView extends GridCanvas {
 	private JPopupMenu contextMenu;
 	private int selectedCell;
 	private int fixedHeight;
-
+	
 	public CanvasView(GridGraph2D<?, ?> grid, int initialHeight) {
 		super(grid);
 		this.fixedHeight = initialHeight;

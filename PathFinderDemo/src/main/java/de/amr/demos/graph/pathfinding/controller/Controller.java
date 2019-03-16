@@ -95,6 +95,16 @@ public class Controller {
 	public void runPathFinderAnimation() {
 		new PathFinderAnimationTask().execute();
 	}
+	
+	public void runSelectedPathFinder() {
+		if (autoRunPathFinders) {
+			model.runAllPathFinders();
+		} else {
+			model.newRun(selectedAlgorithm);
+			model.runPathFinder(selectedAlgorithm);
+		}
+		updateViewIfPresent();
+	}
 
 	// begin step-wise execution
 
