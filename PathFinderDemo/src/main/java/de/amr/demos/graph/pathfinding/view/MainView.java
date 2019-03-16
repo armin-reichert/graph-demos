@@ -14,6 +14,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -30,7 +31,10 @@ import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
+import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;
+import java.awt.Component;
+import javax.swing.Box;
 
 /**
  * Main view of path finder demo app.
@@ -74,8 +78,10 @@ public class MainView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			boolean auto = cbAutoRunPathFinder.isSelected();
-			actionRunSelectedPathFinder.setEnabled(!auto);
-			actionClear.setEnabled(!auto);
+			actionRunSelectedPathFinderAnimation.setEnabled(!auto);
+			actionRestartSelectedPathFinder.setEnabled(!auto);
+			actionStepThroughSelectedPathFinder.setEnabled(!auto);
+			actionFinishSelectedPathFinder.setEnabled(!auto);
 			sliderDelay.setEnabled(!auto);
 			scrollPaneTableResults.setVisible(auto);
 			controller.setAutoRunPathFinders(auto);
@@ -96,7 +102,7 @@ public class MainView extends JPanel {
 		}
 	};
 
-	private Action actionRunSelectedPathFinder = new AbstractAction("Run Selected Path Finder") {
+	private Action actionRunSelectedPathFinderAnimation = new AbstractAction("Animate") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -104,15 +110,39 @@ public class MainView extends JPanel {
 		}
 	};
 
-	private Action actionClear = new AbstractAction("Clear") {
+	private Action actionRestartSelectedPathFinder = new AbstractAction("Restart") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			model.newRun(controller.getSelectedAlgorithm());
-			canvasView.drawGrid();
+			controller.startSelectedPathFinder();
+			actionStepThroughSelectedPathFinder.setEnabled(true);
+			actionFinishSelectedPathFinder.setEnabled(true);
 		}
 	};
 
+	private Action actionStepThroughSelectedPathFinder = new AbstractAction("Steps") {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JComponent source = (JComponent) e.getSource();
+			int numSteps = (Integer) source.getClientProperty("numSteps");
+			Path path = controller.runSelectedPathFinderSteps(numSteps);
+			boolean enabled = path == Path.EMPTY_PATH; 
+			setEnabled(enabled);
+			actionFinishSelectedPathFinder.setEnabled(enabled);
+		}
+	};
+	
+	private Action actionFinishSelectedPathFinder = new AbstractAction("Finish") {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			controller.finishSelectedPathFinder();
+			setEnabled(false);
+			actionStepThroughSelectedPathFinder.setEnabled(false);
+		}
+	};
+	
 	private Action actionShowCost = new AbstractAction("Show Cost") {
 
 		@Override
@@ -147,6 +177,10 @@ public class MainView extends JPanel {
 	private JPanel panelMap;
 	private JScrollPane scrollPaneTableResults;
 	private HelpPanel helpPanel;
+	private JButton btnStep;
+	private JButton btnSteps5;
+	private JButton btnFinish;
+	private Component horizontalStrut;
 
 	public MainView() {
 		setOpaque(false);
@@ -185,13 +219,32 @@ public class MainView extends JPanel {
 		panel.setOpaque(false);
 		panelActions.add(panel, "flowx,cell 1 7,growx");
 
+		JButton btnStart = new JButton("Start");
+		btnStart.setAction(actionRestartSelectedPathFinder);
+		panel.add(btnStart);
+
+		btnStep = new JButton("Step");
+		btnStep.setAction(actionStepThroughSelectedPathFinder);
+		btnStep.putClientProperty("numSteps", 1);
+		btnStep.setText("1 Step");
+		panel.add(btnStep);
+		
+		btnSteps5 = new JButton("5 Steps");
+		btnSteps5.setAction(actionStepThroughSelectedPathFinder);
+		btnSteps5.putClientProperty("numSteps", 5);
+		btnSteps5.setText("5 Steps");
+		panel.add(btnSteps5);
+		
+		btnFinish = new JButton("Finish");
+		btnFinish.setAction(actionFinishSelectedPathFinder);
+		panel.add(btnFinish);
+		
+		horizontalStrut = Box.createHorizontalStrut(20);
+		panel.add(horizontalStrut);
+
 		JButton btnRun = new JButton("Run");
 		panel.add(btnRun);
-		btnRun.setAction(actionRunSelectedPathFinder);
-
-		JButton btnNewButton = new JButton();
-		panel.add(btnNewButton);
-		btnNewButton.setAction(actionClear);
+		btnRun.setAction(actionRunSelectedPathFinderAnimation);
 
 		JLabel lblDelay = new JLabel("Delay [ms]");
 		panelActions.add(lblDelay, "cell 0 8,alignx trailing,aligny top");
@@ -280,14 +333,15 @@ public class MainView extends JPanel {
 		cbAutoRunPathFinder.setSelected(controller.isAutoRunPathFinders());
 		cbAutoRunPathFinder.setAction(actionToggleAutoPathFinding);
 
-		actionClear.setEnabled(!controller.isAutoRunPathFinders());
-		actionRunSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
+		actionRestartSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
+		actionStepThroughSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
+		actionRunSelectedPathFinderAnimation.setEnabled(!controller.isAutoRunPathFinders());
 	}
 
 	public CanvasView getCanvasView() {
 		return canvasView;
 	}
-	
+
 	public int getAnimationDelay() {
 		return sliderDelay.getValue();
 	}

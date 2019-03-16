@@ -3,6 +3,8 @@ package de.amr.demos.graph.pathfinding.controller;
 import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
+import java.util.Optional;
+
 import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
@@ -12,7 +14,9 @@ import de.amr.demos.graph.pathfinding.view.MainView;
 import de.amr.graph.grid.api.Topology;
 import de.amr.graph.grid.ui.animation.AbstractAnimation;
 import de.amr.graph.pathfinder.api.GraphSearchObserver;
+import de.amr.graph.pathfinder.api.Path;
 import de.amr.graph.pathfinder.api.TraversalState;
+import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
  * Demo application controller.
@@ -71,25 +75,60 @@ public class Controller {
 	private void maybeRunPathFinder() {
 		if (autoRunPathFinders) {
 			model.runAllPathFinders();
+			updateViewIfPresent();
 		} else {
 			model.newRun(selectedAlgorithm);
+			startSelectedPathFinder();
 		}
-		view.updateView();
 	}
 
 	public void newRuns() {
 		model.newRuns();
-		view.updateView();
+		updateViewIfPresent();
 	}
 
 	public void runAllPathFinders() {
 		model.runAllPathFinders();
-		view.updateView();
+		updateViewIfPresent();
 	}
 
 	public void runPathFinderAnimation() {
 		new PathFinderAnimationTask().execute();
 	}
+
+	// begin step-wise execution
+
+	public void startSelectedPathFinder() {
+		model.newRun(selectedAlgorithm);
+		GraphSearch<?, ?, ?> pf = model.getPathFinder(selectedAlgorithm);
+		pf.init();
+		pf.start(model.getSource(), model.getTarget());
+		updateViewIfPresent();
+	}
+
+	public Path runSelectedPathFinderSteps(int numSteps) {
+		GraphSearch<?, ?, ?> pf = model.getPathFinder(selectedAlgorithm);
+		if (pf.getState(model.getSource()) == TraversalState.UNVISITED) {
+			startSelectedPathFinder();
+		}
+		while (pf.canExplore() && numSteps > 0) {
+			if (pf.exploreVertex()) {
+				Path path = Path.constructPath(model.getSource(), model.getTarget(), pf);
+				model.storeResult(selectedAlgorithm, path, 0);
+				updateViewIfPresent();
+				return path; // found path
+			}
+			numSteps -= 1;
+		}
+		updateViewIfPresent();
+		return Path.EMPTY_PATH;
+	}
+	
+	public Path finishSelectedPathFinder() {
+		return runSelectedPathFinderSteps(Integer.MAX_VALUE);
+	}
+
+	// end step-wise execution
 
 	public void resetScene() {
 		model.clearMap();
@@ -107,6 +146,14 @@ public class Controller {
 
 	public void setView(MainView view) {
 		this.view = view;
+	}
+
+	public Optional<MainView> getView() {
+		return Optional.ofNullable(view);
+	}
+
+	private void updateViewIfPresent() {
+		getView().ifPresent(MainView::updateView);
 	}
 
 	public boolean isAutoRunPathFinders() {

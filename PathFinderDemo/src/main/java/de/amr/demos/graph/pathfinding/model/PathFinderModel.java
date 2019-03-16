@@ -192,10 +192,15 @@ public class PathFinderModel {
 		watch.start();
 		Path path = Path.computePath(source, target, pf);
 		watch.stop();
+		storeResult(algorithm, path, watch.getNanos() / 1_000_000f);
+	}
+
+	public void storeResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
+		GraphSearch<Tile, Double, ?> pf = getPathFinder(algorithm);
 		long numOpenVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.VISITED).count();
 		long numClosedVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.COMPLETED).count();
-		runs.put(algorithm, new PathFinderRun(pf, path, watch.getNanos() / 1_000_000f, pf.getCost(target),
-				numOpenVertices, numClosedVertices));
+		runs.put(algorithm,
+				new PathFinderRun(pf, path, timeMillis, pf.getCost(target), numOpenVertices, numClosedVertices));
 	}
 
 	public PathFinderRun getRun(PathFinderAlgorithm algorithm) {

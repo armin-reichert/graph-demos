@@ -33,6 +33,7 @@ public class PathFinderDemoApp {
 		MainView view = new MainView();
 		view.init(model, controller);
 		controller.setView(view);
+		controller.startSelectedPathFinder();
 		MainWindow window = new MainWindow();
 		window.setView(view);
 		window.setVisible(true);
