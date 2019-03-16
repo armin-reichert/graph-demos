@@ -258,7 +258,6 @@ public class MainView extends JPanel {
 		canvasView.init(model, controller);
 		canvasView.setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
 		canvasView.setShowCost(cbShowCost.isSelected());
-		canvasView.getAnimation().setFnDelay(sliderDelay::getValue);
 		canvasView.fixHeight(canvasView.getSize().height);
 		panelMap.add(canvasView, BorderLayout.CENTER);
 
@@ -287,6 +286,10 @@ public class MainView extends JPanel {
 
 	public CanvasView getCanvasView() {
 		return canvasView;
+	}
+	
+	public int getAnimationDelay() {
+		return sliderDelay.getValue();
 	}
 
 	public void updateView() {

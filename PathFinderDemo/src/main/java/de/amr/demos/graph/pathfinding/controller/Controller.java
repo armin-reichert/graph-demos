@@ -10,6 +10,9 @@ import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.MainView;
 import de.amr.graph.grid.api.Topology;
+import de.amr.graph.grid.ui.animation.AbstractAnimation;
+import de.amr.graph.pathfinder.api.GraphSearchObserver;
+import de.amr.graph.pathfinder.api.TraversalState;
 
 /**
  * Demo application controller.
@@ -24,15 +27,32 @@ public class Controller {
 	private PathFinderAlgorithm selectedAlgorithm;
 	private boolean autoRunPathFinders;
 
+	private class PathFinderAnimation extends AbstractAnimation implements GraphSearchObserver {
+
+		@Override
+		public void vertexStateChanged(int v, TraversalState oldState, TraversalState newState) {
+			delayed(() -> view.getCanvasView().drawGridCell(v));
+		}
+
+		@Override
+		public void edgeTraversed(int either, int other) {
+			delayed(() -> {
+				view.getCanvasView().drawGridPassage(either, other, true);
+			});
+		}
+	}
+
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
 
 		@Override
 		protected Void doInBackground() throws Exception {
 			model.newRun(selectedAlgorithm);
 			view.getCanvasView().drawGrid();
-			model.getPathFinder(selectedAlgorithm).addObserver(view.getCanvasView().getAnimation());
+			PathFinderAnimation animation = new PathFinderAnimation();
+			animation.setFnDelay(view::getAnimationDelay);
+			model.getPathFinder(selectedAlgorithm).addObserver(animation);
 			model.runPathFinder(selectedAlgorithm);
-			model.getPathFinder(selectedAlgorithm).removeObserver(view.getCanvasView().getAnimation());
+			model.getPathFinder(selectedAlgorithm).removeObserver(animation);
 			return null;
 		}
 

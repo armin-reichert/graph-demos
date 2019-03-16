@@ -27,13 +27,11 @@ import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.impl.GridGraph;
-import de.amr.graph.grid.ui.animation.AbstractAnimation;
 import de.amr.graph.grid.ui.rendering.ConfigurableGridRenderer;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.grid.ui.rendering.PearlsGridRenderer;
 import de.amr.graph.grid.ui.rendering.WallPassageGridRenderer;
-import de.amr.graph.pathfinder.api.GraphSearchObserver;
 import de.amr.graph.pathfinder.api.TraversalState;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
@@ -45,26 +43,6 @@ import de.amr.graph.pathfinder.impl.GraphSearch;
  * @author Armin Reichert
  */
 public class CanvasView extends GridCanvas {
-
-	class PathFinderAnimation extends AbstractAnimation implements GraphSearchObserver {
-
-		@Override
-		public void vertexStateChanged(int v, TraversalState oldState, TraversalState newState) {
-			delayed(() -> drawGridCell(v));
-		}
-
-		@Override
-		public void edgeTraversed(int either, int other) {
-			delayed(() -> {
-				drawGridPassage(either, other, true);
-				// TODO fixme
-				if (style == RenderingStyle.PEARLS) {
-					drawGridCell(either);
-					drawGridCell(other);
-				}
-			});
-		}
-	}
 
 	private class MouseHandler extends MouseAdapter {
 
@@ -159,7 +137,6 @@ public class CanvasView extends GridCanvas {
 	private RenderingStyle style;
 	private boolean showCost;
 	private boolean showParent = false;
-	private PathFinderAnimation animation;
 	private JPopupMenu contextMenu;
 	private int selectedCell;
 	private int fixedHeight;
@@ -168,7 +145,6 @@ public class CanvasView extends GridCanvas {
 		super(grid);
 		this.fixedHeight = initialHeight;
 		style = RenderingStyle.BLOCKS;
-		animation = new PathFinderAnimation();
 		selectedCell = -1;
 		MouseHandler mouse = new MouseHandler();
 		addMouseListener(mouse);
@@ -204,10 +180,6 @@ public class CanvasView extends GridCanvas {
 		this.controller = controller;
 		ConfigurableGridRenderer r = createMapRenderer(fixedHeight / model.getMapSize());
 		pushRenderer(r);
-	}
-
-	public PathFinderAnimation getAnimation() {
-		return animation;
 	}
 
 	public void fixHeight(int fixedHeight) {
@@ -405,5 +377,15 @@ public class CanvasView extends GridCanvas {
 		}
 		r.fnGridBgColor = () -> new Color(160, 160, 160);
 		return r;
+	}
+
+	@Override
+	public void drawGridPassage(int either, int other, boolean visible) {
+		super.drawGridPassage(either, other, visible);
+		// TODO fixme
+		if (style == RenderingStyle.PEARLS) {
+			drawGridCell(either);
+			drawGridCell(other);
+		}
 	}
 }
