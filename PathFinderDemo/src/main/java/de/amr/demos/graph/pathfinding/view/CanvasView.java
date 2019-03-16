@@ -338,7 +338,7 @@ public class CanvasView extends GridCanvas {
 				textSizePct(g, 50);
 				box = box(g, gCost);
 				g.drawString(gCost, (int) (cellSize - box.getWidth()) / 2,
-						cellSize / 2 + g.getFontMetrics().getDescent());
+						(int) (cellSize + box.getHeight() - g.getFontMetrics().getDescent()) / 2);
 			}
 			g.translate(-cellX, -cellY);
 
