@@ -105,7 +105,7 @@ public class PathFinderModel {
 				target = map.numVertices() - 1;
 			}
 		}
-		
+
 		if (source == 0 && target == 0) {
 			target = map.numVertices() - 1;
 		}
@@ -154,11 +154,11 @@ public class PathFinderModel {
 	private GraphSearch<Tile, Double, ?> newPathFinder(PathFinderAlgorithm algorithm) {
 		switch (algorithm) {
 		case AStar:
-			return new AStarSearch<>(map, e -> e, this::distance);
+			return new AStarSearch<>(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
 		case BFS:
 			return new BreadthFirstSearch<>(map, this::distance);
 		case Dijkstra:
-			return new DijkstraSearch<>(map, e -> e);
+			return new DijkstraSearch<>(map, (u, v) -> map.getEdgeLabel(u, v));
 		case GreedyBestFirst:
 			return new BestFirstSearch<>(map, v -> distance(v, target), this::distance);
 		}
