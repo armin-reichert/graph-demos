@@ -99,7 +99,7 @@ public class CanvasView extends GridCanvas {
 		public void mouseMoved(MouseEvent e) {
 			if (e.isAltDown()) {
 				int cell = getCellForEvent(e);
-				if (cell != selectedCell) {
+				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
 					selectedCell = cell;
 					model.setTarget(cell);
 					controller.runSelectedPathFinder();
