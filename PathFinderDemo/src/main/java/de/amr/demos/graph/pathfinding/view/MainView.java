@@ -2,6 +2,7 @@ package de.amr.demos.graph.pathfinding.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.SystemColor;
@@ -10,6 +11,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -33,8 +35,6 @@ import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;
-import java.awt.Component;
-import javax.swing.Box;
 
 /**
  * Main view of path finder demo app.
@@ -81,7 +81,7 @@ public class MainView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			boolean auto = cbAutoRunPathFinder.isSelected();
 			actionRunSelectedPathFinderAnimation.setEnabled(!auto);
-			actionRestartSelectedPathFinder.setEnabled(!auto);
+			actionResetSelectedPathFinder.setEnabled(!auto);
 			actionStepThroughSelectedPathFinder.setEnabled(!auto);
 			actionFinishSelectedPathFinder.setEnabled(!auto);
 			sliderDelay.setEnabled(!auto);
@@ -112,7 +112,7 @@ public class MainView extends JPanel {
 		}
 	};
 
-	private Action actionRestartSelectedPathFinder = new AbstractAction("Restart") {
+	private Action actionResetSelectedPathFinder = new AbstractAction("Reset") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -129,14 +129,14 @@ public class MainView extends JPanel {
 			JComponent source = (JComponent) e.getSource();
 			int numSteps = (Integer) source.getClientProperty("numSteps");
 			Path path = controller.runSelectedPathFinderSteps(numSteps);
-			boolean enabled = path == Path.EMPTY_PATH; 
+			boolean enabled = path == Path.EMPTY_PATH;
 			setEnabled(enabled);
 			actionFinishSelectedPathFinder.setEnabled(enabled);
 		}
 	};
-	
+
 	private Action actionFinishSelectedPathFinder = new AbstractAction("Finish") {
-		
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			controller.finishSelectedPathFinder();
@@ -144,7 +144,7 @@ public class MainView extends JPanel {
 			actionStepThroughSelectedPathFinder.setEnabled(false);
 		}
 	};
-	
+
 	private Action actionShowCost = new AbstractAction("Show Cost") {
 
 		@Override
@@ -221,30 +221,30 @@ public class MainView extends JPanel {
 		panel.setOpaque(false);
 		panelActions.add(panel, "flowx,cell 1 7,growx");
 
-		JButton btnStart = new JButton("Start");
-		btnStart.setAction(actionRestartSelectedPathFinder);
+		JButton btnStart = new JButton();
+		btnStart.setAction(actionResetSelectedPathFinder);
 		panel.add(btnStart);
 
-		btnStep = new JButton("Step");
+		btnStep = new JButton();
 		btnStep.setAction(actionStepThroughSelectedPathFinder);
 		btnStep.putClientProperty("numSteps", 1);
 		btnStep.setText("1 Step");
 		panel.add(btnStep);
-		
-		btnSteps5 = new JButton("5 Steps");
+
+		btnSteps5 = new JButton();
 		btnSteps5.setAction(actionStepThroughSelectedPathFinder);
 		btnSteps5.putClientProperty("numSteps", 5);
 		btnSteps5.setText("5 Steps");
 		panel.add(btnSteps5);
-		
-		btnFinish = new JButton("Finish");
+
+		btnFinish = new JButton();
 		btnFinish.setAction(actionFinishSelectedPathFinder);
 		panel.add(btnFinish);
-		
+
 		horizontalStrut = Box.createHorizontalStrut(20);
 		panel.add(horizontalStrut);
 
-		JButton btnRun = new JButton("Run");
+		JButton btnRun = new JButton();
 		panel.add(btnRun);
 		btnRun.setAction(actionRunSelectedPathFinderAnimation);
 
@@ -335,7 +335,7 @@ public class MainView extends JPanel {
 		cbAutoRunPathFinder.setSelected(controller.isAutoRunPathFinders());
 		cbAutoRunPathFinder.setAction(actionToggleAutoPathFinding);
 
-		actionRestartSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
+		actionResetSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
 		actionStepThroughSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
 		actionRunSelectedPathFinderAnimation.setEnabled(!controller.isAutoRunPathFinders());
 	}

@@ -44,6 +44,11 @@ public class Controller {
 				view.getCanvasView().drawGridPassage(either, other, true);
 			});
 		}
+		
+		@Override
+		public void vertexRemovedFromFrontier(int v) {
+			view.getCanvasView().drawGridCell(v);
+		}
 	}
 
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {

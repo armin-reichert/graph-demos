@@ -49,7 +49,7 @@ public class CanvasView extends GridCanvas {
 		private int draggedCell;
 
 		// grid cell index associated with event
-		private int getCellForEvent(MouseEvent e) {
+		private int getCellUnderMouse(MouseEvent e) {
 			int col = max(0, min(e.getX() / getCellSize(), model.getMap().numCols() - 1));
 			int row = max(0, min(e.getY() / getCellSize(), model.getMap().numRows() - 1));
 			return model.getMap().cell(col, row);
@@ -62,7 +62,7 @@ public class CanvasView extends GridCanvas {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			if (e.getButton() == MouseEvent.BUTTON1) {
-				int cell = getCellForEvent(e);
+				int cell = getCellUnderMouse(e);
 				controller.flipTileAt(cell);
 			}
 		}
@@ -77,7 +77,7 @@ public class CanvasView extends GridCanvas {
 				}
 			} else if (e.isPopupTrigger()) {
 				// open popup menu
-				selectedCell = getCellForEvent(e);
+				selectedCell = getCellUnderMouse(e);
 				boolean blankCellSelected = model.getMap().get(selectedCell) == Tile.BLANK;
 				actionSetSource.setEnabled(blankCellSelected);
 				actionSetTarget.setEnabled(blankCellSelected);
@@ -87,7 +87,7 @@ public class CanvasView extends GridCanvas {
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			int cell = getCellForEvent(e);
+			int cell = getCellUnderMouse(e);
 			if (cell != draggedCell) {
 				// dragging into new cell
 				draggedCell = cell;
@@ -98,7 +98,7 @@ public class CanvasView extends GridCanvas {
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			if (e.isAltDown()) {
-				int cell = getCellForEvent(e);
+				int cell = getCellUnderMouse(e);
 				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
 					selectedCell = cell;
 					model.setTarget(cell);
@@ -243,7 +243,12 @@ public class CanvasView extends GridCanvas {
 		if (partOfSolution(cell)) {
 			return Color.RED.brighter();
 		}
-		TraversalState cellState = model.getPathFinder(controller.getSelectedAlgorithm()).getState(cell);
+		GraphSearch<?> pf = model.getPathFinder(controller.getSelectedAlgorithm());
+		TraversalState cellState = pf.getState(cell);
+		if (pf.getState(model.getTarget()) == TraversalState.UNVISITED && pf.getNextVertex().isPresent()
+				&& cell == pf.getNextVertex().getAsInt()) {
+			return new Color(152, 255, 152);
+		}
 		if (cellState == TraversalState.COMPLETED) {
 			return Color.ORANGE;
 		}
@@ -284,8 +289,13 @@ public class CanvasView extends GridCanvas {
 		@Override
 		public void drawCell(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
 
-			int cellX = grid.col(cell) * getCellSize();
-			int cellY = grid.row(cell) * getCellSize();
+			int col = grid.col(cell);
+			int row = grid.row(cell);
+			int cellX = col * cellSize;
+			int cellY = row * cellSize;
+			GraphSearch<?> pf = model.getPathFinder(controller.getSelectedAlgorithm());
+
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 			// cell square
 			g.setColor(getCellBackground(cell));
@@ -293,12 +303,10 @@ public class CanvasView extends GridCanvas {
 			g.setColor(new Color(160, 160, 160));
 			g.drawRect(cellX, cellY, cellSize, cellSize);
 
-			// check if text gets drawn
+			// draw cell content?
 			if (!showCost || model.getMap().get(cell) == Tile.WALL) {
 				return;
 			}
-
-			GraphSearch<?> pf = model.getPathFinder(controller.getSelectedAlgorithm());
 
 			// cell text color
 			Color textColor = Color.BLUE;
