@@ -281,7 +281,6 @@ public class CanvasView extends GridCanvas {
 			return g.getFontMetrics().getStringBounds(text, g);
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void drawCell(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
 
@@ -299,7 +298,7 @@ public class CanvasView extends GridCanvas {
 				return;
 			}
 
-			GraphSearch<Tile, Double, ?> pf = model.getPathFinder(controller.getSelectedAlgorithm());
+			GraphSearch<?> pf = model.getPathFinder(controller.getSelectedAlgorithm());
 
 			// cell text color
 			Color textColor = Color.BLUE;
@@ -333,7 +332,7 @@ public class CanvasView extends GridCanvas {
 				g.drawString(hCost, (int) (cellSize - box.getWidth() - inset), (int) box.getHeight());
 
 				// F-value
-				AStarSearch<Tile, Double> astar = (AStarSearch<Tile, Double>) pf;
+				AStarSearch astar = (AStarSearch) pf;
 				String fCost = formatValue(astar.getScore(cell));
 				textSizePct(g, 50);
 				box = box(g, fCost);

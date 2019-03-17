@@ -95,7 +95,7 @@ public class Controller {
 	public void runPathFinderAnimation() {
 		new PathFinderAnimationTask().execute();
 	}
-	
+
 	public void runSelectedPathFinder() {
 		if (autoRunPathFinders) {
 			model.runAllPathFinders();
@@ -110,14 +110,14 @@ public class Controller {
 
 	public void startSelectedPathFinder() {
 		model.newRun(selectedAlgorithm);
-		GraphSearch<?, ?, ?> pf = model.getPathFinder(selectedAlgorithm);
+		GraphSearch<?> pf = model.getPathFinder(selectedAlgorithm);
 		pf.init();
 		pf.start(model.getSource(), model.getTarget());
 		updateViewIfPresent();
 	}
 
 	public Path runSelectedPathFinderSteps(int numSteps) {
-		GraphSearch<?, ?, ?> pf = model.getPathFinder(selectedAlgorithm);
+		GraphSearch<?> pf = model.getPathFinder(selectedAlgorithm);
 		if (pf.getState(model.getSource()) == TraversalState.UNVISITED) {
 			startSelectedPathFinder();
 		}
@@ -133,7 +133,7 @@ public class Controller {
 		updateViewIfPresent();
 		return Path.EMPTY_PATH;
 	}
-	
+
 	public Path finishSelectedPathFinder() {
 		return runSelectedPathFinderSteps(Integer.MAX_VALUE);
 	}

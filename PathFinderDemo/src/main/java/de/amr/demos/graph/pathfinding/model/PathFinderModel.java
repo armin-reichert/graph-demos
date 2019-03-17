@@ -151,21 +151,21 @@ public class PathFinderModel {
 		return map.euclidean(u, v);
 	}
 
-	private GraphSearch<Tile, Double, ?> newPathFinder(PathFinderAlgorithm algorithm) {
+	private GraphSearch<?> newPathFinder(PathFinderAlgorithm algorithm) {
 		switch (algorithm) {
 		case AStar:
-			return new AStarSearch<>(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
+			return new AStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
 		case BFS:
-			return new BreadthFirstSearch<>(map, this::distance);
+			return new BreadthFirstSearch(map, this::distance);
 		case Dijkstra:
-			return new DijkstraSearch<>(map, (u, v) -> map.getEdgeLabel(u, v));
+			return new DijkstraSearch(map, (u, v) -> map.getEdgeLabel(u, v));
 		case GreedyBestFirst:
-			return new BestFirstSearch<>(map, v -> distance(v, target), this::distance);
+			return new BestFirstSearch(map, v -> distance(v, target), this::distance);
 		}
 		throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
 	}
 
-	public GraphSearch<Tile, Double, ?> getPathFinder(PathFinderAlgorithm algorithm) {
+	public GraphSearch<?> getPathFinder(PathFinderAlgorithm algorithm) {
 		return runs.get(algorithm).getPathFinder();
 	}
 
@@ -187,7 +187,7 @@ public class PathFinderModel {
 	}
 
 	public void runPathFinder(PathFinderAlgorithm algorithm) {
-		GraphSearch<Tile, Double, ?> pf = getPathFinder(algorithm);
+		GraphSearch<?> pf = getPathFinder(algorithm);
 		StopWatch watch = new StopWatch();
 		watch.start();
 		Path path = Path.computePath(source, target, pf);
@@ -196,7 +196,7 @@ public class PathFinderModel {
 	}
 
 	public void storeResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
-		GraphSearch<Tile, Double, ?> pf = getPathFinder(algorithm);
+		GraphSearch<?> pf = getPathFinder(algorithm);
 		long numOpenVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.VISITED).count();
 		long numClosedVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.COMPLETED).count();
 		runs.put(algorithm,
