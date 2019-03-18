@@ -14,9 +14,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.amr.graph</groupId>
-			<artifactId>graph-parent</artifactId>
+			<artifactId>graph-viz</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<type>pom</type>
 		</dependency>
 	</dependencies>
 </project>
