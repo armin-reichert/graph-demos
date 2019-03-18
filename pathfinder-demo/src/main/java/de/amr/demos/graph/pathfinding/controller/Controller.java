@@ -80,6 +80,7 @@ public class Controller {
 	public void maybeRunPathFinder() {
 		switch (executionMode) {
 		case MANUAL:
+			model.newRuns();
 			updateViewIfPresent();
 			break;
 		case AUTO_SELECTED:
@@ -100,7 +101,7 @@ public class Controller {
 		model.runPathFinder(selectedAlgorithm);
 		updateViewIfPresent();
 	}
-	
+
 	public void runAllPathFinders() {
 		model.runAllPathFinders();
 		updateViewIfPresent();

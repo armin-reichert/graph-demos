@@ -78,6 +78,7 @@ public class MainView extends JPanel {
 			controller.setExecutionMode(executionMode);
 			controller.maybeRunPathFinder();
 			scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
+			updateEnabledState();
 		}
 	};
 
@@ -335,6 +336,8 @@ public class MainView extends JPanel {
 		comboExecutionMode.setModel(new DefaultComboBoxModel<>(ExecutionMode.values()));
 		comboExecutionMode.setSelectedItem(controller.getExecutionMode());
 		comboExecutionMode.setAction(actionSelectExecutionMode);
+		
+		updateEnabledState();
 	}
 
 	public CanvasView getCanvasView() {
@@ -357,5 +360,14 @@ public class MainView extends JPanel {
 		if (canvasView != null) {
 			canvasView.setGrid(model.getMap());
 		}
+	}
+	
+	private void updateEnabledState() {
+		boolean manualExecution = comboExecutionMode.getSelectedItem() == ExecutionMode.MANUAL;
+		actionResetSelectedPathFinder.setEnabled(manualExecution);
+		actionStepThroughSelectedPathFinder.setEnabled(manualExecution);
+		actionFinishSelectedPathFinder.setEnabled(manualExecution);
+		actionRunSelectedPathFinderAnimation.setEnabled(manualExecution);
+		sliderDelay.setEnabled(manualExecution);
 	}
 }
