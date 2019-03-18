@@ -3,9 +3,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>de.amr.demos.graph.sfc</groupId>
   <artifactId>SpaceFillingCurves</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <build>
     <plugins>
       <plugin>
@@ -18,10 +16,16 @@
       </plugin>
     </plugins>
   </build>
+  <parent>
+  	<groupId>de.amr.demos.graph</groupId>
+  	<artifactId>graph-demos-parent</artifactId>
+  	<version>0.0.1-SNAPSHOT</version>
+  	<relativePath>..</relativePath>
+  </parent>
   <dependencies>
   	<dependency>
-  		<groupId>de.amr.graph.viz</groupId>
-  		<artifactId>GraphVisualization</artifactId>
+  		<groupId>de.amr.graph</groupId>
+  		<artifactId>graph-viz</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
   </dependencies>
