@@ -90,7 +90,8 @@ public class MainView extends JPanel {
 			controller.setAutoRunPathFinders(auto);
 			if (auto) {
 				controller.runAllPathFinders();
-			} else {
+			}
+			else {
 				model.newRun(controller.getSelectedAlgorithm());
 				canvasView.drawGrid();
 			}
@@ -202,7 +203,8 @@ public class MainView extends JPanel {
 		panelActions.setBackground(Color.WHITE);
 		panelActions.setPreferredSize(new Dimension(500, 50));
 		add(panelActions, "cell 1 0,grow");
-		panelActions.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][][][grow,bottom]"));
+		panelActions
+				.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][][][grow,bottom]"));
 
 		JLabel lblMap = new JLabel("Map");
 		panelActions.add(lblMap, "cell 0 0 2 1,alignx leading");
@@ -219,10 +221,10 @@ public class MainView extends JPanel {
 
 		spinnerMapSize = new JSpinner();
 		panelActions.add(spinnerMapSize, "cell 1 1");
-		
-				cbShowCost = new JCheckBox("Show Cost");
-				cbShowCost.setAction(actionShowCost);
-				panelActions.add(cbShowCost, "cell 1 7,alignx leading,aligny bottom");
+
+		cbShowCost = new JCheckBox("Show Cost");
+		cbShowCost.setAction(actionShowCost);
+		panelActions.add(cbShowCost, "cell 1 7,alignx leading,aligny bottom");
 
 		lblStepbystep = new JLabel("Step-By-Step Execution");
 		panelActions.add(lblStepbystep, "cell 0 8,alignx trailing");
@@ -285,9 +287,9 @@ public class MainView extends JPanel {
 		comboStyle.setAction(actionSelectMapStyle);
 		comboStyle.setModel(new DefaultComboBoxModel<>(RenderingStyle.values()));
 		panelActions.add(comboStyle, "cell 1 3,growx");
-		
-				cbAutoRunPathFinder = new JCheckBox("Run Automatically");
-				panelActions.add(cbAutoRunPathFinder, "cell 1 11,alignx leading");
+
+		cbAutoRunPathFinder = new JCheckBox("Run Automatically");
+		panelActions.add(cbAutoRunPathFinder, "cell 1 11,alignx leading");
 
 		scrollPaneTableResults = new JScrollPane();
 		scrollPaneTableResults.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);

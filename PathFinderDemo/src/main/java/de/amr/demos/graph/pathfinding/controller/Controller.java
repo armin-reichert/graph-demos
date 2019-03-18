@@ -44,7 +44,7 @@ public class Controller {
 				view.getCanvasView().drawGridPassage(either, other, true);
 			});
 		}
-		
+
 		@Override
 		public void vertexRemovedFromFrontier(int v) {
 			view.getCanvasView().drawGridCell(v);
@@ -81,7 +81,8 @@ public class Controller {
 		if (autoRunPathFinders) {
 			model.runAllPathFinders();
 			updateViewIfPresent();
-		} else {
+		}
+		else {
 			model.newRun(selectedAlgorithm);
 			startSelectedPathFinder();
 		}
@@ -104,7 +105,8 @@ public class Controller {
 	public void runSelectedPathFinder() {
 		if (autoRunPathFinders) {
 			model.runAllPathFinders();
-		} else {
+		}
+		else {
 			model.newRun(selectedAlgorithm);
 			model.runPathFinder(selectedAlgorithm);
 		}

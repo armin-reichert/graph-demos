@@ -80,7 +80,8 @@ public class PathFinderModel {
 					sourceRow = scaledCoord(oldMap.row(source), scalingFactor);
 			if (map.isValidCol(sourceCol) && map.isValidRow(sourceRow)) {
 				source = map.cell(sourceCol, sourceRow);
-			} else {
+			}
+			else {
 				source = 0;
 			}
 		}
@@ -101,7 +102,8 @@ public class PathFinderModel {
 					targetRow = scaledCoord(oldMap.row(target), scalingFactor);
 			if (map.isValidCol(targetCol) && map.isValidRow(targetRow)) {
 				target = map.cell(targetCol, targetRow);
-			} else {
+			}
+			else {
 				target = map.numVertices() - 1;
 			}
 		}
@@ -139,7 +141,8 @@ public class PathFinderModel {
 				if (!map.adjacent(cell, neighbor)) {
 					map.addEdge(cell, neighbor);
 				}
-			} else {
+			}
+			else {
 				if (map.adjacent(cell, neighbor)) {
 					map.removeEdge(cell, neighbor);
 				}

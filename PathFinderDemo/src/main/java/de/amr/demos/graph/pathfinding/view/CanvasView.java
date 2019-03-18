@@ -75,7 +75,8 @@ public class CanvasView extends GridCanvas {
 				if (controller.isAutoRunPathFinders()) {
 					controller.runAllPathFinders();
 				}
-			} else if (e.isPopupTrigger()) {
+			}
+			else if (e.isPopupTrigger()) {
 				// open popup menu
 				selectedCell = getCellUnderMouse(e);
 				boolean blankCellSelected = model.getMap().get(selectedCell) == Tile.BLANK;
@@ -97,8 +98,15 @@ public class CanvasView extends GridCanvas {
 
 		@Override
 		public void mouseMoved(MouseEvent e) {
-			if (e.isAltDown()) {
-				int cell = getCellUnderMouse(e);
+			int cell = getCellUnderMouse(e);
+			if (e.isShiftDown()) {
+				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
+					selectedCell = cell;
+					model.setSource(cell);
+					controller.runSelectedPathFinder();
+				}
+			}
+			else if (e.isControlDown()) {
 				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
 					selectedCell = cell;
 					model.setTarget(cell);
@@ -116,7 +124,8 @@ public class CanvasView extends GridCanvas {
 			GridPosition position = (GridPosition) trigger.getClientProperty("position");
 			if (position != null) {
 				controller.setSource(model.getMap().cell(position));
-			} else {
+			}
+			else {
 				controller.setSource(selectedCell);
 			}
 		}
@@ -130,7 +139,8 @@ public class CanvasView extends GridCanvas {
 			GridPosition position = (GridPosition) trigger.getClientProperty("position");
 			if (position != null) {
 				controller.setTarget(model.getMap().cell(position));
-			} else {
+			}
+			else {
 				controller.setTarget(selectedCell);
 			}
 		}
@@ -312,7 +322,8 @@ public class CanvasView extends GridCanvas {
 			Color textColor = Color.BLUE;
 			if (cell == model.getSource() || cell == model.getTarget() || partOfSolution(cell)) {
 				textColor = Color.WHITE;
-			} else if (pf.getState(cell) == TraversalState.UNVISITED) {
+			}
+			else if (pf.getState(cell) == TraversalState.UNVISITED) {
 				textColor = Color.LIGHT_GRAY;
 			}
 
@@ -402,7 +413,8 @@ public class CanvasView extends GridCanvas {
 			r.fnCellSize = () -> cellSize;
 			r.fnPassageWidth = (u, v) -> cellSize - 1;
 			r.fnPassageColor = (cell, dir) -> Color.WHITE;
-		} else if (style == RenderingStyle.PEARLS) {
+		}
+		else if (style == RenderingStyle.PEARLS) {
 			r = new PearlsGridRenderer();
 			r.fnCellBgColor = this::getCellBackground;
 			r.fnCellSize = () -> cellSize;
@@ -410,7 +422,8 @@ public class CanvasView extends GridCanvas {
 			r.fnPassageColor = (cell, dir) -> partOfSolution(cell)
 					&& partOfSolution(grid.neighbor(cell, dir).getAsInt()) ? Color.RED.brighter() : Color.WHITE;
 			;
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException();
 		}
 		r.fnGridBgColor = () -> new Color(160, 160, 160);
