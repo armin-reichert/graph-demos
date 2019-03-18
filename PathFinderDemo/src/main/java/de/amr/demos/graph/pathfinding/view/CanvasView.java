@@ -72,9 +72,7 @@ public class CanvasView extends GridCanvas {
 			if (draggedCell != -1) {
 				// dragging ends
 				draggedCell = -1;
-				if (controller.isAutoRunPathFinders()) {
-					controller.runAllPathFinders();
-				}
+				controller.maybeRunPathFinder();
 			}
 			else if (e.isPopupTrigger()) {
 				// open popup menu
@@ -102,15 +100,13 @@ public class CanvasView extends GridCanvas {
 			if (e.isShiftDown()) {
 				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
 					selectedCell = cell;
-					model.setSource(cell);
-					controller.runSelectedPathFinder();
+					controller.setSource(cell);
 				}
 			}
 			else if (e.isControlDown()) {
 				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
 					selectedCell = cell;
-					model.setTarget(cell);
-					controller.runSelectedPathFinder();
+					controller.setTarget(cell);
 				}
 			}
 		}

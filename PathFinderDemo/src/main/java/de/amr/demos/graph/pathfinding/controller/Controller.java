@@ -29,7 +29,7 @@ public class Controller {
 	private MainView view;
 
 	private PathFinderAlgorithm selectedAlgorithm;
-	private boolean autoRunPathFinders;
+	private ExecutionMode executionMode;
 
 	private class PathFinderAnimation extends AbstractAnimation implements GraphSearchObserver {
 
@@ -74,17 +74,23 @@ public class Controller {
 	public Controller(PathFinderModel model) {
 		this.model = model;
 		selectedAlgorithm = PathFinderAlgorithm.values()[0];
-		autoRunPathFinders = false;
+		executionMode = ExecutionMode.MANUAL;
 	}
 
-	private void maybeRunPathFinder() {
-		if (autoRunPathFinders) {
-			model.runAllPathFinders();
+	public void maybeRunPathFinder() {
+		switch (executionMode) {
+		case MANUAL:
 			updateViewIfPresent();
-		}
-		else {
-			model.newRun(selectedAlgorithm);
+			break;
+		case AUTO_SELECTED:
+			runSelectedPathFinder();
+			break;
+		case AUTO_ALL:
+			runAllPathFinders();
+			break;
+		case STEPWISE:
 			startSelectedPathFinder();
+			break;
 		}
 	}
 
@@ -93,6 +99,11 @@ public class Controller {
 		updateViewIfPresent();
 	}
 
+	public void runSelectedPathFinder() {
+		model.runPathFinder(selectedAlgorithm);
+		updateViewIfPresent();
+	}
+	
 	public void runAllPathFinders() {
 		model.runAllPathFinders();
 		updateViewIfPresent();
@@ -100,17 +111,6 @@ public class Controller {
 
 	public void runPathFinderAnimation() {
 		new PathFinderAnimationTask().execute();
-	}
-
-	public void runSelectedPathFinder() {
-		if (autoRunPathFinders) {
-			model.runAllPathFinders();
-		}
-		else {
-			model.newRun(selectedAlgorithm);
-			model.runPathFinder(selectedAlgorithm);
-		}
-		updateViewIfPresent();
 	}
 
 	// begin step-wise execution
@@ -173,12 +173,12 @@ public class Controller {
 		getView().ifPresent(MainView::updateView);
 	}
 
-	public boolean isAutoRunPathFinders() {
-		return autoRunPathFinders;
+	public ExecutionMode getExecutionMode() {
+		return executionMode;
 	}
 
-	public void setAutoRunPathFinders(boolean autoRunPathFinders) {
-		this.autoRunPathFinders = autoRunPathFinders;
+	public void setExecutionMode(ExecutionMode executionMode) {
+		this.executionMode = executionMode;
 	}
 
 	public void resizeMap(int size) {
@@ -195,11 +195,13 @@ public class Controller {
 
 	public void setSource(int source) {
 		model.setSource(source);
+		model.newRuns();
 		maybeRunPathFinder();
 	}
 
 	public void setTarget(int target) {
 		model.setTarget(target);
+		model.newRuns();
 		maybeRunPathFinder();
 	}
 

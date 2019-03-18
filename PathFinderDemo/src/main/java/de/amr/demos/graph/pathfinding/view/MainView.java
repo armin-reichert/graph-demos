@@ -27,12 +27,14 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.amr.demos.graph.pathfinding.controller.Controller;
+import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;
+import javax.swing.BoxLayout;
 
 /**
  * Main view of path finder demo app.
@@ -50,11 +52,6 @@ public class MainView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			PathFinderAlgorithm algorithm = comboAlgorithm.getItemAt(comboAlgorithm.getSelectedIndex());
 			controller.selectAlgorithm(algorithm);
-			if (!cbAutoRunPathFinder.isSelected()) {
-				actionStepThroughSelectedPathFinder.setEnabled(true);
-				actionFinishSelectedPathFinder.setEnabled(true);
-				actionResetSelectedPathFinder.setEnabled(true);
-			}
 		}
 	};
 
@@ -76,25 +73,14 @@ public class MainView extends JPanel {
 		}
 	};
 
-	private Action actionToggleAutoPathFinding = new AbstractAction("Run All") {
+	private Action actionSelectExecutionMode = new AbstractAction("Set Execution Mode") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			boolean auto = cbAutoRunPathFinder.isSelected();
-			actionRunSelectedPathFinderAnimation.setEnabled(!auto);
-			actionResetSelectedPathFinder.setEnabled(!auto);
-			actionStepThroughSelectedPathFinder.setEnabled(!auto);
-			actionFinishSelectedPathFinder.setEnabled(!auto);
-			sliderDelay.setEnabled(!auto);
-			scrollPaneTableResults.setVisible(auto);
-			controller.setAutoRunPathFinders(auto);
-			if (auto) {
-				controller.runAllPathFinders();
-			}
-			else {
-				model.newRun(controller.getSelectedAlgorithm());
-				canvasView.drawGrid();
-			}
+			ExecutionMode executionMode = (ExecutionMode) comboExecutionMode.getSelectedItem();
+			controller.setExecutionMode(executionMode);
+			controller.maybeRunPathFinder();
+			scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
 		}
 	};
 
@@ -175,7 +161,6 @@ public class MainView extends JPanel {
 	private JCheckBox cbShowCost;
 	private JLabel lblPathFinding;
 	private JPanel panelActions;
-	private JCheckBox cbAutoRunPathFinder;
 	private JComboBox<RenderingStyle> comboStyle;
 	private JSlider sliderDelay;
 	private JPanel panelMap;
@@ -187,6 +172,8 @@ public class MainView extends JPanel {
 	private JLabel lblStepbystep;
 	private JLabel lblAnimation;
 	private JPanel panel_1;
+	private JLabel lblNewLabel;
+	private JComboBox<ExecutionMode> comboExecutionMode;
 
 	public MainView() {
 		setOpaque(false);
@@ -203,8 +190,7 @@ public class MainView extends JPanel {
 		panelActions.setBackground(Color.WHITE);
 		panelActions.setPreferredSize(new Dimension(500, 50));
 		add(panelActions, "cell 1 0,grow");
-		panelActions
-				.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][][][grow,bottom]"));
+		panelActions.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][][grow,bottom]"));
 
 		JLabel lblMap = new JLabel("Map");
 		panelActions.add(lblMap, "cell 0 0 2 1,alignx leading");
@@ -226,12 +212,20 @@ public class MainView extends JPanel {
 		cbShowCost.setAction(actionShowCost);
 		panelActions.add(cbShowCost, "cell 1 7,alignx leading,aligny bottom");
 
+		lblNewLabel = new JLabel("Execution Mode");
+		panelActions.add(lblNewLabel, "cell 0 8,alignx trailing");
+
+		comboExecutionMode = new JComboBox<>();
+		comboExecutionMode.setModel(new DefaultComboBoxModel<>(ExecutionMode.values()));
+		comboExecutionMode.setAction(actionSelectExecutionMode);
+		panelActions.add(comboExecutionMode, "cell 1 8,growx");
+
 		lblStepbystep = new JLabel("Step-By-Step Execution");
-		panelActions.add(lblStepbystep, "cell 0 8,alignx trailing");
+		panelActions.add(lblStepbystep, "cell 0 9,alignx trailing");
 
 		JPanel panel = new JPanel();
 		panel.setOpaque(false);
-		panelActions.add(panel, "flowx,cell 1 8,alignx left");
+		panelActions.add(panel, "flowx,cell 1 9,alignx left");
 
 		btnStep = new JButton();
 		btnStep.setAction(actionStepThroughSelectedPathFinder);
@@ -254,19 +248,7 @@ public class MainView extends JPanel {
 		panel.add(btnStart);
 
 		lblAnimation = new JLabel("Animated Execution");
-		panelActions.add(lblAnimation, "cell 0 9,alignx trailing");
-
-		JLabel lblDelay = new JLabel("Delay [ms]");
-		panelActions.add(lblDelay, "cell 0 10,alignx trailing,aligny top");
-
-		sliderDelay = new JSlider();
-		sliderDelay.setValue(10);
-		sliderDelay.setMaximum(50);
-		sliderDelay.setMinorTickSpacing(1);
-		sliderDelay.setPaintTicks(true);
-		sliderDelay.setPaintLabels(true);
-		sliderDelay.setMajorTickSpacing(5);
-		panelActions.add(sliderDelay, "cell 1 10,growx");
+		panelActions.add(lblAnimation, "cell 0 10,alignx trailing,aligny center");
 
 		JLabel lblAlgorithm = new JLabel("Algorithm");
 		panelActions.add(lblAlgorithm, "cell 0 6,alignx trailing");
@@ -288,12 +270,9 @@ public class MainView extends JPanel {
 		comboStyle.setModel(new DefaultComboBoxModel<>(RenderingStyle.values()));
 		panelActions.add(comboStyle, "cell 1 3,growx");
 
-		cbAutoRunPathFinder = new JCheckBox("Run Automatically");
-		panelActions.add(cbAutoRunPathFinder, "cell 1 11,alignx leading");
-
 		scrollPaneTableResults = new JScrollPane();
 		scrollPaneTableResults.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-		panelActions.add(scrollPaneTableResults, "cell 0 12 2 1,growx,aligny top");
+		panelActions.add(scrollPaneTableResults, "cell 0 11 2 1,growx,aligny top");
 
 		tableResults = new ResultsTable();
 		tableResults.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -304,16 +283,26 @@ public class MainView extends JPanel {
 		scrollPaneTableResults.setViewportView(tableResults);
 
 		helpPanel = new HelpPanel();
-		panelActions.add(helpPanel, "cell 0 13 2 1,growx,aligny bottom");
+		panelActions.add(helpPanel, "cell 0 12 2 1,growx,aligny bottom");
 
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
-		panelActions.add(panel_1, "cell 1 9");
+		panelActions.add(panel_1, "flowx,cell 1 10,growx");
+		panel_1.setLayout(new MigLayout("", "[][grow]", "[]"));
 
 		JButton btnRun = new JButton();
-		panel_1.add(btnRun);
+		panel_1.add(btnRun, "cell 0 0,aligny center");
 		btnRun.setAction(actionRunSelectedPathFinderAnimation);
 		btnRun.setText("Run");
+
+		sliderDelay = new JSlider();
+		panel_1.add(sliderDelay, "cell 1 0,growx,aligny center");
+		sliderDelay.setValue(10);
+		sliderDelay.setMaximum(50);
+		sliderDelay.setMinorTickSpacing(1);
+		sliderDelay.setPaintTicks(true);
+		sliderDelay.setPaintLabels(true);
+		sliderDelay.setMajorTickSpacing(5);
 	}
 
 	public void init(PathFinderModel model, Controller controller) {
@@ -330,7 +319,7 @@ public class MainView extends JPanel {
 		panelMap.add(canvasView, BorderLayout.CENTER);
 
 		// path finder results table
-		scrollPaneTableResults.setVisible(controller.isAutoRunPathFinders());
+		scrollPaneTableResults.setVisible(controller.getExecutionMode() == ExecutionMode.AUTO_ALL);
 		tableResults.init(model);
 
 		// others controls
@@ -345,12 +334,7 @@ public class MainView extends JPanel {
 		comboAlgorithm.setSelectedItem(controller.getSelectedAlgorithm());
 		comboAlgorithm.setAction(actionSelectAlgorithm);
 
-		cbAutoRunPathFinder.setSelected(controller.isAutoRunPathFinders());
-		cbAutoRunPathFinder.setAction(actionToggleAutoPathFinding);
-
-		actionResetSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
-		actionStepThroughSelectedPathFinder.setEnabled(!controller.isAutoRunPathFinders());
-		actionRunSelectedPathFinderAnimation.setEnabled(!controller.isAutoRunPathFinders());
+		comboExecutionMode.setSelectedItem(controller.getExecutionMode());
 	}
 
 	public CanvasView getCanvasView() {
