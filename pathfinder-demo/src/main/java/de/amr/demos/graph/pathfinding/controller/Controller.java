@@ -11,7 +11,8 @@ import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.MainView;
-import de.amr.graph.grid.api.Topology;
+import de.amr.graph.grid.impl.Top4;
+import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.grid.ui.animation.AbstractAnimation;
 import de.amr.graph.pathfinder.api.GraphSearchObserver;
 import de.amr.graph.pathfinder.api.Path;
@@ -35,19 +36,25 @@ public class Controller {
 
 		@Override
 		public void vertexStateChanged(int v, TraversalState oldState, TraversalState newState) {
-			delayed(() -> view.getCanvasView().drawGridCell(v));
+			view.getCanvasView().ifPresent(canvas -> {
+				delayed(() -> canvas.drawGridCell(v));
+			});
 		}
 
 		@Override
 		public void edgeTraversed(int either, int other) {
-			delayed(() -> {
-				view.getCanvasView().drawGridPassage(either, other, true);
+			view.getCanvasView().ifPresent(canvas -> {
+				delayed(() -> {
+					canvas.drawGridPassage(either, other, true);
+				});
 			});
 		}
 
 		@Override
 		public void vertexRemovedFromFrontier(int v) {
-			view.getCanvasView().drawGridCell(v);
+			view.getCanvasView().ifPresent(canvas -> {
+				canvas.drawGridCell(v);
+			});
 		}
 	}
 
@@ -56,7 +63,7 @@ public class Controller {
 		@Override
 		protected Void doInBackground() throws Exception {
 			model.newRun(selectedAlgorithm);
-			view.getCanvasView().drawGrid();
+			view.getCanvasView().ifPresent(canvas -> canvas.drawGrid());
 			PathFinderAnimation animation = new PathFinderAnimation();
 			animation.setFnDelay(view::getAnimationDelay);
 			model.getPathFinder(selectedAlgorithm).addObserver(animation);
@@ -67,7 +74,8 @@ public class Controller {
 
 		@Override
 		protected void done() {
-			view.getCanvasView().drawGrid(); // redraw to highlight solution
+			// redraw canvas to show path
+			view.getCanvasView().ifPresent(canvas -> canvas.drawGrid());
 		}
 	}
 
@@ -177,6 +185,7 @@ public class Controller {
 
 	public void setExecutionMode(ExecutionMode executionMode) {
 		this.executionMode = executionMode;
+		maybeRunPathFinder();
 	}
 
 	public void resizeMap(int size) {
@@ -185,8 +194,8 @@ public class Controller {
 		maybeRunPathFinder();
 	}
 
-	public void setTopology(Topology topology) {
-		model.setTopology(topology);
+	public void selectTopology(TopologySelection topology) {
+		model.setTopology(topology == TopologySelection._4_NEIGHBORS ? Top4.get() : Top8.get());
 		view.updateCanvas();
 		maybeRunPathFinder();
 	}

@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.util.Optional;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -32,7 +33,6 @@ import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Top4;
-import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;
 
@@ -49,6 +49,7 @@ public class MainView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			PathFinderAlgorithm algorithm = comboAlgorithm.getItemAt(comboAlgorithm.getSelectedIndex());
 			controller.selectAlgorithm(algorithm);
+			updateViewState();
 		}
 	};
 
@@ -57,16 +58,8 @@ public class MainView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			TopologySelection topology = comboTopology.getItemAt(comboTopology.getSelectedIndex());
-			switch (topology) {
-			case _4_NEIGHBORS:
-				controller.setTopology(Top4.get());
-				break;
-			case _8_NEIGHBORS:
-				controller.setTopology(Top8.get());
-				break;
-			default:
-				throw new IllegalArgumentException("Unknown topology: " + topology);
-			}
+			controller.selectTopology(topology);
+			updateViewState();
 		}
 	};
 
@@ -74,11 +67,9 @@ public class MainView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			ExecutionMode executionMode = (ExecutionMode) comboExecutionMode.getSelectedItem();
+			ExecutionMode executionMode = comboExecutionMode.getItemAt(comboExecutionMode.getSelectedIndex());
 			controller.setExecutionMode(executionMode);
-			controller.maybeRunPathFinder();
-			scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
-			updateEnabledState();
+			updateViewState();
 		}
 	};
 
@@ -86,7 +77,10 @@ public class MainView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			canvasView.setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
+			getCanvasView().ifPresent(canvas -> {
+				canvas.setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
+				updateViewState();
+			});
 		}
 	};
 
@@ -103,21 +97,22 @@ public class MainView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			controller.startSelectedPathFinder();
-			actionStepThroughSelectedPathFinder.setEnabled(true);
+			updateViewState();
+			actionStepSelectedPathFinder.setEnabled(true);
 			actionFinishSelectedPathFinder.setEnabled(true);
 		}
 	};
 
-	private Action actionStepThroughSelectedPathFinder = new AbstractAction("Steps") {
+	private Action actionStepSelectedPathFinder = new AbstractAction("Steps") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JComponent source = (JComponent) e.getSource();
 			int numSteps = (Integer) source.getClientProperty("numSteps");
 			Path path = controller.runSelectedPathFinderSteps(numSteps);
-			boolean enabled = path == Path.EMPTY_PATH;
-			setEnabled(enabled);
-			actionFinishSelectedPathFinder.setEnabled(enabled);
+			boolean noPathFound = (path == Path.EMPTY_PATH);
+			setEnabled(noPathFound);
+			actionFinishSelectedPathFinder.setEnabled(noPathFound);
 		}
 	};
 
@@ -127,7 +122,7 @@ public class MainView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			controller.finishSelectedPathFinder();
 			setEnabled(false);
-			actionStepThroughSelectedPathFinder.setEnabled(false);
+			actionStepSelectedPathFinder.setEnabled(false);
 		}
 	};
 
@@ -135,7 +130,7 @@ public class MainView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			canvasView.setShowCost(cbShowCost.isSelected());
+			getCanvasView().ifPresent(canvas -> canvas.setShowCost(cbShowCost.isSelected()));
 		}
 	};
 
@@ -143,15 +138,14 @@ public class MainView extends JPanel {
 
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			// System.out.println("Map size changed to " + spinnerMapSize.getValue());
 			controller.resizeMap((int) spinnerMapSize.getValue());
 		}
 	};
 
 	private PathFinderModel model;
 	private Controller controller;
-
 	private CanvasView canvasView;
+
 	private JComboBox<PathFinderAlgorithm> comboAlgorithm;
 	private JComboBox<TopologySelection> comboTopology;
 	private ResultsTable tableResults;
@@ -224,7 +218,7 @@ public class MainView extends JPanel {
 		panelActions.add(panel, "flowx,cell 1 8,alignx left");
 
 		btnStep = new JButton();
-		btnStep.setAction(actionStepThroughSelectedPathFinder);
+		btnStep.setAction(actionStepSelectedPathFinder);
 		btnStep.putClientProperty("numSteps", 1);
 
 		JButton btnStart = new JButton();
@@ -234,7 +228,7 @@ public class MainView extends JPanel {
 		panel.add(btnStep);
 
 		btnSteps5 = new JButton();
-		btnSteps5.setAction(actionStepThroughSelectedPathFinder);
+		btnSteps5.setAction(actionStepSelectedPathFinder);
 		btnSteps5.putClientProperty("numSteps", 5);
 		btnSteps5.setText("5 Steps");
 		panel.add(btnSteps5);
@@ -315,7 +309,6 @@ public class MainView extends JPanel {
 		panelMap.add(canvasView, BorderLayout.CENTER);
 
 		// path finder results table
-		scrollPaneTableResults.setVisible(controller.getExecutionMode() == ExecutionMode.AUTO_ALL);
 		tableResults.init(model);
 
 		// others controls
@@ -336,38 +329,41 @@ public class MainView extends JPanel {
 		comboExecutionMode.setModel(new DefaultComboBoxModel<>(ExecutionMode.values()));
 		comboExecutionMode.setSelectedItem(controller.getExecutionMode());
 		comboExecutionMode.setAction(actionSelectExecutionMode);
-		
-		updateEnabledState();
+
+		updateViewState();
 	}
 
-	public CanvasView getCanvasView() {
-		return canvasView;
+	public Optional<CanvasView> getCanvasView() {
+		return Optional.ofNullable(canvasView);
 	}
 
 	public int getAnimationDelay() {
 		return sliderDelay.getValue();
 	}
 
-	public void updateView() {
-		tableResults.dataChanged();
-		if (canvasView != null) {
-			canvasView.clear();
-			canvasView.drawGrid();
-		}
-	}
-
-	public void updateCanvas() {
-		if (canvasView != null) {
-			canvasView.setGrid(model.getMap());
-		}
-	}
-	
-	private void updateEnabledState() {
+	private void updateViewState() {
 		boolean manualExecution = comboExecutionMode.getSelectedItem() == ExecutionMode.MANUAL;
 		actionResetSelectedPathFinder.setEnabled(manualExecution);
-		actionStepThroughSelectedPathFinder.setEnabled(manualExecution);
+		actionStepSelectedPathFinder.setEnabled(manualExecution);
 		actionFinishSelectedPathFinder.setEnabled(manualExecution);
 		actionRunSelectedPathFinderAnimation.setEnabled(manualExecution);
 		sliderDelay.setEnabled(manualExecution);
+
+		ExecutionMode executionMode = comboExecutionMode.getItemAt(comboExecutionMode.getSelectedIndex());
+		scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
+		
+		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
+	}
+
+	public void updateView() {
+		tableResults.dataChanged();
+		getCanvasView().ifPresent(canvas -> {
+			canvas.clear();
+			canvas.drawGrid();
+		});
+	}
+
+	public void updateCanvas() {
+		getCanvasView().ifPresent(canvas -> canvas.setGrid(model.getMap()));
 	}
 }
