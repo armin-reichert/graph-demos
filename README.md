@@ -8,7 +8,7 @@ In this application you can add/remove walls in a grid and run different path fi
 
 ![Path finding demo application](https://github.com/armin-reichert/graph-demos/blob/master/pathfinder-demo/doc/pathfinder.png)
 
-![Path finding demo application](https://github.com/armin-reichert/graph-demos/blob/master/pathfinder/doc/astar.png)
+![Path finding demo application](https://github.com/armin-reichert/graph-demos/blob/master/pathfinder-demo/doc/astar.png)
 
 ### Spacing-filling curves
 
