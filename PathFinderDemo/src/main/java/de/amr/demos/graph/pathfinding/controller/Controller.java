@@ -88,9 +88,6 @@ public class Controller {
 		case AUTO_ALL:
 			runAllPathFinders();
 			break;
-		case STEPWISE:
-			startSelectedPathFinder();
-			break;
 		}
 	}
 

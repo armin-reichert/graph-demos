@@ -28,13 +28,13 @@ import javax.swing.event.ChangeListener;
 
 import de.amr.demos.graph.pathfinding.controller.Controller;
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
+import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.BoxLayout;
 
 /**
  * Main view of path finder demo app.
@@ -42,9 +42,6 @@ import javax.swing.BoxLayout;
  * @author Armin Reichert
  */
 public class MainView extends JPanel {
-
-	private static final String _4_NEIGHBORS = "4 Neighbors";
-	private static final String _8_NEIGHBORS = "8 Neighbors";
 
 	private Action actionSelectAlgorithm = new AbstractAction("Select Algorithm") {
 
@@ -59,7 +56,7 @@ public class MainView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String topology = comboTopology.getItemAt(comboTopology.getSelectedIndex());
+			TopologySelection topology = comboTopology.getItemAt(comboTopology.getSelectedIndex());
 			switch (topology) {
 			case _4_NEIGHBORS:
 				controller.setTopology(Top4.get());
@@ -100,7 +97,7 @@ public class MainView extends JPanel {
 		}
 	};
 
-	private Action actionResetSelectedPathFinder = new AbstractAction("Reset") {
+	private Action actionResetSelectedPathFinder = new AbstractAction("Start") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -155,7 +152,7 @@ public class MainView extends JPanel {
 
 	private CanvasView canvasView;
 	private JComboBox<PathFinderAlgorithm> comboAlgorithm;
-	private JComboBox<String> comboTopology;
+	private JComboBox<TopologySelection> comboTopology;
 	private ResultsTable tableResults;
 	private JSpinner spinnerMapSize;
 	private JCheckBox cbShowCost;
@@ -190,12 +187,16 @@ public class MainView extends JPanel {
 		panelActions.setBackground(Color.WHITE);
 		panelActions.setPreferredSize(new Dimension(500, 50));
 		add(panelActions, "cell 1 0,grow");
-		panelActions.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][][grow,bottom]"));
+		panelActions.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][grow,bottom]"));
 
 		JLabel lblMap = new JLabel("Map");
 		panelActions.add(lblMap, "cell 0 0 2 1,alignx leading");
 		lblMap.setForeground(SystemColor.textHighlight);
 		lblMap.setFont(new Font("Arial Black", Font.PLAIN, 16));
+
+		cbShowCost = new JCheckBox("Show Cost");
+		cbShowCost.setAction(actionShowCost);
+		panelActions.add(cbShowCost, "cell 1 4,alignx leading,aligny bottom");
 
 		lblPathFinding = new JLabel("Path Finding");
 		lblPathFinding.setForeground(SystemColor.textHighlight);
@@ -208,28 +209,26 @@ public class MainView extends JPanel {
 		spinnerMapSize = new JSpinner();
 		panelActions.add(spinnerMapSize, "cell 1 1");
 
-		cbShowCost = new JCheckBox("Show Cost");
-		cbShowCost.setAction(actionShowCost);
-		panelActions.add(cbShowCost, "cell 1 7,alignx leading,aligny bottom");
-
 		lblNewLabel = new JLabel("Execution Mode");
-		panelActions.add(lblNewLabel, "cell 0 8,alignx trailing");
+		panelActions.add(lblNewLabel, "cell 0 7,alignx trailing");
 
 		comboExecutionMode = new JComboBox<>();
-		comboExecutionMode.setModel(new DefaultComboBoxModel<>(ExecutionMode.values()));
-		comboExecutionMode.setAction(actionSelectExecutionMode);
-		panelActions.add(comboExecutionMode, "cell 1 8,growx");
+		panelActions.add(comboExecutionMode, "cell 1 7,growx");
 
 		lblStepbystep = new JLabel("Step-By-Step Execution");
-		panelActions.add(lblStepbystep, "cell 0 9,alignx trailing");
+		panelActions.add(lblStepbystep, "cell 0 8,alignx trailing");
 
 		JPanel panel = new JPanel();
 		panel.setOpaque(false);
-		panelActions.add(panel, "flowx,cell 1 9,alignx left");
+		panelActions.add(panel, "flowx,cell 1 8,alignx left");
 
 		btnStep = new JButton();
 		btnStep.setAction(actionStepThroughSelectedPathFinder);
 		btnStep.putClientProperty("numSteps", 1);
+
+		JButton btnStart = new JButton();
+		btnStart.setAction(actionResetSelectedPathFinder);
+		panel.add(btnStart);
 		btnStep.setText("1 Step");
 		panel.add(btnStep);
 
@@ -243,12 +242,8 @@ public class MainView extends JPanel {
 		btnFinish.setAction(actionFinishSelectedPathFinder);
 		panel.add(btnFinish);
 
-		JButton btnStart = new JButton();
-		btnStart.setAction(actionResetSelectedPathFinder);
-		panel.add(btnStart);
-
 		lblAnimation = new JLabel("Animated Execution");
-		panelActions.add(lblAnimation, "cell 0 10,alignx trailing,aligny center");
+		panelActions.add(lblAnimation, "cell 0 9,alignx trailing,aligny center");
 
 		JLabel lblAlgorithm = new JLabel("Algorithm");
 		panelActions.add(lblAlgorithm, "cell 0 6,alignx trailing");
@@ -272,7 +267,7 @@ public class MainView extends JPanel {
 
 		scrollPaneTableResults = new JScrollPane();
 		scrollPaneTableResults.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-		panelActions.add(scrollPaneTableResults, "cell 0 11 2 1,growx,aligny top");
+		panelActions.add(scrollPaneTableResults, "cell 0 10 2 1,growx,aligny top");
 
 		tableResults = new ResultsTable();
 		tableResults.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -283,11 +278,11 @@ public class MainView extends JPanel {
 		scrollPaneTableResults.setViewportView(tableResults);
 
 		helpPanel = new HelpPanel();
-		panelActions.add(helpPanel, "cell 0 12 2 1,growx,aligny bottom");
+		panelActions.add(helpPanel, "cell 0 11 2 1,growx,aligny bottom");
 
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
-		panelActions.add(panel_1, "flowx,cell 1 10,growx");
+		panelActions.add(panel_1, "flowx,cell 1 9,growx");
 		panel_1.setLayout(new MigLayout("", "[][grow]", "[]"));
 
 		JButton btnRun = new JButton();
@@ -297,7 +292,7 @@ public class MainView extends JPanel {
 
 		sliderDelay = new JSlider();
 		panel_1.add(sliderDelay, "cell 1 0,growx,aligny center");
-		sliderDelay.setValue(10);
+		sliderDelay.setValue(5);
 		sliderDelay.setMaximum(50);
 		sliderDelay.setMinorTickSpacing(1);
 		sliderDelay.setPaintTicks(true);
@@ -326,15 +321,20 @@ public class MainView extends JPanel {
 		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), 2, 100, 1));
 		spinnerMapSize.addChangeListener(onMapSizeChange);
 
-		comboTopology.setModel(new DefaultComboBoxModel<>(new String[] { _4_NEIGHBORS, _8_NEIGHBORS }));
-		comboTopology.setSelectedItem(model.getMap().getTopology() == Top4.get() ? _4_NEIGHBORS : _8_NEIGHBORS);
+		sliderDelay.setValue(5);
+
+		comboTopology.setModel(new DefaultComboBoxModel<>(TopologySelection.values()));
+		comboTopology.setSelectedItem(model.getMap().getTopology() == Top4.get() ? TopologySelection._4_NEIGHBORS
+				: TopologySelection._8_NEIGHBORS);
 		comboTopology.setAction(actionSelectTopology);
 
 		comboAlgorithm.setModel(new DefaultComboBoxModel<>(PathFinderAlgorithm.values()));
 		comboAlgorithm.setSelectedItem(controller.getSelectedAlgorithm());
 		comboAlgorithm.setAction(actionSelectAlgorithm);
 
+		comboExecutionMode.setModel(new DefaultComboBoxModel<>(ExecutionMode.values()));
 		comboExecutionMode.setSelectedItem(controller.getExecutionMode());
+		comboExecutionMode.setAction(actionSelectExecutionMode);
 	}
 
 	public CanvasView getCanvasView() {
