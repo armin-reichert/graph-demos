@@ -7,11 +7,12 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>GraphDemos</module>
+		
 		
 		
 		<module>pathfinder-demo</module>
 		<module>space-filling-curves</module>
+		<module>misc</module>
 	</modules>
 	<dependencies>
 		<dependency>
