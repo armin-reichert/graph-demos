@@ -158,8 +158,6 @@ public class MainView extends JPanel {
 	private JPanel panelMap;
 	private JScrollPane scrollPaneTableResults;
 	private HelpPanel helpPanel;
-	private JButton btnStep;
-	private JButton btnSteps5;
 	private JButton btnFinish;
 	private JLabel lblStepbystep;
 	private JLabel lblAnimation;
@@ -168,18 +166,18 @@ public class MainView extends JPanel {
 	private JComboBox<ExecutionMode> comboExecutionMode;
 
 	public MainView() {
-		setOpaque(false);
+		setBackground(Color.WHITE);
 		setLayout(new MigLayout("", "[][grow]", "[grow,fill]"));
 
 		panelMap = new JPanel();
+		panelMap.setOpaque(false);
 		panelMap.setPreferredSize(new Dimension(500, 10));
-		panelMap.setBackground(Color.WHITE);
 		add(panelMap, "cell 0 0,growy");
 		panelMap.setLayout(new BorderLayout(0, 0));
 
 		panelActions = new JPanel();
+		panelActions.setOpaque(false);
 		panelActions.setMinimumSize(new Dimension(550, 10));
-		panelActions.setBackground(Color.WHITE);
 		panelActions.setPreferredSize(new Dimension(500, 50));
 		add(panelActions, "cell 1 0,grow");
 		panelActions.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][grow,bottom]"));
@@ -217,21 +215,27 @@ public class MainView extends JPanel {
 		panel.setOpaque(false);
 		panelActions.add(panel, "flowx,cell 1 8,alignx left");
 
-		btnStep = new JButton();
-		btnStep.setAction(actionStepSelectedPathFinder);
-		btnStep.putClientProperty("numSteps", 1);
-
 		JButton btnStart = new JButton();
 		btnStart.setAction(actionResetSelectedPathFinder);
 		panel.add(btnStart);
-		btnStep.setText("1 Step");
-		panel.add(btnStep);
 
-		btnSteps5 = new JButton();
+		JButton btnStep1 = new JButton();
+		btnStep1.setAction(actionStepSelectedPathFinder);
+		btnStep1.setText("+1");
+		btnStep1.putClientProperty("numSteps", 1);
+		panel.add(btnStep1);
+
+		JButton btnSteps5 = new JButton();
 		btnSteps5.setAction(actionStepSelectedPathFinder);
 		btnSteps5.putClientProperty("numSteps", 5);
-		btnSteps5.setText("5 Steps");
+		btnSteps5.setText("+5");
 		panel.add(btnSteps5);
+
+		JButton btnSteps10 = new JButton("+10");
+		btnSteps10.setAction(actionStepSelectedPathFinder);
+		btnSteps10.setText("+10");
+		btnSteps10.putClientProperty("numSteps", 10);
+		panel.add(btnSteps10);
 
 		btnFinish = new JButton();
 		btnFinish.setAction(actionFinishSelectedPathFinder);
@@ -351,7 +355,7 @@ public class MainView extends JPanel {
 
 		ExecutionMode executionMode = comboExecutionMode.getItemAt(comboExecutionMode.getSelectedIndex());
 		scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
-		
+
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
