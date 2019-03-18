@@ -5,7 +5,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>GraphDemos</artifactId>
+	<artifactId>misc</artifactId>
 	<build>
 		<plugins>
 			<plugin>

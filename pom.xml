@@ -8,8 +8,10 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>GraphDemos</module>
-		<module>PathFinderDemo</module>
-		<module>SpaceFillingCurves</module>
+		
+		
+		<module>pathfinder-demo</module>
+		<module>space-filling-curves</module>
 	</modules>
 	<dependencies>
 		<dependency>
