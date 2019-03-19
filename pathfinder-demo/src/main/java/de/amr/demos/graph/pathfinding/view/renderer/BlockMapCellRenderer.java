@@ -43,6 +43,8 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 	public abstract Color getTextColor(int cell);
 
 	public abstract boolean showCost();
+	
+	public abstract boolean showParentDirection();
 
 	public abstract boolean hasHighlightedBackground(int cell);
 
@@ -77,8 +79,11 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		g.drawRect(0, 0, cellSize, cellSize);
 		g.translate(-cellX, -cellY);
 
-		// draw cell content?
-		if (!showCost() || getMap().get(cell) == Tile.WALL) {
+		if (getMap().get(cell) == Tile.WALL) {
+			return;
+		}
+		
+		if (!showCost()) {
 			return;
 		}
 
