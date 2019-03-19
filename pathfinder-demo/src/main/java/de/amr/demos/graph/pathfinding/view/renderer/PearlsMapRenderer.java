@@ -7,7 +7,6 @@ import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
 import de.amr.graph.grid.ui.rendering.GridRenderingModel;
 
-
 public class PearlsMapRenderer implements GridRenderer {
 
 	@Override

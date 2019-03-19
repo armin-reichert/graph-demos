@@ -15,7 +15,7 @@ public class GridRenderingTestApp extends SwingGridSampleApp {
 	}
 
 	public GridRenderingTestApp() {
-		super(256);
+		super(1024, 768, 256);
 		setAppName("Grid Rendering Demo");
 	}
 

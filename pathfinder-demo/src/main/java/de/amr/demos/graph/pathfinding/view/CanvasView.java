@@ -202,8 +202,8 @@ public class CanvasView extends GridCanvas {
 	}
 
 	private void replaceRenderer(int cellSize) {
-		if (renderStack.size() > 0) {
-			renderStack.pop();
+		if (hasRenderer()) {
+			popRenderer();
 		}
 		pushRenderer(createMapRenderer(cellSize));
 		clear();
