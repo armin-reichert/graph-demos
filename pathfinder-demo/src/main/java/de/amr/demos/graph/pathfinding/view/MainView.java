@@ -32,6 +32,7 @@ import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
+import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;

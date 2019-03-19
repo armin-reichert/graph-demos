@@ -1,18 +1,12 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.graph.pathfinder.api.Path.INFINITE_COST;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -24,17 +18,16 @@ import javax.swing.JPopupMenu;
 import de.amr.demos.graph.pathfinding.controller.Controller;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
+import de.amr.demos.graph.pathfinding.view.renderer.BlockMapCellRenderer;
+import de.amr.demos.graph.pathfinding.view.renderer.BlockMapRenderer;
+import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
 import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.ui.rendering.ConfigurableGridRenderer;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
-import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.grid.ui.rendering.PearlsGridRenderer;
-import de.amr.graph.grid.ui.rendering.WallPassageGridRenderer;
 import de.amr.graph.pathfinder.api.TraversalState;
-import de.amr.graph.pathfinder.impl.AStarSearch;
-import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
@@ -236,7 +229,7 @@ public class CanvasView extends GridCanvas {
 
 	// Renderer
 
-	private Color getCellBackground(int cell) {
+	private Color computeCellBackground(int cell) {
 		if (model.getMap().get(cell) == Tile.WALL) {
 			return new Color(139, 69, 19);
 		}
@@ -268,162 +261,67 @@ public class CanvasView extends GridCanvas {
 		return model.getRun(controller.getSelectedAlgorithm()).pathContains(cell);
 	}
 
-	private class BlockCellRenderer implements GridCellRenderer {
-
-		final Font font = new Font("Arial Narrow", Font.PLAIN, 12);
-		final int inset;
-		final int cellSize;
+	private class BlockCellRenderer extends BlockMapCellRenderer {
 
 		public BlockCellRenderer(int cellSize) {
-			this.cellSize = cellSize;
-			this.inset = cellSize / 10;
-		}
-
-		private String formatValue(double value) {
-			// display real value multiplied by 10
-			return value == INFINITE_COST ? "" : String.format("%.0f", 10 * value);
-		}
-
-		private void textSizePct(Graphics2D g, int percent) {
-			g.setFont(font.deriveFont(Font.PLAIN, cellSize * percent / 100));
-		}
-
-		private Rectangle2D box(Graphics2D g, String text) {
-			return g.getFontMetrics().getStringBounds(text, g);
+			super(cellSize);
 		}
 
 		@Override
-		public void drawCell(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
+		public Color getCellBackground(int cell) {
+			return computeCellBackground(cell);
+		}
 
-			int col = grid.col(cell);
-			int row = grid.row(cell);
-			int cellX = col * cellSize;
-			int cellY = row * cellSize;
-			GraphSearch<?> pf = model.getPathFinder(controller.getSelectedAlgorithm());
+		@Override
+		public GridGraph<Tile, Double> getMap() {
+			return model.getMap();
+		}
 
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		@Override
+		public GraphSearch<?> getPathFinder() {
+			return model.getPathFinder(controller.getSelectedAlgorithm());
+		}
 
-			// cell square
-			g.setColor(getCellBackground(cell));
-			g.fillRect(cellX, cellY, cellSize, cellSize);
-			g.setColor(new Color(160, 160, 160));
-			g.drawRect(cellX, cellY, cellSize, cellSize);
-
-			// draw cell content?
-			if (!showCost || model.getMap().get(cell) == Tile.WALL) {
-				return;
+		@Override
+		public Color getTextColor(int cell) {
+			if (cell == model.getSource() || cell == model.getTarget() || hasHighlightedBackground(cell)) {
+				return Color.WHITE;
 			}
-
-			// cell text color
-			Color textColor = Color.BLUE;
-			if (cell == model.getSource() || cell == model.getTarget() || partOfSolution(cell)) {
-				textColor = Color.WHITE;
+			if (getPathFinder().getState(cell) == TraversalState.UNVISITED) {
+				return Color.LIGHT_GRAY;
 			}
-			else if (pf.getState(cell) == TraversalState.UNVISITED) {
-				textColor = Color.LIGHT_GRAY;
-			}
+			return Color.BLUE;
+		}
 
-			g.translate(cellX, cellY);
+		@Override
+		public boolean hasHighlightedBackground(int cell) {
+			return partOfSolution(cell);
+		}
 
-			// cell text
-			g.setFont(font);
-			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			Rectangle2D box;
-
-			if (pf.getClass() == AStarSearch.class) {
-
-				// G-value
-				String gCost = formatValue(pf.getCost(cell));
-				textSizePct(g, 30);
-				box = box(g, gCost);
-				g.setColor(textColor);
-				g.drawString(gCost, inset, (int) box.getHeight());
-
-				// H-value
-				String hCost = formatValue(model.distance(cell, model.getTarget()));
-				textSizePct(g, 30);
-				box = box(g, hCost);
-				g.setColor(textColor);
-				g.drawString(hCost, (int) (cellSize - box.getWidth() - inset), (int) box.getHeight());
-
-				// F-value
-				AStarSearch astar = (AStarSearch) pf;
-				String fCost = formatValue(astar.getScore(cell));
-				textSizePct(g, 50);
-				box = box(g, fCost);
-				if (!partOfSolution(cell)) {
-					g.setColor(Color.MAGENTA);
-				}
-				g.drawString(fCost, (int) (cellSize - box.getWidth()) / 2, cellSize - inset);
-			}
-
-			else if (pf.getClass() == BestFirstSearch.class) {
-
-				// H-value
-				String hCost = formatValue(model.distance(cell, model.getTarget()));
-				textSizePct(g, 30);
-				box = box(g, hCost);
-				if (pf.getState(cell) != TraversalState.UNVISITED && !partOfSolution(cell)) {
-					g.setColor(Color.MAGENTA);
-				}
-				g.drawString(hCost, inset, (int) box.getHeight());
-
-				// G-value
-				String gCost = formatValue(pf.getCost(cell));
-				textSizePct(g, 50);
-				box = box(g, gCost);
-				g.setColor(textColor);
-				g.drawString(gCost, (int) (cellSize - box.getWidth()) / 2, cellSize - inset);
-			}
-
-			else {
-				// G-value
-				String gCost = formatValue(pf.getCost(cell));
-				textSizePct(g, 50);
-				box = box(g, gCost);
-				g.setColor(textColor);
-				g.drawString(gCost, (int) (cellSize - box.getWidth()) / 2,
-						(int) (cellSize + box.getHeight() - g.getFontMetrics().getDescent()) / 2);
-			}
-			g.translate(-cellX, -cellY);
-
-			// parent
-			if (showParent) {
-				int parent = pf.getParent(cell);
-				if (parent != -1) {
-					int parentX = grid.col(parent) * getCellSize();
-					int parentY = grid.row(parent) * getCellSize();
-					int offset = getCellSize() / 2;
-					g.setColor(Color.BLACK);
-					g.setStroke(new BasicStroke(2));
-					g.drawLine(cellX + offset, cellY + offset, parentX + offset, parentY + offset);
-				}
-			}
+		@Override
+		public boolean showCost() {
+			return showCost;
 		}
 	}
 
 	private ConfigurableGridRenderer createMapRenderer(int cellSize) {
-		ConfigurableGridRenderer r;
 		if (style == RenderingStyle.BLOCKS) {
-			r = new WallPassageGridRenderer(new BlockCellRenderer(cellSize));
+			BlockMapRenderer r = new BlockMapRenderer(new BlockCellRenderer(cellSize));
 			r.fnCellSize = () -> cellSize;
-			r.fnPassageWidth = (u, v) -> cellSize - 1;
-			r.fnPassageColor = (cell, dir) -> Color.WHITE;
+			r.fnGridBgColor = () -> new Color(160, 160, 160);
+			return r;
 		}
-		else if (style == RenderingStyle.PEARLS) {
-			r = new PearlsGridRenderer();
-			r.fnCellBgColor = this::getCellBackground;
+		if (style == RenderingStyle.PEARLS) {
+			PearlsGridRenderer r = new PearlsGridRenderer();
 			r.fnCellSize = () -> cellSize;
+			r.fnGridBgColor = () -> new Color(160, 160, 160);
+			r.fnCellBgColor = this::computeCellBackground;
 			r.fnPassageWidth = (u, v) -> Math.max(cellSize * 5 / 100, 1);
 			r.fnPassageColor = (cell, dir) -> partOfSolution(cell)
 					&& partOfSolution(grid.neighbor(cell, dir).getAsInt()) ? Color.RED.brighter() : Color.WHITE;
-			;
+			return r;
 		}
-		else {
-			throw new IllegalArgumentException();
-		}
-		r.fnGridBgColor = () -> new Color(160, 160, 160);
-		return r;
+		throw new IllegalArgumentException();
 	}
 
 	@Override
