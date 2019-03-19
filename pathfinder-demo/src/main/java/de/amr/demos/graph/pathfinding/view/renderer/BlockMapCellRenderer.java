@@ -51,7 +51,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 	public abstract boolean hasHighlightedBackground(int cell);
 
-	private String formatValue(double value, double factor) {
+	private String formatScaledValue(double value, double factor) {
 		// display real value multiplied by 10
 		return value == INFINITE_COST ? "" : String.format("%.0f", factor * value);
 	}
@@ -66,8 +66,8 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 	@Override
 	public void drawCell(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
-		int col = grid.col(cell), x = col * cellSize;
-		int row = grid.row(cell), y = row * cellSize;
+		int x = grid.col(cell) * cellSize;
+		int y = grid.row(cell) * cellSize;
 
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -84,10 +84,12 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 			return;
 		}
 
+		// draw compass needle pointing to parent cell
 		if (showParent()) {
-			drawParentDirection(g, cell, x, y, getPathFinder());
+			drawCompassNeedle(g, grid, cell);
 		}
 
+		// draw path finder dependent content
 		if (showCost()) {
 			g.translate(x, y);
 			if (getPathFinder().getClass() == AStarSearch.class) {
@@ -97,7 +99,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 				drawContentBestFirstSearch(g, cell, (BestFirstSearch) getPathFinder());
 			}
 			else {
-				drawContentAny(g, cell, getPathFinder());
+				drawContent(g, cell, getPathFinder());
 			}
 			g.translate(-x, -y);
 		}
@@ -109,34 +111,27 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		g.setFont(font);
 
 		// G-value
-		String gCost = formatValue(astar.getCost(cell), 10);
+		String gCost = formatScaledValue(astar.getCost(cell), 10);
 		setRelativeFontSize(g, 30);
 		textBox = bounds(g, gCost);
 		g.setColor(textColor);
 		g.drawString(gCost, inset, (int) textBox.getHeight());
 
 		// H-value
-		String hCost = formatValue(astar.getEstimatedCost(cell), 10);
+		String hCost = formatScaledValue(astar.getEstimatedCost(cell), 10);
 		setRelativeFontSize(g, 30);
 		textBox = bounds(g, hCost);
 		g.setColor(textColor);
 		g.drawString(hCost, (int) (cellSize - textBox.getWidth() - inset), (int) textBox.getHeight());
 
 		// F-value
-		String fCost = formatValue(astar.getScore(cell), 10);
+		String fCost = formatScaledValue(astar.getScore(cell), 10);
+		setRelativeFontSize(g, showParent() ? 30 : 50);
+		textBox = bounds(g, fCost);
 		if (!hasHighlightedBackground(cell)) {
 			g.setColor(Color.MAGENTA);
 		}
-		if (showParent()) {
-			setRelativeFontSize(g, 30);
-			textBox = bounds(g, fCost);
-			g.drawString(fCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
-		}
-		else {
-			setRelativeFontSize(g, 50);
-			textBox = bounds(g, fCost);
-			g.drawString(fCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
-		}
+		g.drawString(fCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
 	}
 
 	private void drawContentBestFirstSearch(Graphics2D g, int cell, BestFirstSearch bfs) {
@@ -145,7 +140,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		g.setFont(font);
 
 		// H-value
-		String hCost = formatValue(bfs.getEstimatedCost(cell), 10);
+		String hCost = formatScaledValue(bfs.getEstimatedCost(cell), 10);
 		setRelativeFontSize(g, 30);
 		textBox = bounds(g, hCost);
 		if (bfs.getState(cell) != TraversalState.UNVISITED && !hasHighlightedBackground(cell)) {
@@ -154,20 +149,20 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		g.drawString(hCost, inset, (int) textBox.getHeight());
 
 		// G-value
-		String gCost = formatValue(bfs.getCost(cell), 10);
+		String gCost = formatScaledValue(bfs.getCost(cell), 10);
 		setRelativeFontSize(g, 50);
 		textBox = bounds(g, gCost);
 		g.setColor(textColor);
 		g.drawString(gCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
 	}
 
-	private void drawContentAny(Graphics2D g, int cell, GraphSearch<?> pf) {
+	private void drawContent(Graphics2D g, int cell, GraphSearch<?> pf) {
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
 		g.setFont(font);
 
 		// G-value
-		String gCost = formatValue(getPathFinder().getCost(cell), 10);
+		String gCost = formatScaledValue(getPathFinder().getCost(cell), 10);
 		setRelativeFontSize(g, 50);
 		textBox = bounds(g, gCost);
 		g.setColor(textColor);
@@ -175,11 +170,13 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 				(int) (cellSize + textBox.getHeight() - g.getFontMetrics().getDescent()) / 2);
 	}
 
-	private void drawParentDirection(Graphics2D g, int cell, int x, int y, GraphSearch<?> pf) {
-		int parent = pf.getParent(cell);
+	private void drawCompassNeedle(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
+		int parent = getPathFinder().getParent(cell);
 		if (parent == -1) {
 			return;
 		}
+		int x = grid.col(cell) * cellSize;
+		int y = grid.row(cell) * cellSize;
 		int r = cellSize / 10;
 		float lineThickness = Math.max(1, cellSize / 20);
 		Graphics2D g2 = (Graphics2D) g.create();
