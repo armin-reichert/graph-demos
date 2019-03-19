@@ -147,7 +147,7 @@ public class CanvasView extends GridCanvas {
 	private Controller controller;
 	private RenderingStyle style;
 	private boolean showCost;
-	private boolean showParentDirection;
+	private boolean showParent;
 	private JPopupMenu contextMenu;
 	private int selectedCell;
 	private int fixedHeight;
@@ -227,8 +227,8 @@ public class CanvasView extends GridCanvas {
 		drawGrid();
 	}
 
-	public void setShowParentDirection(boolean showParentDirection) {
-		this.showParentDirection = showParentDirection;
+	public void setShowParent(boolean showParent) {
+		this.showParent = showParent;
 		drawGrid();
 	}
 
@@ -309,8 +309,8 @@ public class CanvasView extends GridCanvas {
 		}
 
 		@Override
-		public boolean showParentDirection() {
-			return showParentDirection;
+		public boolean showParent() {
+			return showParent;
 		}
 	}
 

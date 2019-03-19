@@ -21,8 +21,8 @@ import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
- * Renderes the map cells as "blocks". Depending on the assiciated path finder algorithm, different
- * information is displayed.
+ * Renders the map vertices as "blocks". Depending on the associated path finder algorithm,
+ * different information is displayed inside each cell.
  * 
  * @author Armin Reichert
  */
@@ -47,13 +47,13 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 	public abstract boolean showCost();
 
-	public abstract boolean showParentDirection();
+	public abstract boolean showParent();
 
 	public abstract boolean hasHighlightedBackground(int cell);
 
-	private String formatValue(double value) {
+	private String formatValue(double value, double factor) {
 		// display real value multiplied by 10
-		return value == INFINITE_COST ? "" : String.format("%.0f", 10 * value);
+		return value == INFINITE_COST ? "" : String.format("%.0f", factor * value);
 	}
 
 	private void setRelativeFontSize(Graphics2D g, int percent) {
@@ -66,13 +66,11 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 	@Override
 	public void drawCell(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
-
-		int col = grid.col(cell);
-		int row = grid.row(cell);
-		int x = col * cellSize;
-		int y = row * cellSize;
+		int col = grid.col(cell), x = col * cellSize;
+		int row = grid.row(cell), y = row * cellSize;
 
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
 		// draw cell background and cell border
 		g.translate(x, y);
@@ -86,67 +84,68 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 			return;
 		}
 
-		if (!showCost()) {
-			return;
-		}
-
-		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		g.setFont(font);
-		if (getPathFinder().getClass() == AStarSearch.class) {
-			g.translate(x, y);
-			drawContentAStar(g, cell, (AStarSearch) getPathFinder());
-			g.translate(-x, -y);
-		}
-		else if (getPathFinder().getClass() == BestFirstSearch.class) {
-			g.translate(x, y);
-			drawContentBestFirstSearch(g, cell, (BestFirstSearch) getPathFinder());
-			g.translate(-x, -y);
-		}
-		else {
-			g.translate(x, y);
-			drawContentAny(g, cell, getPathFinder());
-			g.translate(-x, -y);
-		}
-
-		if (showParentDirection()) {
+		if (showParent()) {
 			drawParentDirection(g, cell, x, y, getPathFinder());
+		}
+
+		if (showCost()) {
+			g.translate(x, y);
+			if (getPathFinder().getClass() == AStarSearch.class) {
+				drawContentAStar(g, cell, (AStarSearch) getPathFinder());
+			}
+			else if (getPathFinder().getClass() == BestFirstSearch.class) {
+				drawContentBestFirstSearch(g, cell, (BestFirstSearch) getPathFinder());
+			}
+			else {
+				drawContentAny(g, cell, getPathFinder());
+			}
+			g.translate(-x, -y);
 		}
 	}
 
 	private void drawContentAStar(Graphics2D g, int cell, AStarSearch astar) {
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
+		g.setFont(font);
 
 		// G-value
-		String gCost = formatValue(astar.getCost(cell));
+		String gCost = formatValue(astar.getCost(cell), 10);
 		setRelativeFontSize(g, 30);
 		textBox = bounds(g, gCost);
 		g.setColor(textColor);
 		g.drawString(gCost, inset, (int) textBox.getHeight());
 
 		// H-value
-		String hCost = formatValue(astar.getEstimatedCost(cell));
+		String hCost = formatValue(astar.getEstimatedCost(cell), 10);
 		setRelativeFontSize(g, 30);
 		textBox = bounds(g, hCost);
 		g.setColor(textColor);
 		g.drawString(hCost, (int) (cellSize - textBox.getWidth() - inset), (int) textBox.getHeight());
 
 		// F-value
-		String fCost = formatValue(astar.getScore(cell));
-		setRelativeFontSize(g, 50);
-		textBox = bounds(g, fCost);
+		String fCost = formatValue(astar.getScore(cell), 10);
 		if (!hasHighlightedBackground(cell)) {
 			g.setColor(Color.MAGENTA);
 		}
-		g.drawString(fCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
+		if (showParent()) {
+			setRelativeFontSize(g, 30);
+			textBox = bounds(g, fCost);
+			g.drawString(fCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
+		}
+		else {
+			setRelativeFontSize(g, 50);
+			textBox = bounds(g, fCost);
+			g.drawString(fCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
+		}
 	}
 
 	private void drawContentBestFirstSearch(Graphics2D g, int cell, BestFirstSearch bfs) {
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
+		g.setFont(font);
 
 		// H-value
-		String hCost = formatValue(bfs.getEstimatedCost(cell));
+		String hCost = formatValue(bfs.getEstimatedCost(cell), 10);
 		setRelativeFontSize(g, 30);
 		textBox = bounds(g, hCost);
 		if (bfs.getState(cell) != TraversalState.UNVISITED && !hasHighlightedBackground(cell)) {
@@ -155,7 +154,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		g.drawString(hCost, inset, (int) textBox.getHeight());
 
 		// G-value
-		String gCost = formatValue(bfs.getCost(cell));
+		String gCost = formatValue(bfs.getCost(cell), 10);
 		setRelativeFontSize(g, 50);
 		textBox = bounds(g, gCost);
 		g.setColor(textColor);
@@ -165,9 +164,10 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 	private void drawContentAny(Graphics2D g, int cell, GraphSearch<?> pf) {
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
+		g.setFont(font);
 
 		// G-value
-		String gCost = formatValue(getPathFinder().getCost(cell));
+		String gCost = formatValue(getPathFinder().getCost(cell), 10);
 		setRelativeFontSize(g, 50);
 		textBox = bounds(g, gCost);
 		g.setColor(textColor);
@@ -181,16 +181,16 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 			return;
 		}
 		int r = cellSize / 10;
+		float lineThickness = Math.max(1, cellSize / 20);
 		Graphics2D g2 = (Graphics2D) g.create();
 		g2.translate(x + cellSize / 2, y + cellSize / 2);
-		g2.setColor(Color.GRAY);
+		g2.setColor(Color.BLACK);
 		g2.fillOval(-r, -r, 2 * r, 2 * r);
 		int dir = getMap().direction(cell, parent).getAsInt();
-		g2.drawString(dir + "", cellSize / 2, cellSize / 2);
 		double theta = Math.toRadians(-computeRotationDegrees(dir));
 		g2.rotate(theta);
 		int lineLength = cellSize * 33 / 100;
-		g2.setStroke(new BasicStroke(Math.max(1, cellSize / 20)));
+		g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 		g2.drawLine(0, -lineLength, 0, 0);
 		g2.dispose();
 	}

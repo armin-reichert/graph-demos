@@ -135,6 +135,14 @@ public class MainView extends JPanel {
 		}
 	};
 
+	private Action actionShowParent = new AbstractAction("Show Parent") {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			getCanvasView().ifPresent(canvas -> canvas.setShowParent(cbShowParent.isSelected()));
+		}
+	};
+
 	private ChangeListener onMapSizeChange = new ChangeListener() {
 
 		@Override
@@ -165,6 +173,7 @@ public class MainView extends JPanel {
 	private JPanel panel_1;
 	private JLabel lblNewLabel;
 	private JComboBox<ExecutionMode> comboExecutionMode;
+	private JCheckBox cbShowParent;
 
 	public MainView() {
 		setBackground(Color.WHITE);
@@ -190,7 +199,11 @@ public class MainView extends JPanel {
 
 		cbShowCost = new JCheckBox("Show Cost");
 		cbShowCost.setAction(actionShowCost);
-		panelActions.add(cbShowCost, "cell 1 4,alignx leading,aligny bottom");
+		panelActions.add(cbShowCost, "flowx,cell 1 4");
+
+		cbShowParent = new JCheckBox("Show Parent");
+		cbShowParent.setAction(actionShowParent);
+		panelActions.add(cbShowParent, "cell 1 4");
 
 		lblPathFinding = new JLabel("Path Finding");
 		lblPathFinding.setForeground(SystemColor.textHighlight);
@@ -298,6 +311,7 @@ public class MainView extends JPanel {
 		sliderDelay.setPaintTicks(true);
 		sliderDelay.setPaintLabels(true);
 		sliderDelay.setMajorTickSpacing(5);
+
 	}
 
 	public void init(PathFinderModel model, Controller controller) {
