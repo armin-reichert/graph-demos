@@ -2,6 +2,7 @@ package de.amr.demos.graph.pathfinding.view.renderer;
 
 import static de.amr.graph.pathfinder.api.Path.INFINITE_COST;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -11,6 +12,8 @@ import java.awt.geom.Rectangle2D;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.impl.GridGraph;
+import de.amr.graph.grid.impl.Top4;
+import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.pathfinder.api.TraversalState;
 import de.amr.graph.pathfinder.impl.AStarSearch;
@@ -89,17 +92,25 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		g.setFont(font);
-		g.translate(x, y);
 		if (getPathFinder().getClass() == AStarSearch.class) {
+			g.translate(x, y);
 			drawContentAStar(g, cell, (AStarSearch) getPathFinder());
+			g.translate(-x, -y);
 		}
 		else if (getPathFinder().getClass() == BestFirstSearch.class) {
+			g.translate(x, y);
 			drawContentBestFirstSearch(g, cell, (BestFirstSearch) getPathFinder());
+			g.translate(-x, -y);
 		}
 		else {
+			g.translate(x, y);
 			drawContentAny(g, cell, getPathFinder());
+			g.translate(-x, -y);
 		}
-		g.translate(-x, -y);
+
+		if (showParentDirection()) {
+			drawParentDirection(g, cell, x, y, getPathFinder());
+		}
 	}
 
 	private void drawContentAStar(Graphics2D g, int cell, AStarSearch astar) {
@@ -162,5 +173,61 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		g.setColor(textColor);
 		g.drawString(gCost, (int) (cellSize - textBox.getWidth()) / 2,
 				(int) (cellSize + textBox.getHeight() - g.getFontMetrics().getDescent()) / 2);
+	}
+
+	private void drawParentDirection(Graphics2D g, int cell, int x, int y, GraphSearch<?> pf) {
+		int parent = pf.getParent(cell);
+		if (parent == -1) {
+			return;
+		}
+		int r = cellSize / 10;
+		Graphics2D g2 = (Graphics2D) g.create();
+		g2.translate(x + cellSize / 2, y + cellSize / 2);
+		g2.setColor(Color.GRAY);
+		g2.fillOval(-r, -r, 2 * r, 2 * r);
+		int dir = getMap().direction(cell, parent).getAsInt();
+		g2.drawString(dir + "", cellSize / 2, cellSize / 2);
+		double theta = Math.toRadians(-computeRotationDegrees(dir));
+		g2.rotate(theta);
+		int lineLength = cellSize * 33 / 100;
+		g2.setStroke(new BasicStroke(Math.max(1, cellSize / 20)));
+		g2.drawLine(0, -lineLength, 0, 0);
+		g2.dispose();
+	}
+
+	private int computeRotationDegrees(int dir) {
+		if (getMap().getTopology() == Top4.get()) {
+			switch (dir) {
+			case Top4.N:
+				return 0;
+			case Top4.W:
+				return 90;
+			case Top4.S:
+				return 180;
+			case Top4.E:
+				return 270;
+			}
+		}
+		else if (getMap().getTopology() == Top8.get()) {
+			switch (dir) {
+			case Top8.N:
+				return 0;
+			case Top8.NW:
+				return 45;
+			case Top8.W:
+				return 90;
+			case Top8.SW:
+				return 135;
+			case Top8.S:
+				return 180;
+			case Top8.SE:
+				return 225;
+			case Top8.E:
+				return 270;
+			case Top8.NE:
+				return 315;
+			}
+		}
+		throw new IllegalStateException();
 	}
 }
