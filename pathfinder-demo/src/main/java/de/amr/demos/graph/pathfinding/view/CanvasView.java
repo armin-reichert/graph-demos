@@ -24,8 +24,8 @@ import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
 import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.impl.GridGraph;
-import de.amr.graph.grid.ui.rendering.ConfigurableGridRenderer;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
+import de.amr.graph.grid.ui.rendering.GridRenderer;
 import de.amr.graph.grid.ui.rendering.PearlsGridRenderer;
 import de.amr.graph.pathfinder.api.TraversalState;
 import de.amr.graph.pathfinder.impl.GraphSearch;
@@ -36,6 +36,15 @@ import de.amr.graph.pathfinder.impl.GraphSearch;
  * @author Armin Reichert
  */
 public class CanvasView extends GridCanvas {
+
+	private PathFinderModel model;
+	private Controller controller;
+	private RenderingStyle style;
+	private boolean showCost;
+	private boolean showParent;
+	private JPopupMenu contextMenu;
+	private int selectedCell;
+	private int fixedHeight;
 
 	private class MouseHandler extends MouseAdapter {
 
@@ -143,18 +152,9 @@ public class CanvasView extends GridCanvas {
 		}
 	};
 
-	private PathFinderModel model;
-	private Controller controller;
-	private RenderingStyle style;
-	private boolean showCost;
-	private boolean showParent;
-	private JPopupMenu contextMenu;
-	private int selectedCell;
-	private int fixedHeight;
-
-	public CanvasView(GridGraph2D<?, ?> grid, int initialHeight) {
+	public CanvasView(GridGraph2D<?, ?> grid, int height) {
 		super(grid);
-		this.fixedHeight = initialHeight;
+		fixedHeight = height;
 		style = RenderingStyle.BLOCKS;
 		selectedCell = -1;
 		MouseHandler mouse = new MouseHandler();
@@ -189,8 +189,7 @@ public class CanvasView extends GridCanvas {
 	public void init(PathFinderModel model, Controller controller) {
 		this.model = model;
 		this.controller = controller;
-		ConfigurableGridRenderer r = createMapRenderer(fixedHeight / model.getMapSize());
-		pushRenderer(r);
+		pushRenderer(createMapRenderer(fixedHeight / model.getMapSize()));
 	}
 
 	public void fixHeight(int fixedHeight) {
@@ -314,7 +313,7 @@ public class CanvasView extends GridCanvas {
 		}
 	}
 
-	private ConfigurableGridRenderer createMapRenderer(int cellSize) {
+	private GridRenderer createMapRenderer(int cellSize) {
 		if (style == RenderingStyle.BLOCKS) {
 			BlockMapRenderer r = new BlockMapRenderer(new BlockCellRenderer(cellSize));
 			r.fnCellSize = () -> cellSize;
