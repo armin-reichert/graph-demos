@@ -27,7 +27,7 @@ import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
 import de.amr.graph.grid.ui.rendering.PearlsGridRenderer;
-import de.amr.graph.pathfinder.api.TraversalState;
+import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**

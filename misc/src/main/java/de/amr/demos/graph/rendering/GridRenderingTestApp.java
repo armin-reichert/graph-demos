@@ -1,6 +1,6 @@
 package de.amr.demos.graph.rendering;
 
-import static de.amr.graph.pathfinder.api.TraversalState.COMPLETED;
+import static de.amr.graph.core.api.TraversalState.COMPLETED;
 import static java.lang.String.format;
 import static java.lang.System.out;
 

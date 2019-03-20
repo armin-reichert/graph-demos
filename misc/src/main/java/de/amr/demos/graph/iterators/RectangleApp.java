@@ -1,6 +1,6 @@
 package de.amr.demos.graph.iterators;
 
-import static de.amr.graph.pathfinder.api.TraversalState.COMPLETED;
+import static de.amr.graph.core.api.TraversalState.COMPLETED;
 
 import de.amr.graph.grid.shapes.Rectangle;
 import de.amr.graph.grid.traversals.ExpandingRectangle;
