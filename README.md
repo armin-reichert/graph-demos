@@ -6,9 +6,9 @@ This repository contains some graph sample applications:
 
 In this application you can add/remove walls in a grid and run different path finding algorithms (BFS, Dijkstra, Best-First Search, A*):
 
-![Path finding demo application](https://github.com/armin-reichert/graph-demos/blob/master/pathfinder-demo/doc/pathfinder.png)
+![Path finding demo application](https://github.com/armin-reichert/graph-demos/blob/master/graph-demos-pathfinder/doc/pathfinder.png)
 
-![Path finding demo application](https://github.com/armin-reichert/graph-demos/blob/master/pathfinder-demo/doc/astar.png)
+![Path finding demo application](https://github.com/armin-reichert/graph-demos/blob/master/graph-demos-pathfinder/doc/astar.png)
 
 ### Spacing-filling curves
 
