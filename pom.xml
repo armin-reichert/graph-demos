@@ -10,9 +10,10 @@
 		
 		
 		
-		<module>pathfinder-demo</module>
+		
 		<module>space-filling-curves</module>
 		
 		<module>graph-demos-misc</module>
+		<module>graph-demos-pathfinder</module>
 	</modules>
 </project>
