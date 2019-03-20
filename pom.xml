@@ -12,13 +12,7 @@
 		
 		<module>pathfinder-demo</module>
 		<module>space-filling-curves</module>
-		<module>misc</module>
+		
+		<module>graph-demos-misc</module>
 	</modules>
-	<dependencies>
-		<dependency>
-			<groupId>de.amr.graph</groupId>
-			<artifactId>graph-viz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-	</dependencies>
 </project>
