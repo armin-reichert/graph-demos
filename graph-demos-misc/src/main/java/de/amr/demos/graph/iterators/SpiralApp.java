@@ -1,9 +1,9 @@
 package de.amr.demos.graph.iterators;
 
-import static de.amr.graph.grid.api.GridPosition.CENTER;
 import static de.amr.graph.core.api.TraversalState.COMPLETED;
 import static de.amr.graph.core.api.TraversalState.UNVISITED;
 import static de.amr.graph.core.api.TraversalState.VISITED;
+import static de.amr.graph.grid.api.GridPosition.CENTER;
 
 import de.amr.graph.grid.traversals.Spiral;
 import de.amr.graph.grid.ui.SwingGridSampleApp;
