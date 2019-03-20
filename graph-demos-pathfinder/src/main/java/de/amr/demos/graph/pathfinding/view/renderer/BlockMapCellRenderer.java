@@ -6,16 +6,17 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 
 import de.amr.demos.graph.pathfinding.model.Tile;
+import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
-import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.GraphSearch;
@@ -179,16 +180,20 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		int y = grid.row(cell) * cellSize;
 		int r = cellSize / 10;
 		float lineThickness = Math.max(1, cellSize / 20);
-		Graphics2D g2 = (Graphics2D) g.create();
-		g2.translate(x + cellSize / 2, y + cellSize / 2);
-		g2.setColor(Color.BLACK);
-		g2.fillOval(-r, -r, 2 * r, 2 * r);
 		int dir = getMap().direction(cell, parent).getAsInt();
 		double theta = Math.toRadians(-computeRotationDegrees(dir));
-		g2.rotate(theta);
 		int lineLength = cellSize * 33 / 100;
+		Graphics2D g2 = (Graphics2D) g.create();
+		g2.setColor(Color.BLACK);
 		g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g2.drawLine(0, -lineLength, 0, 0);
+		g2.translate(x + cellSize / 2, y + cellSize / 2);
+		Polygon p = new Polygon();
+		p.addPoint(-r, 0);
+		p.addPoint(r, 0);
+		p.addPoint(0, -lineLength);
+		g2.rotate(theta);
+		g2.fillOval(-r, -r, 2 * r, 2 * r);
+		g2.fillPolygon(p);
 		g2.dispose();
 	}
 
