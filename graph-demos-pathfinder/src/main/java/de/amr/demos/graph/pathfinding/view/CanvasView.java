@@ -122,13 +122,13 @@ public class CanvasView extends JPanel {
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			int cell = getCellUnderMouse(e);
-			if (e.isShiftDown()) {
+			if (e.isControlDown()) {
 				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
 					selectedCell = cell;
 					controller.setSource(cell);
 				}
 			}
-			else if (e.isControlDown()) {
+			else if (e.isAltDown()) {
 				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
 					selectedCell = cell;
 					controller.setTarget(cell);

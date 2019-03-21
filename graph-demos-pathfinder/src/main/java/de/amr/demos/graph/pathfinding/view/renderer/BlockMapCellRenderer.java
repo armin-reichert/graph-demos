@@ -36,7 +36,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 	public BlockMapCellRenderer(int cellSize, Color gridBackground) {
 		this.cellSize = cellSize;
-		this.inset = cellSize / 10;
+		this.inset = 2;
 		this.gridBackground = gridBackground;
 	}
 
@@ -199,7 +199,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 			int r = cellSize / 10;
 			float lineThickness = Math.max(1, cellSize / 20);
 			double theta = Math.toRadians(-computeRotationDegrees(dir));
-			int lineLength = cellSize * 33 / 100;
+			int lineLength = cellSize * 25 / 100;
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.setColor(Color.DARK_GRAY);
 			g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
