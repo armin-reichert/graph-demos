@@ -22,6 +22,7 @@ public class RecursiveCrossesApp extends SwingGridSampleApp {
 	public void run() {
 		IntStream.of(64, 32, 16, 8, 4, 2).forEach(cellSize -> {
 			setCellSize(cellSize);
+			getCanvas().clear();
 			new RecursiveCrosses(getGrid()).forEach(cell -> getGrid().set(cell, COMPLETED));
 			sleep(1000);
 		});

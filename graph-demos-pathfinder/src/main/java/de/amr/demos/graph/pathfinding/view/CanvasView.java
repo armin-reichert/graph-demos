@@ -3,6 +3,7 @@ package de.amr.demos.graph.pathfinding.view;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -13,6 +14,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import de.amr.demos.graph.pathfinding.controller.Controller;
@@ -21,13 +23,14 @@ import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.BlockMapCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.BlockMapRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
-import de.amr.graph.grid.api.GridGraph2D;
+import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.impl.GridGraph;
+import de.amr.graph.grid.ui.animation.AbstractAnimation;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
 import de.amr.graph.grid.ui.rendering.PearlsGridRenderer;
-import de.amr.graph.core.api.TraversalState;
+import de.amr.graph.pathfinder.api.GraphSearchObserver;
 import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
@@ -35,16 +38,36 @@ import de.amr.graph.pathfinder.impl.GraphSearch;
  * 
  * @author Armin Reichert
  */
-public class CanvasView extends GridCanvas {
+public class CanvasView extends JPanel {
 
 	private PathFinderModel model;
 	private Controller controller;
 	private RenderingStyle style;
 	private boolean showCost;
 	private boolean showParent;
-	private JPopupMenu contextMenu;
 	private int selectedCell;
-	private int fixedHeight;
+	private GridCanvas canvas;
+	private JPopupMenu contextMenu;
+
+	public class PathFinderAnimation extends AbstractAnimation implements GraphSearchObserver {
+
+		@Override
+		public void vertexStateChanged(int v, TraversalState oldState, TraversalState newState) {
+			delayed(() -> canvas.drawGridCell(v));
+		}
+
+		@Override
+		public void edgeTraversed(int either, int other) {
+			delayed(() -> {
+				canvas.drawGridPassage(either, other, true);
+			});
+		}
+
+		@Override
+		public void vertexRemovedFromFrontier(int v) {
+			canvas.drawGridCell(v);
+		}
+	}
 
 	private class MouseHandler extends MouseAdapter {
 
@@ -52,8 +75,8 @@ public class CanvasView extends GridCanvas {
 
 		// grid cell index associated with event
 		private int getCellUnderMouse(MouseEvent e) {
-			int col = max(0, min(e.getX() / getCellSize(), model.getMap().numCols() - 1));
-			int row = max(0, min(e.getY() / getCellSize(), model.getMap().numRows() - 1));
+			int col = max(0, min(e.getX() / canvas.getCellSize(), model.getMap().numCols() - 1));
+			int row = max(0, min(e.getY() / canvas.getCellSize(), model.getMap().numRows() - 1));
 			return model.getMap().cell(col, row);
 		}
 
@@ -82,7 +105,7 @@ public class CanvasView extends GridCanvas {
 				boolean blankCellSelected = model.getMap().get(selectedCell) == Tile.BLANK;
 				actionSetSource.setEnabled(blankCellSelected);
 				actionSetTarget.setEnabled(blankCellSelected);
-				contextMenu.show(CanvasView.this, e.getX(), e.getY());
+				contextMenu.show(canvas, e.getX(), e.getY());
 			}
 		}
 
@@ -152,16 +175,77 @@ public class CanvasView extends GridCanvas {
 		}
 	};
 
-	public CanvasView(GridGraph2D<?, ?> grid, int height) {
-		super(grid);
-		fixedHeight = height;
+	public CanvasView() {
 		style = RenderingStyle.BLOCKS;
 		selectedCell = -1;
+		setLayout(new BorderLayout(0, 0));
+		canvas = new GridCanvas();
+		add(canvas);
+	}
+
+	public void init(PathFinderModel model, Controller controller) {
+		this.model = model;
+		this.controller = controller;
+		int cellSize = getHeight() / model.getMapSize();
+		canvas.setCellSize(cellSize, false);
+		canvas.setGrid(model.getMap());
+		replaceRenderer();
 		MouseHandler mouse = new MouseHandler();
-		addMouseListener(mouse);
-		addMouseMotionListener(mouse);
+		canvas.addMouseListener(mouse);
+		canvas.addMouseMotionListener(mouse);
 		createContextMenu();
 	}
+
+	private void replaceRenderer() {
+		canvas.replaceRenderer(createMapRenderer());
+		canvas.clear();
+		canvas.drawGrid();
+	}
+
+	public void setGrid(GridGraph<?, ?> grid) {
+		int cellSize = getHeight() / grid.numCols();
+		canvas.setGrid(grid, false);
+		canvas.setCellSize(cellSize, false);
+		replaceRenderer();
+	}
+
+	public PathFinderAnimation createAnimation() {
+		return new PathFinderAnimation();
+	}
+
+	public void setStyle(RenderingStyle style) {
+		this.style = style;
+		replaceRenderer();
+	}
+
+	public RenderingStyle getStyle() {
+		return style;
+	}
+
+	public void setShowCost(boolean showCost) {
+		this.showCost = showCost;
+		canvas.drawGrid();
+	}
+
+	public boolean isShowCost() {
+		return showCost;
+	}
+
+	public void setShowParent(boolean showParent) {
+		this.showParent = showParent;
+		canvas.drawGrid();
+	}
+
+	public boolean isShowParent() {
+		return showParent;
+	}
+
+	public void updateView() {
+		canvas.clear();
+		canvas.drawGrid();
+	}
+
+	// Context menu
 
 	private void createContextMenu() {
 		contextMenu = new JPopupMenu();
@@ -184,51 +268,6 @@ public class CanvasView extends GridCanvas {
 		contextMenu.add(targetMenu);
 		contextMenu.addSeparator();
 		contextMenu.add(actionResetScene);
-	}
-
-	public void init(PathFinderModel model, Controller controller) {
-		this.model = model;
-		this.controller = controller;
-		pushRenderer(createMapRenderer(fixedHeight / model.getMapSize()));
-	}
-
-	public void fixHeight(int fixedHeight) {
-		this.fixedHeight = fixedHeight;
-	}
-
-	private int getCellSize() {
-		return getRenderer().get().getModel().getCellSize();
-	}
-
-	private void replaceRenderer(int cellSize) {
-		if (hasRenderer()) {
-			popRenderer();
-		}
-		pushRenderer(createMapRenderer(cellSize));
-		clear();
-		drawGrid();
-	}
-
-	@Override
-	public void setGrid(GridGraph<?, ?> grid) {
-		super.setGrid(grid);
-		int cellSize = (int) Math.floor((float) fixedHeight / grid.numCols());
-		replaceRenderer(cellSize);
-	}
-
-	public void setStyle(RenderingStyle style) {
-		this.style = style;
-		replaceRenderer(getCellSize());
-	}
-
-	public void setShowCost(boolean showCost) {
-		this.showCost = showCost;
-		drawGrid();
-	}
-
-	public void setShowParent(boolean showParent) {
-		this.showParent = showParent;
-		drawGrid();
 	}
 
 	// Renderer
@@ -313,33 +352,25 @@ public class CanvasView extends GridCanvas {
 		}
 	}
 
-	private GridRenderer createMapRenderer(int cellSize) {
+	private GridRenderer createMapRenderer() {
 		if (style == RenderingStyle.BLOCKS) {
-			BlockMapRenderer r = new BlockMapRenderer(new BlockCellRenderer(cellSize));
-			r.fnCellSize = () -> cellSize;
+			BlockMapRenderer r = new BlockMapRenderer(new BlockCellRenderer(canvas.getCellSize()));
+			r.fnCellSize = canvas::getCellSize;
 			r.fnGridBgColor = () -> new Color(160, 160, 160);
 			return r;
 		}
 		if (style == RenderingStyle.PEARLS) {
 			PearlsGridRenderer r = new PearlsGridRenderer();
-			r.fnCellSize = () -> cellSize;
+			r.fnCellSize = canvas::getCellSize;
 			r.fnGridBgColor = () -> new Color(160, 160, 160);
 			r.fnCellBgColor = this::computeCellBackground;
-			r.fnPassageWidth = (u, v) -> Math.max(cellSize * 5 / 100, 1);
-			r.fnPassageColor = (cell, dir) -> partOfSolution(cell)
-					&& partOfSolution(grid.neighbor(cell, dir).getAsInt()) ? Color.RED.brighter() : Color.WHITE;
+			r.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
+			r.fnPassageColor = (cell,
+					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).getAsInt())
+							? Color.RED.brighter()
+							: Color.WHITE;
 			return r;
 		}
 		throw new IllegalArgumentException();
-	}
-
-	@Override
-	public void drawGridPassage(int either, int other, boolean visible) {
-		super.drawGridPassage(either, other, visible);
-		// TODO fixme
-		if (style == RenderingStyle.PEARLS) {
-			drawGridCell(either);
-			drawGridCell(other);
-		}
 	}
 }

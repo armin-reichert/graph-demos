@@ -147,7 +147,8 @@ public class MainView extends JPanel {
 
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			controller.resizeMap((int) spinnerMapSize.getValue());
+			int newSize = (int) spinnerMapSize.getValue();
+			controller.resizeMap(newSize);
 		}
 	};
 
@@ -164,7 +165,6 @@ public class MainView extends JPanel {
 	private JPanel panelActions;
 	private JComboBox<RenderingStyle> comboStyle;
 	private JSlider sliderDelay;
-	private JPanel panelMap;
 	private JScrollPane scrollPaneTableResults;
 	private HelpPanel helpPanel;
 	private JButton btnFinish;
@@ -177,19 +177,20 @@ public class MainView extends JPanel {
 
 	public MainView() {
 		setBackground(Color.WHITE);
-		setLayout(new MigLayout("", "[][grow]", "[grow,fill]"));
+		setLayout(new MigLayout("", "[grow][]", "[grow,fill]"));
 
-		panelMap = new JPanel();
-		panelMap.setOpaque(false);
-		panelMap.setPreferredSize(new Dimension(500, 10));
-		add(panelMap, "cell 0 0,growy");
-		panelMap.setLayout(new BorderLayout(0, 0));
+		canvasView = new CanvasView();
+		int height = Toolkit.getDefaultToolkit().getScreenSize().height * 85 / 100;
+		canvasView.setSize(height, height);
+		canvasView.setPreferredSize(new Dimension(height, height));
+		add(canvasView, "cell 0 0,grow");
+		canvasView.setLayout(new BorderLayout(0, 0));
 
 		panelActions = new JPanel();
 		panelActions.setOpaque(false);
 		panelActions.setMinimumSize(new Dimension(550, 10));
 		panelActions.setPreferredSize(new Dimension(500, 50));
-		add(panelActions, "cell 1 0,grow");
+		add(panelActions, "cell 1 0,growy");
 		panelActions.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][grow,bottom]"));
 
 		JLabel lblMap = new JLabel("Map");
@@ -319,13 +320,9 @@ public class MainView extends JPanel {
 		this.controller = controller;
 
 		// canvas
-		int height = Toolkit.getDefaultToolkit().getScreenSize().height * 85 / 100;
-		canvasView = new CanvasView(model.getMap(), height);
 		canvasView.init(model, controller);
 		canvasView.setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
 		canvasView.setShowCost(cbShowCost.isSelected());
-		canvasView.fixHeight(canvasView.getSize().height);
-		panelMap.add(canvasView, BorderLayout.CENTER);
 
 		// path finder results table
 		tableResults.init(model);
@@ -376,13 +373,14 @@ public class MainView extends JPanel {
 
 	public void updateView() {
 		tableResults.dataChanged();
-		getCanvasView().ifPresent(canvas -> {
-			canvas.clear();
-			canvas.drawGrid();
+		getCanvasView().ifPresent(canvasView -> {
+			canvasView.updateView();
 		});
 	}
 
-	public void updateCanvas() {
-		getCanvasView().ifPresent(canvas -> canvas.setGrid(model.getMap()));
+	public void updateCanvasView() {
+		getCanvasView().ifPresent(canvasView -> {
+			canvasView.setGrid(model.getMap());
+		});
 	}
 }

@@ -24,6 +24,7 @@ public class HilbertLCurveWirthApp extends SwingGridSampleApp {
 	public void run() {
 		IntStream.of(256, 128, 64, 32, 16, 8, 4, 2).forEach(cellSize -> {
 			setCellSize(cellSize);
+			getCanvas().clear();
 			HilbertLCurveWirth curve = new HilbertLCurveWirth(log(2, getGrid().numCols()));
 			traverse(curve, getGrid(), getGrid().cell(TOP_RIGHT), this::addEdge);
 			floodFill(TOP_RIGHT);

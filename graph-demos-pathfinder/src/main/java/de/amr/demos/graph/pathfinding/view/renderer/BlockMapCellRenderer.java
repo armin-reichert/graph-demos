@@ -176,25 +176,26 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		if (parent == -1) {
 			return;
 		}
-		int x = grid.col(cell) * cellSize;
-		int y = grid.row(cell) * cellSize;
-		int r = cellSize / 10;
-		float lineThickness = Math.max(1, cellSize / 20);
-		int dir = getMap().direction(cell, parent).getAsInt();
-		double theta = Math.toRadians(-computeRotationDegrees(dir));
-		int lineLength = cellSize * 33 / 100;
-		Graphics2D g2 = (Graphics2D) g.create();
-		g2.setColor(Color.BLACK);
-		g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g2.translate(x + cellSize / 2, y + cellSize / 2);
-		Polygon p = new Polygon();
-		p.addPoint(-r, 0);
-		p.addPoint(r, 0);
-		p.addPoint(0, -lineLength);
-		g2.rotate(theta);
-		g2.fillOval(-r, -r, 2 * r, 2 * r);
-		g2.fillPolygon(p);
-		g2.dispose();
+		getMap().direction(cell, parent).ifPresent(dir -> {
+			int x = grid.col(cell) * cellSize;
+			int y = grid.row(cell) * cellSize;
+			int r = cellSize / 10;
+			float lineThickness = Math.max(1, cellSize / 20);
+			double theta = Math.toRadians(-computeRotationDegrees(dir));
+			int lineLength = cellSize * 33 / 100;
+			Graphics2D g2 = (Graphics2D) g.create();
+			g2.setColor(Color.BLACK);
+			g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g2.translate(x + cellSize / 2, y + cellSize / 2);
+			Polygon p = new Polygon();
+			p.addPoint(-r, 0);
+			p.addPoint(r, 0);
+			p.addPoint(0, -lineLength);
+			g2.rotate(theta);
+			g2.fillOval(-r, -r, 2 * r, 2 * r);
+			g2.fillPolygon(p);
+			g2.dispose();
+		});
 	}
 
 	private int computeRotationDegrees(int dir) {

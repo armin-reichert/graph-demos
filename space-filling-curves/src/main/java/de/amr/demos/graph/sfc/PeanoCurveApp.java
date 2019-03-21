@@ -24,6 +24,7 @@ public class PeanoCurveApp extends SwingGridSampleApp {
 	public void run() {
 		IntStream.of(3, 9, 81, 243).forEach(n -> {
 			setCellSize(getCanvas().getWidth() / n);
+			getCanvas().clear();
 			traverse(new PeanoCurve(log(3, n)), getGrid(), getGrid().cell(BOTTOM_LEFT), this::addEdge);
 			floodFill(BOTTOM_LEFT);
 			sleep(1000);

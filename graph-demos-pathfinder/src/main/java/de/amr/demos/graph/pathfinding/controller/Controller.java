@@ -10,13 +10,12 @@ import javax.swing.SwingWorker;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
+import de.amr.demos.graph.pathfinding.view.CanvasView.PathFinderAnimation;
 import de.amr.demos.graph.pathfinding.view.MainView;
+import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
-import de.amr.graph.grid.ui.animation.AbstractAnimation;
-import de.amr.graph.pathfinder.api.GraphSearchObserver;
 import de.amr.graph.pathfinder.api.Path;
-import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
@@ -32,50 +31,26 @@ public class Controller {
 	private PathFinderAlgorithm selectedAlgorithm;
 	private ExecutionMode executionMode;
 
-	private class PathFinderAnimation extends AbstractAnimation implements GraphSearchObserver {
-
-		@Override
-		public void vertexStateChanged(int v, TraversalState oldState, TraversalState newState) {
-			view.getCanvasView().ifPresent(canvas -> {
-				delayed(() -> canvas.drawGridCell(v));
-			});
-		}
-
-		@Override
-		public void edgeTraversed(int either, int other) {
-			view.getCanvasView().ifPresent(canvas -> {
-				delayed(() -> {
-					canvas.drawGridPassage(either, other, true);
-				});
-			});
-		}
-
-		@Override
-		public void vertexRemovedFromFrontier(int v) {
-			view.getCanvasView().ifPresent(canvas -> {
-				canvas.drawGridCell(v);
-			});
-		}
-	}
-
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
 
 		@Override
 		protected Void doInBackground() throws Exception {
 			model.newRun(selectedAlgorithm);
-			view.getCanvasView().ifPresent(canvas -> canvas.drawGrid());
-			PathFinderAnimation animation = new PathFinderAnimation();
-			animation.setFnDelay(view::getAnimationDelay);
-			model.getPathFinder(selectedAlgorithm).addObserver(animation);
-			model.runPathFinder(selectedAlgorithm);
-			model.getPathFinder(selectedAlgorithm).removeObserver(animation);
+			view.getCanvasView().ifPresent(canvas -> {
+				canvas.updateView();
+				PathFinderAnimation animation = canvas.createAnimation();
+				animation.setFnDelay(view::getAnimationDelay);
+				model.getPathFinder(selectedAlgorithm).addObserver(animation);
+				model.runPathFinder(selectedAlgorithm);
+				model.getPathFinder(selectedAlgorithm).removeObserver(animation);
+			});
 			return null;
 		}
 
 		@Override
 		protected void done() {
 			// redraw canvas to show path
-			view.getCanvasView().ifPresent(canvas -> canvas.drawGrid());
+			view.getCanvasView().ifPresent(canvas -> canvas.updateView());
 		}
 	}
 
@@ -190,13 +165,13 @@ public class Controller {
 
 	public void resizeMap(int size) {
 		model.resizeMap(size);
-		view.updateCanvas();
+		view.updateCanvasView();
 		maybeRunPathFinder();
 	}
 
 	public void selectTopology(TopologySelection topology) {
 		model.setTopology(topology == TopologySelection._4_NEIGHBORS ? Top4.get() : Top8.get());
-		view.updateCanvas();
+		view.updateCanvasView();
 		maybeRunPathFinder();
 	}
 

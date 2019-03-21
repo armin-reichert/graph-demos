@@ -52,6 +52,7 @@ public class HilbertCurveApp extends SwingGridSampleApp {
 		Stream.of(TOP_RIGHT, TOP_LEFT, BOTTOM_RIGHT, BOTTOM_LEFT).forEach(start -> {
 			IntStream.of(256, 128, 64, 32, 16, 8, 4, 2).forEach(cellSize -> {
 				setCellSize(cellSize);
+				getCanvas().clear();
 				List<Integer> dir = ORIENTATION.get(start);
 				HilbertCurve hilbert = new HilbertCurve(log(2, getGrid().numCols()), dir.get(0), dir.get(1),
 						dir.get(2), dir.get(3));

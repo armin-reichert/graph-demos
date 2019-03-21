@@ -24,6 +24,7 @@ public class HilbertLCurveApp extends SwingGridSampleApp {
 	public void run() {
 		IntStream.of(256, 128, 64, 32, 16, 8, 4, 2).forEach(cellSize -> {
 			setCellSize(cellSize);
+			getCanvas().clear();
 			HilbertLCurve curve = new HilbertLCurve(log(2, getGrid().numCols()));
 			traverse(curve, getGrid(), getGrid().cell(BOTTOM_LEFT), this::addEdge);
 			floodFill(BOTTOM_LEFT);
