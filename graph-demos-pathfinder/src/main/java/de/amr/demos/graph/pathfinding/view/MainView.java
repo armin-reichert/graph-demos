@@ -156,13 +156,15 @@ public class MainView extends JPanel {
 	private Controller controller;
 	private CanvasView canvasView;
 
+	private JPanel panelActions;
+	private JSpinner spinnerMapSize;
 	private JComboBox<PathFinderAlgorithm> comboAlgorithm;
 	private JComboBox<TopologySelection> comboTopology;
+	private JComboBox<ExecutionMode> comboExecutionMode;
 	private ResultsTable tableResults;
-	private JSpinner spinnerMapSize;
 	private JCheckBox cbShowCost;
+	private JCheckBox cbShowParent;
 	private JLabel lblPathFinding;
-	private JPanel panelActions;
 	private JComboBox<RenderingStyle> comboStyle;
 	private JSlider sliderDelay;
 	private JScrollPane scrollPaneTableResults;
@@ -172,8 +174,6 @@ public class MainView extends JPanel {
 	private JLabel lblAnimation;
 	private JPanel panel_1;
 	private JLabel lblNewLabel;
-	private JComboBox<ExecutionMode> comboExecutionMode;
-	private JCheckBox cbShowParent;
 
 	public MainView() {
 		setBackground(Color.WHITE);
@@ -369,6 +369,7 @@ public class MainView extends JPanel {
 		scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
 
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
+		cbShowParent.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
 	public void updateView() {
