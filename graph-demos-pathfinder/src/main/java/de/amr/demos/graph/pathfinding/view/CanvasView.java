@@ -176,10 +176,12 @@ public class CanvasView extends JPanel {
 	};
 
 	public CanvasView() {
+		setBackground(Color.WHITE);
 		style = RenderingStyle.BLOCKS;
 		selectedCell = -1;
 		setLayout(new BorderLayout(0, 0));
 		canvas = new GridCanvas();
+		canvas.setBackground(Color.WHITE);
 		add(canvas);
 	}
 
@@ -307,7 +309,7 @@ public class CanvasView extends JPanel {
 	private class BlockCellRenderer extends BlockMapCellRenderer {
 
 		public BlockCellRenderer(int cellSize) {
-			super(cellSize);
+			super(cellSize, new Color(160, 160, 160));
 		}
 
 		@Override

@@ -29,13 +29,15 @@ import de.amr.graph.pathfinder.impl.GraphSearch;
  */
 public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
+	private Color gridBackground;
 	private Font font = new Font("Arial Narrow", Font.PLAIN, 12);
 	private int inset;
 	private int cellSize;
 
-	public BlockMapCellRenderer(int cellSize) {
+	public BlockMapCellRenderer(int cellSize, Color gridBackground) {
 		this.cellSize = cellSize;
 		this.inset = cellSize / 10;
+		this.gridBackground = gridBackground;
 	}
 
 	public abstract GridGraph<Tile, Double> getMap();
@@ -73,12 +75,27 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-		// draw cell background and cell border
 		g.translate(x, y);
+
+		// draw cell background
 		g.setColor(getCellBackground(cell));
 		g.fillRect(0, 0, cellSize, cellSize);
-		g.setColor(new Color(160, 160, 160));
-		g.drawRect(0, 0, cellSize, cellSize);
+
+		// draw cell border
+		g.setColor(gridBackground);
+		if (grid.col(cell) == grid.numCols() - 1) {
+			g.drawRect(0, 0, cellSize - 1, cellSize);
+		}
+		else {
+			g.drawRect(0, 0, cellSize, cellSize);
+		}
+		if (grid.row(cell) == grid.numRows() - 1) {
+			g.drawRect(0, 0, cellSize, cellSize - 1);
+		}
+		else {
+			g.drawRect(0, 0, cellSize, cellSize);
+		}
+
 		g.translate(-x, -y);
 
 		if (getMap().get(cell) == Tile.WALL) {
@@ -188,8 +205,8 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 			g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			g2.translate(x + cellSize / 2, y + cellSize / 2);
 			Polygon p = new Polygon();
-			p.addPoint(-r, 0);
-			p.addPoint(r, 0);
+			p.addPoint(-r, -r / 6);
+			p.addPoint(r, -r / 6);
 			p.addPoint(0, -lineLength);
 			g2.rotate(theta);
 			g2.fillOval(-r, -r, 2 * r, 2 * r);
