@@ -184,7 +184,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 			double theta = Math.toRadians(-computeRotationDegrees(dir));
 			int lineLength = cellSize * 33 / 100;
 			Graphics2D g2 = (Graphics2D) g.create();
-			g2.setColor(Color.BLACK);
+			g2.setColor(Color.DARK_GRAY);
 			g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			g2.translate(x + cellSize / 2, y + cellSize / 2);
 			Polygon p = new Polygon();
