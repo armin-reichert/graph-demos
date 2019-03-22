@@ -8,11 +8,11 @@ import de.amr.graph.grid.ui.rendering.ConfigurableGridRenderer;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
 
-public class BlockMapRenderer extends ConfigurableGridRenderer implements GridRenderer {
+public class BlocksMapRenderer extends ConfigurableGridRenderer implements GridRenderer {
 
 	private GridCellRenderer cellRenderer;
 
-	public BlockMapRenderer(GridCellRenderer cellRenderer) {
+	public BlocksMapRenderer(GridCellRenderer cellRenderer) {
 		this.cellRenderer = Objects.requireNonNull(cellRenderer);
 	}
 

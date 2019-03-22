@@ -20,8 +20,8 @@ import javax.swing.JPopupMenu;
 import de.amr.demos.graph.pathfinding.controller.Controller;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
-import de.amr.demos.graph.pathfinding.view.renderer.BlockMapCellRenderer;
-import de.amr.demos.graph.pathfinding.view.renderer.BlockMapRenderer;
+import de.amr.demos.graph.pathfinding.view.renderer.BlocksCellRenderer;
+import de.amr.demos.graph.pathfinding.view.renderer.BlocksMapRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
@@ -34,18 +34,20 @@ import de.amr.graph.pathfinder.api.GraphSearchObserver;
 import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
- * View showing map and path finder animations.
+ * View showing the map with the path finder data and animations.
  * 
  * @author Armin Reichert
  */
 public class CanvasView extends JPanel {
+
+	private static final Color GRID_BACKGROUND = new Color(160, 160, 160);
 
 	private PathFinderModel model;
 	private Controller controller;
 	private RenderingStyle style;
 	private boolean showCost;
 	private boolean showParent;
-	private int selectedCell;
+	private int cellUnderMouse;
 	private GridCanvas canvas;
 	private JPopupMenu contextMenu;
 
@@ -58,9 +60,7 @@ public class CanvasView extends JPanel {
 
 		@Override
 		public void edgeTraversed(int either, int other) {
-			delayed(() -> {
-				canvas.drawGridPassage(either, other, true);
-			});
+			delayed(() -> canvas.drawGridPassage(either, other, true));
 		}
 
 		@Override
@@ -73,15 +73,14 @@ public class CanvasView extends JPanel {
 
 		private int draggedCell;
 
-		// grid cell index associated with event
+		public MouseHandler() {
+			draggedCell = -1;
+		}
+
 		private int getCellUnderMouse(MouseEvent e) {
 			int col = max(0, min(e.getX() / canvas.getCellSize(), model.getMap().numCols() - 1));
 			int row = max(0, min(e.getY() / canvas.getCellSize(), model.getMap().numRows() - 1));
 			return model.getMap().cell(col, row);
-		}
-
-		public MouseHandler() {
-			draggedCell = -1;
 		}
 
 		@Override
@@ -93,18 +92,29 @@ public class CanvasView extends JPanel {
 		}
 
 		@Override
+		public void mouseMoved(MouseEvent e) {
+			cellUnderMouse = getCellUnderMouse(e);
+			if (e.isControlDown() && cellUnderMouse != model.getSource()) {
+				controller.setSource(cellUnderMouse);
+			}
+			else if (e.isAltDown() && cellUnderMouse != model.getTarget()) {
+				controller.setTarget(cellUnderMouse);
+			}
+		}
+
+		@Override
 		public void mouseReleased(MouseEvent e) {
+			cellUnderMouse = getCellUnderMouse(e);
 			if (draggedCell != -1) {
-				// dragging ends
+				// end of dragging
+				System.out.println("dragging ends");
 				draggedCell = -1;
 				controller.maybeRunPathFinder();
 			}
 			else if (e.isPopupTrigger()) {
-				// open popup menu
-				selectedCell = getCellUnderMouse(e);
-				boolean blankCellSelected = model.getMap().get(selectedCell) == Tile.BLANK;
-				actionSetSource.setEnabled(blankCellSelected);
-				actionSetTarget.setEnabled(blankCellSelected);
+				boolean noWall = model.getMap().get(cellUnderMouse) != Tile.WALL;
+				actionSetSource.setEnabled(noWall);
+				actionSetTarget.setEnabled(noWall);
 				contextMenu.show(canvas, e.getX(), e.getY());
 			}
 		}
@@ -113,28 +123,12 @@ public class CanvasView extends JPanel {
 		public void mouseDragged(MouseEvent e) {
 			int cell = getCellUnderMouse(e);
 			if (cell != draggedCell) {
-				// dragging into new cell
+				// dragged mouse into new cell
 				draggedCell = cell;
 				controller.setTileAt(cell, e.isShiftDown() ? Tile.BLANK : Tile.WALL);
 			}
 		}
 
-		@Override
-		public void mouseMoved(MouseEvent e) {
-			int cell = getCellUnderMouse(e);
-			if (e.isControlDown()) {
-				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
-					selectedCell = cell;
-					controller.setSource(cell);
-				}
-			}
-			else if (e.isAltDown()) {
-				if (cell != selectedCell && model.getMap().get(cell) != Tile.WALL) {
-					selectedCell = cell;
-					controller.setTarget(cell);
-				}
-			}
-		}
 	}
 
 	private Action actionSetSource = new AbstractAction("Search From Here") {
@@ -143,12 +137,7 @@ public class CanvasView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			JComponent trigger = (JComponent) e.getSource();
 			GridPosition position = (GridPosition) trigger.getClientProperty("position");
-			if (position != null) {
-				controller.setSource(model.getMap().cell(position));
-			}
-			else {
-				controller.setSource(selectedCell);
-			}
+			controller.setSource(position != null ? model.getMap().cell(position) : cellUnderMouse);
 		}
 	};
 
@@ -158,12 +147,7 @@ public class CanvasView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			JComponent trigger = (JComponent) e.getSource();
 			GridPosition position = (GridPosition) trigger.getClientProperty("position");
-			if (position != null) {
-				controller.setTarget(model.getMap().cell(position));
-			}
-			else {
-				controller.setTarget(selectedCell);
-			}
+			controller.setTarget(position != null ? model.getMap().cell(position) : cellUnderMouse);
 		}
 	};
 
@@ -178,7 +162,7 @@ public class CanvasView extends JPanel {
 	public CanvasView() {
 		setBackground(Color.WHITE);
 		style = RenderingStyle.BLOCKS;
-		selectedCell = -1;
+		cellUnderMouse = -1;
 		setLayout(new BorderLayout(0, 0));
 		canvas = new GridCanvas();
 		canvas.setBackground(Color.WHITE);
@@ -188,14 +172,14 @@ public class CanvasView extends JPanel {
 	public void init(PathFinderModel model, Controller controller) {
 		this.model = model;
 		this.controller = controller;
-		int cellSize = getHeight() / model.getMapSize();
-		canvas.setCellSize(cellSize, false);
-		canvas.setGrid(model.getMap());
-		replaceRenderer();
 		MouseHandler mouse = new MouseHandler();
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
 		createContextMenu();
+		int cellSize = getHeight() / model.getMapSize();
+		canvas.setCellSize(cellSize, false);
+		canvas.setGrid(model.getMap(), false);
+		replaceRenderer();
 	}
 
 	private void replaceRenderer() {
@@ -306,10 +290,16 @@ public class CanvasView extends JPanel {
 		return model.getRun(controller.getSelectedAlgorithm()).pathContains(cell);
 	}
 
-	private class BlockCellRenderer extends BlockMapCellRenderer {
+	private class BlocksCellRendererAdapter extends BlocksCellRenderer {
 
-		public BlockCellRenderer(int cellSize) {
-			super(cellSize, new Color(160, 160, 160));
+		@Override
+		public int getCellSize() {
+			return canvas.getCellSize();
+		}
+
+		@Override
+		public Color getGridBackground() {
+			return GRID_BACKGROUND;
 		}
 
 		@Override
@@ -351,15 +341,15 @@ public class CanvasView extends JPanel {
 
 	private GridRenderer createMapRenderer() {
 		if (style == RenderingStyle.BLOCKS) {
-			BlockMapRenderer r = new BlockMapRenderer(new BlockCellRenderer(canvas.getCellSize()));
+			BlocksMapRenderer r = new BlocksMapRenderer(new BlocksCellRendererAdapter());
 			r.fnCellSize = canvas::getCellSize;
-			r.fnGridBgColor = () -> new Color(160, 160, 160);
+			r.fnGridBgColor = () -> GRID_BACKGROUND;
 			return r;
 		}
 		if (style == RenderingStyle.PEARLS) {
 			PearlsGridRenderer r = new PearlsGridRenderer();
 			r.fnCellSize = canvas::getCellSize;
-			r.fnGridBgColor = () -> new Color(160, 160, 160);
+			r.fnGridBgColor = () -> GRID_BACKGROUND;
 			r.fnCellBgColor = this::computeCellBackground;
 			r.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
 			r.fnPassageColor = (cell,
@@ -368,6 +358,6 @@ public class CanvasView extends JPanel {
 							: Color.WHITE;
 			return r;
 		}
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException("Unknown style: " + style);
 	}
 }

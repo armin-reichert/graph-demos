@@ -23,38 +23,27 @@ import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
- * Renders map cells as "blocks". Depending on the associated path finder algorithm, different
+ * Renders map cells as "blocks". Depending on the current path finder algorithm, different
  * information is displayed inside each cell.
  * 
  * @author Armin Reichert
  */
-public abstract class BlockMapCellRenderer implements GridCellRenderer {
+public abstract class BlocksCellRenderer implements GridCellRenderer {
 
 	private final Font font = new Font("Arial Narrow", Font.PLAIN, 12);
-	private final Color gridBackground;
 	private final int inset;
-	private final int cellSize;
 	private final Area needle;
 
-	public BlockMapCellRenderer(int cellSize, Color gridBackground) {
-		this.cellSize = cellSize;
-		this.inset = Math.max(cellSize / 20, 3);
-		this.gridBackground = gridBackground;
-		this.needle = createNeedle(cellSize);
+	public BlocksCellRenderer() {
+		this.inset = Math.max(getCellSize() / 20, 3);
+		this.needle = createNeedle();
 	}
 
-	private static Area createNeedle(int cellSize) {
-		int r = cellSize / 10;
-		Area needle = new Area(new Ellipse2D.Double(-r, -r, 2 * r, 2 * r));
-		Polygon p = new Polygon();
-		p.addPoint(-r, -r / 6);
-		p.addPoint(r, -r / 6);
-		p.addPoint(0, -(cellSize * 25 / 100));
-		needle.add(new Area(p));
-		return needle;
-	}
+	public abstract int getCellSize();
 
 	public abstract GraphSearch<?> getPathFinder();
+
+	public abstract Color getGridBackground();
 
 	public abstract Color getBackground(int cell);
 
@@ -66,13 +55,24 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 	public abstract boolean showParent();
 
+	private Area createNeedle() {
+		int r = getCellSize() / 10;
+		Area needle = new Area(new Ellipse2D.Double(-r, -r, 2 * r, 2 * r));
+		Polygon p = new Polygon();
+		p.addPoint(-r, -r / 6);
+		p.addPoint(r, -r / 6);
+		p.addPoint(0, -(getCellSize() * 25 / 100));
+		needle.add(new Area(p));
+		return needle;
+	}
+
 	private String formatScaledValue(double value, double factor) {
 		// display real value multiplied by 10
 		return value == INFINITE_COST ? "" : String.format("%.0f", factor * value);
 	}
 
 	private void setRelativeFontSize(Graphics2D g, int percent) {
-		g.setFont(font.deriveFont((float) cellSize * percent / 100));
+		g.setFont(font.deriveFont((float) getCellSize() * percent / 100));
 	}
 
 	private Rectangle2D getBounds(Graphics2D g, String text) {
@@ -81,20 +81,20 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 	@Override
 	public void drawCell(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
-		final int x = grid.col(cell) * cellSize;
-		final int y = grid.row(cell) * cellSize;
+		final int x = grid.col(cell) * getCellSize();
+		final int y = grid.row(cell) * getCellSize();
 		g.translate(x, y);
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		// cell background
 		g.setColor(getBackground(cell));
-		g.fillRect(0, 0, cellSize, cellSize);
+		g.fillRect(0, 0, getCellSize(), getCellSize());
 		// cell border
-		g.setColor(gridBackground);
+		g.setColor(getGridBackground());
 		boolean lastCol = grid.col(cell) == grid.numCols() - 1;
-		g.drawRect(0, 0, lastCol ? cellSize - 1 : cellSize, cellSize);
+		g.drawRect(0, 0, lastCol ? getCellSize() - 1 : getCellSize(), getCellSize());
 		boolean lastRow = grid.row(cell) == grid.numRows() - 1;
-		g.drawRect(0, 0, cellSize, lastRow ? cellSize - 1 : cellSize);
+		g.drawRect(0, 0, getCellSize(), lastRow ? getCellSize() - 1 : getCellSize());
 		// cell content
 		drawCellContent(g, cell, grid);
 		g.translate(-x, -y);
@@ -139,7 +139,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		setRelativeFontSize(g, 30);
 		textBox = getBounds(g, hCost);
 		g.setColor(textColor);
-		g.drawString(hCost, (int) (cellSize - textBox.getWidth() - inset), (int) textBox.getHeight());
+		g.drawString(hCost, (int) (getCellSize() - textBox.getWidth() - inset), (int) textBox.getHeight());
 
 		// F-value
 		String fCost = formatScaledValue(astar.getScore(cell), 10);
@@ -148,7 +148,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		if (!isHighlighted(cell)) {
 			g.setColor(Color.MAGENTA);
 		}
-		g.drawString(fCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
+		g.drawString(fCost, (int) (getCellSize() - textBox.getWidth()) / 2, getCellSize() - inset);
 	}
 
 	private void drawContentBestFirstSearch(Graphics2D g, int cell, BestFirstSearch bfs) {
@@ -170,7 +170,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		setRelativeFontSize(g, 50);
 		textBox = getBounds(g, gCost);
 		g.setColor(textColor);
-		g.drawString(gCost, (int) (cellSize - textBox.getWidth()) / 2, cellSize - inset);
+		g.drawString(gCost, (int) (getCellSize() - textBox.getWidth()) / 2, getCellSize() - inset);
 	}
 
 	private void drawContentGeneric(Graphics2D g, int cell, GraphSearch<?> pf) {
@@ -183,8 +183,8 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		setRelativeFontSize(g, 50);
 		textBox = getBounds(g, gCost);
 		g.setColor(textColor);
-		g.drawString(gCost, (int) (cellSize - textBox.getWidth()) / 2,
-				(int) (cellSize + textBox.getHeight() - g.getFontMetrics().getDescent()) / 2);
+		g.drawString(gCost, (int) (getCellSize() - textBox.getWidth()) / 2,
+				(int) (getCellSize() + textBox.getHeight() - g.getFontMetrics().getDescent()) / 2);
 	}
 
 	private void drawNeedle(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
@@ -192,13 +192,13 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		if (parent == -1) {
 			return;
 		}
-		Stroke stroke = new BasicStroke(Math.max(1, cellSize / 20), BasicStroke.CAP_ROUND,
+		Stroke stroke = new BasicStroke(Math.max(1, getCellSize() / 20), BasicStroke.CAP_ROUND,
 				BasicStroke.JOIN_ROUND);
 		grid.direction(cell, parent).ifPresent(dir -> {
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.setColor(Color.DARK_GRAY);
 			g2.setStroke(stroke);
-			g2.translate(cellSize / 2, cellSize / 2);
+			g2.translate(getCellSize() / 2, getCellSize() / 2);
 			// direction constants start at North and then go clock-wise
 			g2.rotate(Math.toRadians((grid.getTopology() == Top4.get() ? 90 : 45) * dir));
 			g2.fill(needle);
