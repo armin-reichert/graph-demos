@@ -15,7 +15,6 @@ import java.awt.geom.Rectangle2D;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridGraph2D;
-import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.pathfinder.impl.AStarSearch;
@@ -23,24 +22,24 @@ import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
- * Renders the map vertices as "blocks". Depending on the associated path finder algorithm,
- * different information is displayed inside each cell.
+ * Renders map cells as "blocks". Depending on the associated path finder algorithm, different
+ * information is displayed inside each cell.
  * 
  * @author Armin Reichert
  */
 public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
-	private Color gridBackground;
-	private Font font = new Font("Arial Narrow", Font.PLAIN, 12);
-	private int inset;
-	private int cellSize;
-	private Area needle;
+	private final Font font = new Font("Arial Narrow", Font.PLAIN, 12);
+	private final Color gridBackground;
+	private final int inset;
+	private final int cellSize;
+	private final Area needle;
 
 	public BlockMapCellRenderer(int cellSize, Color gridBackground) {
 		this.cellSize = cellSize;
 		this.inset = Math.max(cellSize / 20, 3);
 		this.gridBackground = gridBackground;
-		needle = createNeedle(cellSize);
+		this.needle = createNeedle(cellSize);
 	}
 
 	private static Area createNeedle(int cellSize) {
@@ -53,8 +52,6 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		needle.add(new Area(p));
 		return needle;
 	}
-
-	public abstract GridGraph<Tile, Double> getMap();
 
 	public abstract GraphSearch<?> getPathFinder();
 
@@ -112,7 +109,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 		g.translate(-x, -y);
 
-		if (getMap().get(cell) == Tile.WALL) {
+		if (grid.get(cell) == Tile.WALL) {
 			return;
 		}
 
@@ -210,8 +207,8 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 		int x = grid.col(cell) * cellSize;
 		int y = grid.row(cell) * cellSize;
 		float thickness = Math.max(1, cellSize / 20);
-		int rot = getMap().getTopology() == Top4.get() ? 90 : 45;
-		getMap().direction(cell, parent).ifPresent(dir -> {
+		int rot = grid.getTopology() == Top4.get() ? 90 : 45;
+		grid.direction(cell, parent).ifPresent(dir -> {
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.setColor(Color.DARK_GRAY);
 			g2.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));

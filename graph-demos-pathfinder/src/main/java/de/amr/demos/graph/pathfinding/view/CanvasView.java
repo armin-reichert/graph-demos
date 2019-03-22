@@ -318,11 +318,6 @@ public class CanvasView extends JPanel {
 		}
 
 		@Override
-		public GridGraph<Tile, Double> getMap() {
-			return model.getMap();
-		}
-
-		@Override
 		public GraphSearch<?> getPathFinder() {
 			return model.getPathFinder(controller.getSelectedAlgorithm());
 		}
