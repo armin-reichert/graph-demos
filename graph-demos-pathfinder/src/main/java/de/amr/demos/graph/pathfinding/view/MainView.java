@@ -174,6 +174,7 @@ public class MainView extends JPanel {
 	private JLabel lblAnimation;
 	private JPanel panel_1;
 	private JLabel lblNewLabel;
+	private JLabel lblTotalCells;
 
 	public MainView() {
 		setBackground(Color.WHITE);
@@ -215,7 +216,7 @@ public class MainView extends JPanel {
 		panelActions.add(lblMapSize, "cell 0 1,alignx trailing");
 
 		spinnerMapSize = new JSpinner();
-		panelActions.add(spinnerMapSize, "cell 1 1");
+		panelActions.add(spinnerMapSize, "flowx,cell 1 1");
 
 		lblNewLabel = new JLabel("Execution Mode");
 		panelActions.add(lblNewLabel, "cell 0 7,alignx trailing");
@@ -313,6 +314,9 @@ public class MainView extends JPanel {
 		sliderDelay.setPaintLabels(true);
 		sliderDelay.setMajorTickSpacing(5);
 
+		lblTotalCells = new JLabel("(### cells)");
+		panelActions.add(lblTotalCells, "cell 1 1");
+
 	}
 
 	public void init(PathFinderModel model, Controller controller) {
@@ -347,6 +351,7 @@ public class MainView extends JPanel {
 		comboExecutionMode.setAction(actionSelectExecutionMode);
 
 		updateViewState();
+		onModelChange();
 	}
 
 	public Optional<CanvasView> getCanvasView() {
@@ -372,16 +377,17 @@ public class MainView extends JPanel {
 		cbShowParent.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
-	public void updateView() {
+	public void onModelChange() {
 		tableResults.dataChanged();
-		getCanvasView().ifPresent(canvasView -> {
+		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
+		if (canvasView != null) {
 			canvasView.updateView();
-		});
+		}
 	}
 
-	public void updateCanvasView() {
-		getCanvasView().ifPresent(canvasView -> {
+	public void onMapChange() {
+		if (canvasView != null) {
 			canvasView.setGrid(model.getMap());
-		});
+		}
 	}
 }

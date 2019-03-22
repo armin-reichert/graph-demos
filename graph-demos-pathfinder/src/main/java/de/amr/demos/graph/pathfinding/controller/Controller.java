@@ -151,7 +151,7 @@ public class Controller {
 	}
 
 	private void updateViewIfPresent() {
-		getView().ifPresent(MainView::updateView);
+		getView().ifPresent(MainView::onModelChange);
 	}
 
 	public ExecutionMode getExecutionMode() {
@@ -165,13 +165,13 @@ public class Controller {
 
 	public void resizeMap(int size) {
 		model.resizeMap(size);
-		view.updateCanvasView();
+		view.onMapChange();
 		maybeRunPathFinder();
 	}
 
 	public void selectTopology(TopologySelection topology) {
 		model.setTopology(topology == TopologySelection._4_NEIGHBORS ? Top4.get() : Top8.get());
-		view.updateCanvasView();
+		view.onMapChange();
 		maybeRunPathFinder();
 	}
 
