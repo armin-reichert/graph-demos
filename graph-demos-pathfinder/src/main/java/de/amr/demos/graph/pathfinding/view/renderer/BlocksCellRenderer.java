@@ -41,7 +41,7 @@ public abstract class BlocksCellRenderer implements GridCellRenderer {
 
 	public abstract int getCellSize();
 
-	public abstract GraphSearch<?> getPathFinder();
+	public abstract GraphSearch getPathFinder();
 
 	public abstract Color getGridBackground();
 
@@ -111,18 +111,19 @@ public abstract class BlocksCellRenderer implements GridCellRenderer {
 		// draw path finder dependent content
 		if (showCost()) {
 			if (getPathFinder().getClass() == AStarSearch.class) {
-				drawContentAStar(g, cell, (AStarSearch) getPathFinder());
+				drawContentAStar(g, cell);
 			}
 			else if (getPathFinder().getClass() == BestFirstSearch.class) {
-				drawContentBestFirstSearch(g, cell, (BestFirstSearch) getPathFinder());
+				drawContentBestFirstSearch(g, cell);
 			}
 			else {
-				drawContentGeneric(g, cell, getPathFinder());
+				drawContentGeneric(g, cell);
 			}
 		}
 	}
 
-	private void drawContentAStar(Graphics2D g, int cell, AStarSearch astar) {
+	private void drawContentAStar(Graphics2D g, int cell) {
+		AStarSearch astar = (AStarSearch) getPathFinder();
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
 		g.setFont(font);
@@ -151,7 +152,8 @@ public abstract class BlocksCellRenderer implements GridCellRenderer {
 		g.drawString(fCost, (int) (getCellSize() - textBox.getWidth()) / 2, getCellSize() - inset);
 	}
 
-	private void drawContentBestFirstSearch(Graphics2D g, int cell, BestFirstSearch bfs) {
+	private void drawContentBestFirstSearch(Graphics2D g, int cell) {
+		BestFirstSearch bfs = (BestFirstSearch) getPathFinder();
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
 		g.setFont(font);
@@ -173,7 +175,7 @@ public abstract class BlocksCellRenderer implements GridCellRenderer {
 		g.drawString(gCost, (int) (getCellSize() - textBox.getWidth()) / 2, getCellSize() - inset);
 	}
 
-	private void drawContentGeneric(Graphics2D g, int cell, GraphSearch<?> pf) {
+	private void drawContentGeneric(Graphics2D g, int cell) {
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
 		g.setFont(font);

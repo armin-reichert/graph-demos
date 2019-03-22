@@ -3,7 +3,7 @@ package de.amr.demos.graph.pathfinding.model;
 import java.util.BitSet;
 
 import de.amr.graph.pathfinder.api.Path;
-import de.amr.graph.pathfinder.impl.GraphSearch;
+import de.amr.graph.pathfinder.impl.AbstractGraphSearch;
 
 /**
  * Represents of a path finder run.
@@ -12,7 +12,7 @@ import de.amr.graph.pathfinder.impl.GraphSearch;
  */
 public class PathFinderRun {
 
-	private final GraphSearch<?> pathFinder;
+	private final AbstractGraphSearch<?> pathFinder;
 	private Path path;
 	private final BitSet pathCells;
 	private final float runningTimeMillis;
@@ -20,7 +20,7 @@ public class PathFinderRun {
 	private final long numOpenVertices;
 	private final long numClosedVertices;
 
-	PathFinderRun(GraphSearch<?> pathFinder) {
+	PathFinderRun(AbstractGraphSearch<?> pathFinder) {
 		this.pathFinder = pathFinder;
 		path = Path.EMPTY_PATH;
 		this.pathCells = new BitSet();
@@ -30,7 +30,7 @@ public class PathFinderRun {
 		this.numClosedVertices = 0;
 	}
 
-	PathFinderRun(GraphSearch<?> pathFinder, Path path, float runningTimeMillis, double cost,
+	PathFinderRun(AbstractGraphSearch<?> pathFinder, Path path, float runningTimeMillis, double cost,
 			long numOpenVertices, long numClosedVertices) {
 		this.pathFinder = pathFinder;
 		this.path = path;
@@ -42,7 +42,7 @@ public class PathFinderRun {
 		this.numClosedVertices = numClosedVertices;
 	}
 
-	public GraphSearch<?> getPathFinder() {
+	public AbstractGraphSearch<?> getPathFinder() {
 		return pathFinder;
 	}
 

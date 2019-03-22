@@ -7,14 +7,15 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
+import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.core.api.UndirectedEdge;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.api.Topology;
 import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.Path;
-import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.pathfinder.impl.AStarSearch;
+import de.amr.graph.pathfinder.impl.AbstractGraphSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.BreadthFirstSearch;
 import de.amr.graph.pathfinder.impl.DijkstraSearch;
@@ -154,7 +155,7 @@ public class PathFinderModel {
 		return map.euclidean(u, v);
 	}
 
-	private GraphSearch<?> newPathFinder(PathFinderAlgorithm algorithm) {
+	private AbstractGraphSearch<?> newPathFinder(PathFinderAlgorithm algorithm) {
 		switch (algorithm) {
 		case AStar:
 			return new AStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
@@ -168,7 +169,7 @@ public class PathFinderModel {
 		throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
 	}
 
-	public GraphSearch<?> getPathFinder(PathFinderAlgorithm algorithm) {
+	public AbstractGraphSearch<?> getPathFinder(PathFinderAlgorithm algorithm) {
 		return runs.get(algorithm).getPathFinder();
 	}
 
@@ -190,7 +191,7 @@ public class PathFinderModel {
 	}
 
 	public void runPathFinder(PathFinderAlgorithm algorithm) {
-		GraphSearch<?> pf = getPathFinder(algorithm);
+		GraphSearch pf = getPathFinder(algorithm);
 		StopWatch watch = new StopWatch();
 		watch.start();
 		Path path = Path.computePath(source, target, pf);
@@ -199,7 +200,7 @@ public class PathFinderModel {
 	}
 
 	public void storeResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
-		GraphSearch<?> pf = getPathFinder(algorithm);
+		AbstractGraphSearch<?> pf = getPathFinder(algorithm);
 		long numOpenVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.VISITED).count();
 		long numClosedVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.COMPLETED).count();
 		runs.put(algorithm,

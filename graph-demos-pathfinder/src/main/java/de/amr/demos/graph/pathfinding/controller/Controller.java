@@ -98,14 +98,14 @@ public class Controller {
 
 	public void startSelectedPathFinder() {
 		model.newRun(selectedAlgorithm);
-		GraphSearch<?> pf = model.getPathFinder(selectedAlgorithm);
+		GraphSearch pf = model.getPathFinder(selectedAlgorithm);
 		pf.init();
 		pf.start(model.getSource(), model.getTarget());
 		updateViewIfPresent();
 	}
 
 	public Path runSelectedPathFinderSteps(int numSteps) {
-		GraphSearch<?> pf = model.getPathFinder(selectedAlgorithm);
+		GraphSearch pf = model.getPathFinder(selectedAlgorithm);
 		if (pf.getState(model.getSource()) == TraversalState.UNVISITED) {
 			startSelectedPathFinder();
 		}

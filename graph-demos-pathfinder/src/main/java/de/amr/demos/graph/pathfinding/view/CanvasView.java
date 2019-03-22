@@ -271,7 +271,7 @@ public class CanvasView extends JPanel {
 		if (partOfSolution(cell)) {
 			return Color.RED.brighter();
 		}
-		GraphSearch<?> pf = model.getPathFinder(controller.getSelectedAlgorithm());
+		GraphSearch pf = model.getPathFinder(controller.getSelectedAlgorithm());
 		TraversalState cellState = pf.getState(cell);
 		if (pf.getState(model.getTarget()) == TraversalState.UNVISITED && pf.getNextVertex().isPresent()
 				&& cell == pf.getNextVertex().getAsInt()) {
@@ -308,7 +308,7 @@ public class CanvasView extends JPanel {
 		}
 
 		@Override
-		public GraphSearch<?> getPathFinder() {
+		public GraphSearch getPathFinder() {
 			return model.getPathFinder(controller.getSelectedAlgorithm());
 		}
 
