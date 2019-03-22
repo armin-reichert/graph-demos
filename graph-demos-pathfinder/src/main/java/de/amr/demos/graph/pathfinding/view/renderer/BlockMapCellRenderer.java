@@ -36,7 +36,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 	public BlockMapCellRenderer(int cellSize, Color gridBackground) {
 		this.cellSize = cellSize;
-		this.inset = 2;
+		this.inset = Math.max(cellSize / 20, 3);
 		this.gridBackground = gridBackground;
 	}
 
