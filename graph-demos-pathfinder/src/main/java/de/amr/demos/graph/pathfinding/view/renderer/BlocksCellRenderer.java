@@ -18,9 +18,9 @@ import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
+import de.amr.graph.pathfinder.api.GraphSearch;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
-import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
  * Renders map cells as "blocks". Depending on the current path finder algorithm, different

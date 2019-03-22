@@ -15,8 +15,8 @@ import de.amr.demos.graph.pathfinding.view.MainView;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
+import de.amr.graph.pathfinder.api.GraphSearch;
 import de.amr.graph.pathfinder.api.Path;
-import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
  * Demo application controller.

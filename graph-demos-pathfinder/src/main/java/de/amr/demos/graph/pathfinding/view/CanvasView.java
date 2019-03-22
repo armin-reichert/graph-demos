@@ -30,8 +30,8 @@ import de.amr.graph.grid.ui.animation.AbstractAnimation;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
 import de.amr.graph.grid.ui.rendering.PearlsGridRenderer;
+import de.amr.graph.pathfinder.api.GraphSearch;
 import de.amr.graph.pathfinder.api.GraphSearchObserver;
-import de.amr.graph.pathfinder.impl.GraphSearch;
 
 /**
  * View showing the map with the path finder data and animations.

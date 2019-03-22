@@ -13,13 +13,15 @@ import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.api.Topology;
 import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.impl.Top8;
+import de.amr.graph.pathfinder.api.GraphSearch;
+import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
 import de.amr.graph.pathfinder.impl.AStarSearch;
-import de.amr.graph.pathfinder.impl.AbstractGraphSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
+import de.amr.graph.pathfinder.impl.BidiBFS;
+import de.amr.graph.pathfinder.impl.BidiDijkstra;
 import de.amr.graph.pathfinder.impl.BreadthFirstSearch;
 import de.amr.graph.pathfinder.impl.DijkstraSearch;
-import de.amr.graph.pathfinder.impl.GraphSearch;
 import de.amr.util.StopWatch;
 
 /**
@@ -45,6 +47,24 @@ public class PathFinderModel {
 		source = map.cell(mapSize / 4, mapSize / 2);
 		target = map.cell(mapSize * 3 / 4, mapSize / 2);
 		newRuns();
+	}
+
+	private ObservableGraphSearch newPathFinder(PathFinderAlgorithm algorithm) {
+		switch (algorithm) {
+		case AStar:
+			return new AStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
+		case BFS:
+			return new BreadthFirstSearch(map, this::distance);
+		case Dijkstra:
+			return new DijkstraSearch(map, (u, v) -> map.getEdgeLabel(u, v));
+		case GreedyBestFirst:
+			return new BestFirstSearch(map, v -> distance(v, target), this::distance);
+		case BidiBFS:
+			return new BidiBFS(map, this::distance);
+		case BidiDijkstra:
+			return new BidiDijkstra(map, this::distance);
+		}
+		throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
 	}
 
 	private void newMap(int mapSize, Topology topology) {
@@ -155,21 +175,7 @@ public class PathFinderModel {
 		return map.euclidean(u, v);
 	}
 
-	private AbstractGraphSearch<?> newPathFinder(PathFinderAlgorithm algorithm) {
-		switch (algorithm) {
-		case AStar:
-			return new AStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
-		case BFS:
-			return new BreadthFirstSearch(map, this::distance);
-		case Dijkstra:
-			return new DijkstraSearch(map, (u, v) -> map.getEdgeLabel(u, v));
-		case GreedyBestFirst:
-			return new BestFirstSearch(map, v -> distance(v, target), this::distance);
-		}
-		throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
-	}
-
-	public AbstractGraphSearch<?> getPathFinder(PathFinderAlgorithm algorithm) {
+	public ObservableGraphSearch getPathFinder(PathFinderAlgorithm algorithm) {
 		return runs.get(algorithm).getPathFinder();
 	}
 
@@ -200,7 +206,7 @@ public class PathFinderModel {
 	}
 
 	public void storeResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
-		AbstractGraphSearch<?> pf = getPathFinder(algorithm);
+		ObservableGraphSearch pf = getPathFinder(algorithm);
 		long numOpenVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.VISITED).count();
 		long numClosedVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.COMPLETED).count();
 		runs.put(algorithm,
