@@ -313,7 +313,7 @@ public class CanvasView extends JPanel {
 		}
 
 		@Override
-		public Color getCellBackground(int cell) {
+		public Color getBackground(int cell) {
 			return computeCellBackground(cell);
 		}
 
@@ -324,7 +324,7 @@ public class CanvasView extends JPanel {
 
 		@Override
 		public Color getTextColor(int cell) {
-			if (cell == model.getSource() || cell == model.getTarget() || hasHighlightedBackground(cell)) {
+			if (cell == model.getSource() || cell == model.getTarget() || isHighlighted(cell)) {
 				return Color.WHITE;
 			}
 			if (getPathFinder().getState(cell) == TraversalState.UNVISITED) {
@@ -334,7 +334,7 @@ public class CanvasView extends JPanel {
 		}
 
 		@Override
-		public boolean hasHighlightedBackground(int cell) {
+		public boolean isHighlighted(int cell) {
 			return partOfSolution(cell);
 		}
 
