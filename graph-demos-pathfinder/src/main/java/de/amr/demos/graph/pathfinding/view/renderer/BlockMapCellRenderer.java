@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 import de.amr.demos.graph.pathfinding.model.Tile;
@@ -15,7 +17,6 @@ import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.impl.Top4;
-import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
@@ -33,11 +34,24 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 	private Font font = new Font("Arial Narrow", Font.PLAIN, 12);
 	private int inset;
 	private int cellSize;
+	private Area needle;
 
 	public BlockMapCellRenderer(int cellSize, Color gridBackground) {
 		this.cellSize = cellSize;
 		this.inset = Math.max(cellSize / 20, 3);
 		this.gridBackground = gridBackground;
+		needle = createNeedle(cellSize);
+	}
+
+	private static Area createNeedle(int cellSize) {
+		int r = cellSize / 10;
+		Area needle = new Area(new Ellipse2D.Double(-r, -r, 2 * r, 2 * r));
+		Polygon p = new Polygon();
+		p.addPoint(-r, -r / 6);
+		p.addPoint(r, -r / 6);
+		p.addPoint(0, -(cellSize * 25 / 100));
+		needle.add(new Area(p));
+		return needle;
 	}
 
 	public abstract GridGraph<Tile, Double> getMap();
@@ -104,7 +118,7 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 
 		// draw compass needle pointing to parent cell
 		if (showParent()) {
-			drawCompassNeedle(g, grid, cell);
+			drawNeedle(g, grid, cell);
 		}
 
 		// draw path finder dependent content
@@ -188,66 +202,24 @@ public abstract class BlockMapCellRenderer implements GridCellRenderer {
 				(int) (cellSize + textBox.getHeight() - g.getFontMetrics().getDescent()) / 2);
 	}
 
-	private void drawCompassNeedle(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
+	private void drawNeedle(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
 		int parent = getPathFinder().getParent(cell);
 		if (parent == -1) {
 			return;
 		}
+		int x = grid.col(cell) * cellSize;
+		int y = grid.row(cell) * cellSize;
+		float thickness = Math.max(1, cellSize / 20);
+		int rot = getMap().getTopology() == Top4.get() ? 90 : 45;
 		getMap().direction(cell, parent).ifPresent(dir -> {
-			int x = grid.col(cell) * cellSize;
-			int y = grid.row(cell) * cellSize;
-			int r = cellSize / 10;
-			float lineThickness = Math.max(1, cellSize / 20);
-			double theta = Math.toRadians(-computeRotationDegrees(dir));
-			int lineLength = cellSize * 25 / 100;
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.setColor(Color.DARK_GRAY);
-			g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g2.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			g2.translate(x + cellSize / 2, y + cellSize / 2);
-			Polygon p = new Polygon();
-			p.addPoint(-r, -r / 6);
-			p.addPoint(r, -r / 6);
-			p.addPoint(0, -lineLength);
-			g2.rotate(theta);
-			g2.fillOval(-r, -r, 2 * r, 2 * r);
-			g2.fillPolygon(p);
+			// direction constants start at North and then go clock-wise
+			g2.rotate(Math.toRadians(rot * dir));
+			g2.fill(needle);
 			g2.dispose();
 		});
-	}
-
-	private int computeRotationDegrees(int dir) {
-		if (getMap().getTopology() == Top4.get()) {
-			switch (dir) {
-			case Top4.N:
-				return 0;
-			case Top4.W:
-				return 90;
-			case Top4.S:
-				return 180;
-			case Top4.E:
-				return 270;
-			}
-		}
-		else if (getMap().getTopology() == Top8.get()) {
-			switch (dir) {
-			case Top8.N:
-				return 0;
-			case Top8.NW:
-				return 45;
-			case Top8.W:
-				return 90;
-			case Top8.SW:
-				return 135;
-			case Top8.S:
-				return 180;
-			case Top8.SE:
-				return 225;
-			case Top8.E:
-				return 270;
-			case Top8.NE:
-				return 315;
-			}
-		}
-		throw new IllegalStateException();
 	}
 }
