@@ -306,13 +306,10 @@ public class MainView extends JPanel {
 		btnRun.setText("Run");
 
 		sliderDelay = new JSlider();
+		sliderDelay.setToolTipText("Delay");
 		panel_1.add(sliderDelay, "cell 1 0,growx,aligny center");
-		sliderDelay.setValue(5);
-		sliderDelay.setMaximum(50);
-		sliderDelay.setMinorTickSpacing(1);
-		sliderDelay.setPaintTicks(true);
-		sliderDelay.setPaintLabels(true);
-		sliderDelay.setMajorTickSpacing(5);
+		sliderDelay.setValue(0);
+		sliderDelay.setMaximum(100 * 100);
 
 		lblTotalCells = new JLabel("(### cells)");
 		panelActions.add(lblTotalCells, "cell 1 1");
@@ -335,7 +332,7 @@ public class MainView extends JPanel {
 		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), 2, 100, 1));
 		spinnerMapSize.addChangeListener(onMapSizeChange);
 
-		sliderDelay.setValue(5);
+		sliderDelay.setValue((sliderDelay.getModel().getMinimum() + sliderDelay.getModel().getMaximum()) / 2);
 
 		comboTopology.setModel(new DefaultComboBoxModel<>(TopologySelection.values()));
 		comboTopology.setSelectedItem(model.getMap().getTopology() == Top4.get() ? TopologySelection._4_NEIGHBORS
@@ -359,7 +356,7 @@ public class MainView extends JPanel {
 	}
 
 	public int getAnimationDelay() {
-		return sliderDelay.getValue();
+		return (int) Math.round(Math.sqrt(sliderDelay.getValue()));
 	}
 
 	private void updateViewState() {
