@@ -286,7 +286,8 @@ public class MainView extends JPanel {
 
 		tableResults = new ResultsTable();
 		tableResults.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-		tableResults.setPreferredScrollableViewportSize(new Dimension(500, 64));
+		tableResults
+				.setPreferredScrollableViewportSize(new Dimension(500, PathFinderAlgorithm.values().length * 16));
 		tableResults.setFillsViewportHeight(true);
 		tableResults.setEnabled(false);
 		tableResults.setShowVerticalLines(false);
@@ -354,7 +355,7 @@ public class MainView extends JPanel {
 	public Optional<CanvasView> getCanvasView() {
 		return Optional.ofNullable(canvasView);
 	}
-	
+
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
