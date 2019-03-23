@@ -22,6 +22,7 @@ import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksMapRenderer;
+import de.amr.demos.graph.pathfinding.view.renderer.PearlsMapRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
@@ -29,9 +30,9 @@ import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.ui.animation.AbstractAnimation;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
-import de.amr.graph.grid.ui.rendering.PearlsGridRenderer;
 import de.amr.graph.pathfinder.api.GraphSearch;
 import de.amr.graph.pathfinder.api.GraphSearchObserver;
+import de.amr.graph.pathfinder.impl.BidiGraphSearch;
 
 /**
  * View showing the map with the path finder data and animations.
@@ -94,10 +95,10 @@ public class CanvasView extends JPanel {
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			cellUnderMouse = getCellUnderMouse(e);
-			if (e.isControlDown() && cellUnderMouse != model.getSource()) {
+			if (e.isShiftDown() && e.isAltDown() && cellUnderMouse != model.getSource()) {
 				controller.setSource(cellUnderMouse);
 			}
-			else if (e.isAltDown() && cellUnderMouse != model.getTarget()) {
+			else if (!e.isShiftDown() && e.isAltDown() && cellUnderMouse != model.getTarget()) {
 				controller.setTarget(cellUnderMouse);
 			}
 		}
@@ -107,7 +108,6 @@ public class CanvasView extends JPanel {
 			cellUnderMouse = getCellUnderMouse(e);
 			if (draggedCell != -1) {
 				// end of dragging
-				System.out.println("dragging ends");
 				draggedCell = -1;
 				controller.maybeRunPathFinder();
 			}
@@ -230,7 +230,7 @@ public class CanvasView extends JPanel {
 		canvas.clear();
 		canvas.drawGrid();
 	}
-
+	
 	// Context menu
 
 	private void createContextMenu() {
@@ -259,6 +259,10 @@ public class CanvasView extends JPanel {
 	// Renderer
 
 	private Color computeCellBackground(int cell) {
+		if (cell < 0 || cell >= model.getMap().numVertices()) {
+			throw new IllegalArgumentException("Illegal cell " + cell);
+		}
+		GraphSearch pf = model.getPathFinder(controller.getSelectedAlgorithm());
 		if (model.getMap().get(cell) == Tile.WALL) {
 			return new Color(139, 69, 19);
 		}
@@ -268,19 +272,23 @@ public class CanvasView extends JPanel {
 		if (cell == model.getTarget()) {
 			return Color.GREEN.darker();
 		}
+		if (pf instanceof BidiGraphSearch) {
+			BidiGraphSearch bidi = (BidiGraphSearch) pf;
+			if (cell == bidi.getMeetingPoint()) {
+				return Color.GRAY;
+			}
+		}
 		if (partOfSolution(cell)) {
 			return Color.RED.brighter();
 		}
-		GraphSearch pf = model.getPathFinder(controller.getSelectedAlgorithm());
-		TraversalState cellState = pf.getState(cell);
 		if (pf.getState(model.getTarget()) == TraversalState.UNVISITED && pf.getNextVertex().isPresent()
 				&& cell == pf.getNextVertex().getAsInt()) {
 			return new Color(152, 255, 152);
 		}
-		if (cellState == TraversalState.COMPLETED) {
+		if (pf.getState(cell) == TraversalState.COMPLETED) {
 			return Color.ORANGE;
 		}
-		if (cellState == TraversalState.VISITED) {
+		if (pf.getState(cell) == TraversalState.VISITED) {
 			return Color.YELLOW;
 		}
 		return Color.WHITE;
@@ -347,7 +355,7 @@ public class CanvasView extends JPanel {
 			return r;
 		}
 		if (style == RenderingStyle.PEARLS) {
-			PearlsGridRenderer r = new PearlsGridRenderer();
+			PearlsMapRenderer r = new PearlsMapRenderer();
 			r.fnCellSize = canvas::getCellSize;
 			r.fnGridBgColor = () -> GRID_BACKGROUND;
 			r.fnCellBgColor = this::computeCellBackground;

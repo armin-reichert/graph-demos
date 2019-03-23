@@ -348,11 +348,19 @@ public class MainView extends JPanel {
 		comboExecutionMode.setAction(actionSelectExecutionMode);
 
 		updateViewState();
-		onModelChange();
+		updateMainView();
 	}
 
 	public Optional<CanvasView> getCanvasView() {
 		return Optional.ofNullable(canvasView);
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		if (canvasView != null) {
+			canvasView.setEnabled(enabled);
+		}
 	}
 
 	public int getAnimationDelay() {
@@ -374,7 +382,7 @@ public class MainView extends JPanel {
 		cbShowParent.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
-	public void onModelChange() {
+	public void updateMainView() {
 		tableResults.dataChanged();
 		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
 		if (canvasView != null) {
@@ -382,7 +390,7 @@ public class MainView extends JPanel {
 		}
 	}
 
-	public void onMapChange() {
+	public void updateCanvasView() {
 		if (canvasView != null) {
 			canvasView.setGrid(model.getMap());
 		}
