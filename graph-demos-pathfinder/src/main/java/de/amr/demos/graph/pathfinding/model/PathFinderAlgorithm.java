@@ -2,6 +2,7 @@ package de.amr.demos.graph.pathfinding.model;
 
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
+import de.amr.graph.pathfinder.impl.BidiAStar;
 import de.amr.graph.pathfinder.impl.BidiBFS;
 import de.amr.graph.pathfinder.impl.BidiDijkstra;
 import de.amr.graph.pathfinder.impl.BreadthFirstSearch;
@@ -13,6 +14,7 @@ public enum PathFinderAlgorithm {
 	Dijkstra("Dijkstra", DijkstraSearch.class),
 	AStar("A* Search", AStarSearch.class),
 	BidiBFS("Bidirectional BFS", BidiBFS.class),
+	BidiAStar("Bidirectional A*", BidiAStar.class),
 	BidiDijkstra("Bidirectional Dijkstra", BidiDijkstra.class);
 
 	private final String displayName;

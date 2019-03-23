@@ -21,6 +21,7 @@ import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.pathfinder.api.GraphSearch;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
+import de.amr.graph.pathfinder.impl.BidiAStar;
 
 /**
  * Renders map cells as "blocks". Depending on the current path finder algorithm, different
@@ -110,7 +111,7 @@ public abstract class BlocksCellRenderer implements GridCellRenderer {
 		}
 		// draw path finder dependent content
 		if (showCost()) {
-			if (getPathFinder().getClass() == AStarSearch.class) {
+			if (getPathFinder().getClass() == AStarSearch.class || getPathFinder().getClass() == BidiAStar.class) {
 				drawContentAStar(g, cell);
 			}
 			else if (getPathFinder().getClass() == BestFirstSearch.class) {
@@ -123,7 +124,14 @@ public abstract class BlocksCellRenderer implements GridCellRenderer {
 	}
 
 	private void drawContentAStar(Graphics2D g, int cell) {
-		AStarSearch astar = (AStarSearch) getPathFinder();
+		AStarSearch astar;
+		if (getPathFinder() instanceof BidiAStar) {
+			//TODO
+			astar = ((BidiAStar) getPathFinder()).getForwardSearch();
+		}
+		else {
+			astar = (AStarSearch) getPathFinder();
+		}
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
 		g.setFont(font);

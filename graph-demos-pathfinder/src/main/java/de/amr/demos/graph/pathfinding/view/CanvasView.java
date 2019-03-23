@@ -230,7 +230,7 @@ public class CanvasView extends JPanel {
 		canvas.clear();
 		canvas.drawGrid();
 	}
-	
+
 	// Context menu
 
 	private void createContextMenu() {
@@ -273,7 +273,7 @@ public class CanvasView extends JPanel {
 			return Color.GREEN.darker();
 		}
 		if (pf instanceof BidiGraphSearch) {
-			BidiGraphSearch bidi = (BidiGraphSearch) pf;
+			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) pf;
 			if (cell == bidi.getMeetingPoint()) {
 				return Color.GRAY;
 			}

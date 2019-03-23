@@ -18,6 +18,7 @@ import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
+import de.amr.graph.pathfinder.impl.BidiAStar;
 import de.amr.graph.pathfinder.impl.BidiBFS;
 import de.amr.graph.pathfinder.impl.BidiDijkstra;
 import de.amr.graph.pathfinder.impl.BreadthFirstSearch;
@@ -61,6 +62,8 @@ public class PathFinderModel {
 			return new BestFirstSearch(map, v -> distance(v, target), this::distance);
 		case BidiBFS:
 			return new BidiBFS(map, this::distance);
+		case BidiAStar:
+			return new BidiAStar(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
 		case BidiDijkstra:
 			return new BidiDijkstra(map, this::distance);
 		}
