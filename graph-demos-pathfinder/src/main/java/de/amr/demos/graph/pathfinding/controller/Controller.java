@@ -122,7 +122,6 @@ public class Controller {
 		runTaskAndUpdateView(() -> {
 			model.newRun(selectedAlgorithm);
 			GraphSearch pf = model.getPathFinder(selectedAlgorithm);
-			pf.init();
 			pf.start(model.getSource(), model.getTarget());
 		});
 	}
