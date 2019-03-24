@@ -135,7 +135,7 @@ public class Controller {
 			for (int n = numSteps; n > 0 && pf.canExplore(); --n) {
 				boolean found = pf.exploreVertex();
 				if (found) {
-					Path path = Path.constructPath(model.getSource(), model.getTarget(), pf);
+					Path path = Path.extractPath(model.getSource(), model.getTarget(), pf);
 					model.storeResult(selectedAlgorithm, path, 0);
 					return path; // found path
 				}
