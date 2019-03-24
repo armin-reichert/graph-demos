@@ -335,7 +335,7 @@ public class MainView extends JPanel {
 		tableResults.init(model);
 
 		// others controls
-		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), 2, 100, 1));
+		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), 2, 200, 1));
 		spinnerMapSize.addChangeListener(onMapSizeChange);
 
 		sliderDelay.setValue((sliderDelay.getModel().getMinimum() + sliderDelay.getModel().getMaximum()) / 2);
