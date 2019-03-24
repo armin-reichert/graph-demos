@@ -296,7 +296,7 @@ public class MainView extends JPanel {
 
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
-		panelActions.add(panel_1, "flowx,cell 1 9,growx");
+		panelActions.add(panel_1, "flowx,cell 1 9,growx,aligny center");
 		panel_1.setLayout(new MigLayout("", "[][grow]", "[]"));
 
 		JButton btnRun = new JButton();
@@ -305,6 +305,7 @@ public class MainView extends JPanel {
 		btnRun.setText("Run");
 
 		sliderDelay = new JSlider();
+		sliderDelay.setPreferredSize(new Dimension(200, 16));
 		sliderDelay.setToolTipText("Delay");
 		panel_1.add(sliderDelay, "cell 1 0,growx,aligny center");
 		sliderDelay.setValue(0);
@@ -367,12 +368,12 @@ public class MainView extends JPanel {
 	}
 
 	private void updateViewState() {
-		boolean manualExecution = comboExecutionMode.getSelectedItem() == ExecutionMode.MANUAL;
-		actionResetSelectedPathFinder.setEnabled(manualExecution);
-		actionStepSelectedPathFinder.setEnabled(manualExecution);
-		actionFinishSelectedPathFinder.setEnabled(manualExecution);
-		actionRunSelectedPathFinderAnimation.setEnabled(manualExecution);
-		sliderDelay.setEnabled(manualExecution);
+		boolean manual = comboExecutionMode.getSelectedItem() == ExecutionMode.MANUAL;
+		actionResetSelectedPathFinder.setEnabled(manual);
+		actionStepSelectedPathFinder.setEnabled(manual);
+		actionFinishSelectedPathFinder.setEnabled(manual);
+		actionRunSelectedPathFinderAnimation.setEnabled(manual);
+		sliderDelay.setEnabled(manual);
 
 		ExecutionMode executionMode = comboExecutionMode.getItemAt(comboExecutionMode.getSelectedIndex());
 		scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
