@@ -236,8 +236,8 @@ public class MainView extends JPanel {
 
 		JButton btnStep1 = new JButton();
 		btnStep1.setAction(actionStepSelectedPathFinder);
-		btnStep1.setText("+1");
 		btnStep1.putClientProperty("numSteps", 1);
+		btnStep1.setText("+1");
 		panel.add(btnStep1);
 
 		JButton btnSteps5 = new JButton();
@@ -246,11 +246,17 @@ public class MainView extends JPanel {
 		btnSteps5.setText("+5");
 		panel.add(btnSteps5);
 
-		JButton btnSteps10 = new JButton("+10");
+		JButton btnSteps10 = new JButton();
 		btnSteps10.setAction(actionStepSelectedPathFinder);
-		btnSteps10.setText("+10");
 		btnSteps10.putClientProperty("numSteps", 10);
+		btnSteps10.setText("+10");
 		panel.add(btnSteps10);
+
+		JButton btnSteps50 = new JButton();
+		btnSteps50.setAction(actionStepSelectedPathFinder);
+		btnSteps50.putClientProperty("numSteps", 50);
+		btnSteps50.setText("+50");
+		panel.add(btnSteps50);
 
 		btnFinish = new JButton();
 		btnFinish.setAction(actionFinishSelectedPathFinder);
