@@ -22,7 +22,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -197,7 +196,7 @@ public class MainView extends JPanel {
 		JLabel lblMap = new JLabel("Map");
 		panelActions.add(lblMap, "cell 0 0 2 1,alignx leading");
 		lblMap.setForeground(SystemColor.textHighlight);
-		lblMap.setFont(new Font("Arial Black", Font.PLAIN, 16));
+		lblMap.setFont(new Font("Arial Black", Font.PLAIN, 14));
 
 		cbShowCost = new JCheckBox("Show Cost");
 		cbShowCost.setAction(actionShowCost);
@@ -209,7 +208,7 @@ public class MainView extends JPanel {
 
 		lblPathFinding = new JLabel("Path Finding");
 		lblPathFinding.setForeground(SystemColor.textHighlight);
-		lblPathFinding.setFont(new Font("Arial Black", Font.PLAIN, 16));
+		lblPathFinding.setFont(new Font("Arial Black", Font.PLAIN, 14));
 		panelActions.add(lblPathFinding, "cell 0 5 2 1,alignx leading");
 
 		JLabel lblMapSize = new JLabel("Rows/Cols");
@@ -281,7 +280,6 @@ public class MainView extends JPanel {
 		panelActions.add(comboStyle, "cell 1 3,growx");
 
 		scrollPaneTableResults = new JScrollPane();
-		scrollPaneTableResults.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		panelActions.add(scrollPaneTableResults, "cell 0 10 2 1,growx,aligny top");
 
 		tableResults = new ResultsTable();
