@@ -25,7 +25,7 @@ public class PathFinderRun {
 		path = Path.EMPTY_PATH;
 		this.pathCells = new BitSet();
 		this.runningTimeMillis = 0;
-		this.cost = Path.INFINITE_COST;
+		this.cost = 0;
 		this.numOpenVertices = 0;
 		this.numClosedVertices = 0;
 	}

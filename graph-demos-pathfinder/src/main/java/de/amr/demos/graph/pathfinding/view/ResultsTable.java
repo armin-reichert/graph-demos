@@ -57,7 +57,7 @@ public class ResultsTable extends JTable {
 		new ColumnSpec(
 				"Loss", 
 				Double.class, 
-				loss -> String.format("%.0f %%", loss)),
+				loss -> loss.equals(Path.INFINITE_COST) ? "" : String.format("%.0f %%", loss)),
 		new ColumnSpec(
 				"Open", Long.class), 
 		new ColumnSpec(
@@ -108,7 +108,7 @@ public class ResultsTable extends JTable {
 				return result.getCost();
 			case 4:
 				double optimalCost = model.getRun(PathFinderAlgorithm.AStar).getCost();
-				return 100 * (result.getCost() - optimalCost) / optimalCost;
+				return optimalCost != 0 ? 100 * (result.getCost() - optimalCost) / optimalCost : Path.INFINITE_COST;
 			case 5:
 				return result.getNumOpenVertices();
 			case 6:
