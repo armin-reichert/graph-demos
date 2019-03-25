@@ -63,7 +63,7 @@ public class PathFinderModel {
 		case BidiBFS:
 			return new BidiBFS(map, this::distance);
 		case BidiAStar:
-			return new BidiAStar(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
+			return new BidiAStar(map, (u, v) -> map.getEdgeLabel(u, v), this::distance, this::distance);
 		case BidiDijkstra:
 			return new BidiDijkstra(map, this::distance);
 		}
