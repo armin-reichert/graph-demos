@@ -111,8 +111,15 @@ public abstract class BlocksCellRenderer implements GridCellRenderer {
 		}
 		// draw path finder dependent content
 		if (showCost()) {
-			if (getPathFinder().getClass() == AStarSearch.class || getPathFinder().getClass() == BidiAStarSearch.class) {
-				drawContentAStar(g, cell);
+			if (getPathFinder().getClass() == AStarSearch.class) {
+				drawContentAStar(g, cell, (AStarSearch) getPathFinder());
+			}
+			else if (getPathFinder().getClass() == BidiAStarSearch.class) {
+				BidiAStarSearch bidiAStar = (BidiAStarSearch) getPathFinder();
+				drawContentAStar(g, cell,
+						bidiAStar.getForwardSearch().getState(cell) != TraversalState.UNVISITED
+								? bidiAStar.getForwardSearch()
+								: bidiAStar.getBackwardsSearch());
 			}
 			else if (getPathFinder().getClass() == BestFirstSearch.class) {
 				drawContentBestFirstSearch(g, cell);
@@ -123,15 +130,7 @@ public abstract class BlocksCellRenderer implements GridCellRenderer {
 		}
 	}
 
-	private void drawContentAStar(Graphics2D g, int cell) {
-		AStarSearch astar;
-		if (getPathFinder() instanceof BidiAStarSearch) {
-			//TODO
-			astar = ((BidiAStarSearch) getPathFinder()).getForwardSearch();
-		}
-		else {
-			astar = (AStarSearch) getPathFinder();
-		}
+	private void drawContentAStar(Graphics2D g, int cell, AStarSearch astar) {
 		Rectangle2D textBox;
 		Color textColor = getTextColor(cell);
 		g.setFont(font);
