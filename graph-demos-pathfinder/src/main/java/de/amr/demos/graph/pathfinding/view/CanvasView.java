@@ -230,6 +230,10 @@ public class CanvasView extends JPanel {
 		canvas.clear();
 		canvas.drawGrid();
 	}
+	
+	public GridCanvas getCanvas() {
+		return canvas;
+	}
 
 	// Context menu
 

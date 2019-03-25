@@ -36,7 +36,6 @@ public class Controller {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			model.newRun(selectedAlgorithm);
 			mainView.getCanvasView().ifPresent(canvasView -> {
 				PathFinderAnimation animation = canvasView.createAnimation();
 				animation.setFnDelay(mainView::getAnimationDelay);
@@ -77,11 +76,11 @@ public class Controller {
 
 	// end step-wise execution
 
-	public Optional<MainView> getView() {
+	public Optional<MainView> getMainView() {
 		return Optional.ofNullable(mainView);
 	}
 
-	public void setView(MainView view) {
+	public void setMainView(MainView view) {
 		this.mainView = view;
 	}
 
@@ -112,11 +111,8 @@ public class Controller {
 	// animated execution
 
 	public void runPathFinderAnimation() {
-		getView().ifPresent(mainView -> {
-			mainView.getCanvasView().ifPresent(canvasView -> {
-				canvasView.updateView();
-			});
-		});
+		model.newRun(selectedAlgorithm);
+		getMainView().ifPresent(mainView -> mainView.updateMainView());
 		new PathFinderAnimationTask().execute();
 	}
 
