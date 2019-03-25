@@ -2,9 +2,9 @@ package de.amr.demos.graph.pathfinding.model;
 
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
-import de.amr.graph.pathfinder.impl.BidiAStar;
-import de.amr.graph.pathfinder.impl.BidiBFS;
-import de.amr.graph.pathfinder.impl.BidiDijkstra;
+import de.amr.graph.pathfinder.impl.BidiAStarSearch;
+import de.amr.graph.pathfinder.impl.BidiBreadthFirstSearch;
+import de.amr.graph.pathfinder.impl.BidiDijkstraSearch;
 import de.amr.graph.pathfinder.impl.BreadthFirstSearch;
 import de.amr.graph.pathfinder.impl.DijkstraSearch;
 
@@ -13,9 +13,9 @@ public enum PathFinderAlgorithm {
 	Dijkstra("Dijkstra", DijkstraSearch.class),
 	GreedyBestFirst("Best-First Search", BestFirstSearch.class),
 	AStar("A* Search", AStarSearch.class),
-	BidiBFS("Bidirectional BFS", BidiBFS.class),
-	BidiDijkstra("Bidirectional Dijkstra", BidiDijkstra.class),
-	BidiAStar("Bidirectional A*", BidiAStar.class);
+	BidiBFS("Bidirectional BFS", BidiBreadthFirstSearch.class),
+	BidiDijkstra("Bidirectional Dijkstra", BidiDijkstraSearch.class),
+	BidiAStar("Bidirectional A*", BidiAStarSearch.class);
 
 	private final String displayName;
 	private final Class<?> implementation;

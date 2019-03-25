@@ -18,9 +18,9 @@ import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
-import de.amr.graph.pathfinder.impl.BidiAStar;
-import de.amr.graph.pathfinder.impl.BidiBFS;
-import de.amr.graph.pathfinder.impl.BidiDijkstra;
+import de.amr.graph.pathfinder.impl.BidiAStarSearch;
+import de.amr.graph.pathfinder.impl.BidiBreadthFirstSearch;
+import de.amr.graph.pathfinder.impl.BidiDijkstraSearch;
 import de.amr.graph.pathfinder.impl.BreadthFirstSearch;
 import de.amr.graph.pathfinder.impl.DijkstraSearch;
 import de.amr.util.StopWatch;
@@ -61,11 +61,11 @@ public class PathFinderModel {
 		case GreedyBestFirst:
 			return new BestFirstSearch(map, v -> distance(v, target), this::distance);
 		case BidiBFS:
-			return new BidiBFS(map, this::distance);
+			return new BidiBreadthFirstSearch(map, this::distance);
 		case BidiAStar:
-			return new BidiAStar(map, (u, v) -> map.getEdgeLabel(u, v), this::distance, this::distance);
+			return new BidiAStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), this::distance, this::distance);
 		case BidiDijkstra:
-			return new BidiDijkstra(map, this::distance);
+			return new BidiDijkstraSearch(map, this::distance);
 		}
 		throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
 	}
