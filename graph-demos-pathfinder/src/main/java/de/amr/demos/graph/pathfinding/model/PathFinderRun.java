@@ -17,7 +17,7 @@ public class PathFinderRun {
 	private final BitSet pathCells;
 	private final float runningTimeMillis;
 	private final double cost;
-	private final long numOpenVertices;
+	private final long numTouchedVertices;
 	private final long numClosedVertices;
 
 	PathFinderRun(ObservableGraphSearch pathFinder) {
@@ -26,19 +26,19 @@ public class PathFinderRun {
 		this.pathCells = new BitSet();
 		this.runningTimeMillis = 0;
 		this.cost = 0;
-		this.numOpenVertices = 0;
+		this.numTouchedVertices = 0;
 		this.numClosedVertices = 0;
 	}
 
 	PathFinderRun(ObservableGraphSearch pathFinder, Path path, float runningTimeMillis, double cost,
-			long numOpenVertices, long numClosedVertices) {
+			long numTouchedVertices, long numClosedVertices) {
 		this.pathFinder = pathFinder;
 		this.path = path;
 		this.pathCells = new BitSet();
 		path.forEach(pathCells::set);
 		this.runningTimeMillis = runningTimeMillis;
 		this.cost = cost;
-		this.numOpenVertices = numOpenVertices;
+		this.numTouchedVertices = numTouchedVertices;
 		this.numClosedVertices = numClosedVertices;
 	}
 
@@ -62,8 +62,8 @@ public class PathFinderRun {
 		return cost;
 	}
 
-	public long getNumOpenVertices() {
-		return numOpenVertices;
+	public long getNumTouchedVertices() {
+		return numTouchedVertices;
 	}
 
 	public long getNumClosedVertices() {

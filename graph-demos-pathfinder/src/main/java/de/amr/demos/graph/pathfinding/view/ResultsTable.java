@@ -59,7 +59,7 @@ public class ResultsTable extends JTable {
 				Double.class, 
 				loss -> loss.equals(Path.INFINITE_COST) ? "" : String.format("%.0f %%", loss)),
 		new ColumnSpec(
-				"Open", Long.class), 
+				"Touched", Long.class), 
 		new ColumnSpec(
 				"Closed", Long.class), 
 		//@formatter:on
@@ -110,7 +110,7 @@ public class ResultsTable extends JTable {
 				double optimalCost = model.getRun(PathFinderAlgorithm.AStar).getCost();
 				return optimalCost != 0 ? 100 * (result.getCost() - optimalCost) / optimalCost : Path.INFINITE_COST;
 			case 5:
-				return result.getNumOpenVertices();
+				return result.getNumTouchedVertices();
 			case 6:
 				return result.getNumClosedVertices();
 			}
@@ -149,7 +149,8 @@ public class ResultsTable extends JTable {
 
 	public void dataChanged() {
 		if (getModel() != null) {
-			((ResultsTableModel) getModel()).fireTableDataChanged();
+			ResultsTableModel tm = (ResultsTableModel) getModel();
+			tm.fireTableDataChanged();
 		}
 	}
 }

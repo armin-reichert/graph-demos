@@ -210,10 +210,10 @@ public class PathFinderModel {
 
 	public void storeResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
 		ObservableGraphSearch pf = getPathFinder(algorithm);
-		long numOpenVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.VISITED).count();
+		long numTouchedVertices = map.vertices().filter(v -> pf.getState(v) != TraversalState.UNVISITED).count();
 		long numClosedVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.COMPLETED).count();
 		runs.put(algorithm,
-				new PathFinderRun(pf, path, timeMillis, pf.getCost(target), numOpenVertices, numClosedVertices));
+				new PathFinderRun(pf, path, timeMillis, pf.getCost(target), numTouchedVertices, numClosedVertices));
 	}
 
 	public PathFinderRun getRun(PathFinderAlgorithm algorithm) {
