@@ -43,6 +43,9 @@ import net.miginfocom.swing.MigLayout;
  */
 public class MainView extends JPanel {
 
+	static final int MIN_GRID_SIZE = 2;
+	static final int MAX_GRID_SIZE = 316;
+
 	private Action actionSelectAlgorithm = new AbstractAction("Select Algorithm") {
 
 		@Override
@@ -311,7 +314,6 @@ public class MainView extends JPanel {
 		btnRun.setText("Run");
 
 		sliderDelay = new JSlider();
-		sliderDelay.setPreferredSize(new Dimension(200, 16));
 		sliderDelay.setToolTipText("Delay");
 		panel_1.add(sliderDelay, "cell 1 0,growx,aligny center");
 		sliderDelay.setValue(0);
@@ -335,7 +337,7 @@ public class MainView extends JPanel {
 		tableResults.init(model);
 
 		// others controls
-		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), 2, 200, 1));
+		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), MIN_GRID_SIZE, MAX_GRID_SIZE, 1));
 		spinnerMapSize.addChangeListener(onMapSizeChange);
 
 		sliderDelay.setValue((sliderDelay.getModel().getMinimum() + sliderDelay.getModel().getMaximum()) / 2);
@@ -390,7 +392,8 @@ public class MainView extends JPanel {
 
 	public void updateMainView() {
 		tableResults.dataChanged();
-		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
+		lblTotalCells.setText(String.format("(%d cells - %d px/cell)", model.getMapSize() * model.getMapSize(),
+				canvasView != null ? canvasView.getCanvas().getCellSize() : 0));
 		if (canvasView != null) {
 			canvasView.updateView();
 		}
