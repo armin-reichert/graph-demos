@@ -6,36 +6,38 @@ import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
 
 /**
- * Represents of a path finder run.
+ * Result of a path-finder run.
  * 
  * @author Armin Reichert
  */
-public class PathFinderRun {
+public class PathFinderResult {
+
+	public static final PathFinderResult NO_RESULT = new PathFinderResult(null);
 
 	private final ObservableGraphSearch pathFinder;
 	private Path path;
-	private final BitSet pathCells;
+	private final BitSet pathSet;
 	private final float runningTimeMillis;
 	private final double cost;
 	private final long numTouchedVertices;
 	private final long numClosedVertices;
 
-	PathFinderRun(ObservableGraphSearch pathFinder) {
+	PathFinderResult(ObservableGraphSearch pathFinder) {
 		this.pathFinder = pathFinder;
 		path = Path.NULL;
-		this.pathCells = new BitSet();
+		this.pathSet = new BitSet();
 		this.runningTimeMillis = 0;
 		this.cost = 0;
 		this.numTouchedVertices = 0;
 		this.numClosedVertices = 0;
 	}
 
-	PathFinderRun(ObservableGraphSearch pathFinder, Path path, float runningTimeMillis, double cost,
+	PathFinderResult(ObservableGraphSearch pathFinder, Path path, float runningTimeMillis, double cost,
 			long numTouchedVertices, long numClosedVertices) {
 		this.pathFinder = pathFinder;
 		this.path = path;
-		this.pathCells = new BitSet();
-		path.forEach(pathCells::set);
+		this.pathSet = new BitSet();
+		path.forEach(pathSet::set);
 		this.runningTimeMillis = runningTimeMillis;
 		this.cost = cost;
 		this.numTouchedVertices = numTouchedVertices;
@@ -47,7 +49,7 @@ public class PathFinderRun {
 	}
 
 	public boolean pathContains(int cell) {
-		return pathCells.get(cell);
+		return pathSet.get(cell);
 	}
 
 	public float getRunningTimeMillis() {

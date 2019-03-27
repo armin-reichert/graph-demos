@@ -9,7 +9,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
-import de.amr.demos.graph.pathfinding.model.PathFinderRun;
+import de.amr.demos.graph.pathfinding.model.PathFinderResult;
 import de.amr.graph.pathfinder.api.Path;
 
 /**
@@ -96,7 +96,7 @@ public class ResultsTable extends JTable {
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			PathFinderAlgorithm algorithm = PathFinderAlgorithm.values()[rowIndex];
-			PathFinderRun result = model.getRun(algorithm);
+			PathFinderResult result = model.getResult(algorithm);
 			switch (columnIndex) {
 			case 0:
 				return algorithm;
@@ -107,7 +107,7 @@ public class ResultsTable extends JTable {
 			case 3:
 				return result.getCost();
 			case 4:
-				double optimalCost = model.getRun(PathFinderAlgorithm.AStar).getCost();
+				double optimalCost = model.getResult(PathFinderAlgorithm.AStar).getCost();
 				return optimalCost != 0 ? 100 * (result.getCost() - optimalCost) / optimalCost : Path.INFINITE_COST;
 			case 5:
 				return result.getNumTouchedVertices();

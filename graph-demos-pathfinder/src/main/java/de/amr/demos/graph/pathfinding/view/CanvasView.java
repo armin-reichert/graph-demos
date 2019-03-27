@@ -300,7 +300,7 @@ public class CanvasView extends JPanel {
 	}
 
 	private boolean partOfSolution(int cell) {
-		return model.getRun(controller.getSelectedAlgorithm()).pathContains(cell);
+		return model.getResult(controller.getSelectedAlgorithm()).pathContains(cell);
 	}
 
 	private class BlocksCellRendererAdapter extends BlocksCellRenderer {

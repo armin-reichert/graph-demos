@@ -26,15 +26,13 @@ import de.amr.graph.pathfinder.impl.DijkstraSearch;
 import de.amr.util.StopWatch;
 
 /**
- * Model for path finder demo app.
+ * Model for path finder demo application.
  * 
  * @author Armin Reichert
  */
 public class PathFinderModel {
 
-	private static final PathFinderRun NO_RUN = new PathFinderRun(null);
-
-	private final Map<PathFinderAlgorithm, PathFinderRun> runs = new EnumMap<>(PathFinderAlgorithm.class);
+	private final Map<PathFinderAlgorithm, PathFinderResult> results = new EnumMap<>(PathFinderAlgorithm.class);
 	private GridGraph<Tile, Double> map;
 	private int source;
 	private int target;
@@ -47,7 +45,10 @@ public class PathFinderModel {
 		newMap(mapSize, topology);
 		source = map.cell(mapSize / 4, mapSize / 2);
 		target = map.cell(mapSize * 3 / 4, mapSize / 2);
-		newRuns();
+	}
+
+	private double distance(int u, int v) {
+		return map.euclidean(u, v);
 	}
 
 	private ObservableGraphSearch newPathFinder(PathFinderAlgorithm algorithm) {
@@ -147,7 +148,7 @@ public class PathFinderModel {
 	public void resizeMap(int size) {
 		if (size != map.numRows()) {
 			newMap(size, map.getTopology());
-			newRuns();
+			clearResults();
 		}
 	}
 
@@ -174,26 +175,27 @@ public class PathFinderModel {
 		});
 	}
 
-	public double distance(int u, int v) {
-		return map.euclidean(u, v);
+	public PathFinderResult getResult(PathFinderAlgorithm algorithm) {
+		return Optional.ofNullable(results.get(algorithm)).orElse(PathFinderResult.NO_RESULT);
 	}
 
 	public ObservableGraphSearch getPathFinder(PathFinderAlgorithm algorithm) {
-		return runs.get(algorithm).getPathFinder();
-	}
-
-	public void newRuns() {
-		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
-			newRun(algorithm);
+		if (!results.containsKey(algorithm)) {
+			clearResult(algorithm);
 		}
+		return results.get(algorithm).getPathFinder();
 	}
 
-	public void newRun(PathFinderAlgorithm algorithm) {
-		runs.put(algorithm, new PathFinderRun(newPathFinder(algorithm)));
+	public void clearResults() {
+		results.clear();
+	}
+
+	public void clearResult(PathFinderAlgorithm algorithm) {
+		results.put(algorithm, new PathFinderResult(newPathFinder(algorithm)));
 	}
 
 	public void runAllPathFinders() {
-		newRuns();
+		results.clear();
 		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
 			runPathFinder(algorithm);
 		}
@@ -210,14 +212,9 @@ public class PathFinderModel {
 
 	public void storeResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
 		ObservableGraphSearch pf = getPathFinder(algorithm);
-		long numTouchedVertices = map.vertices().filter(v -> pf.getState(v) != TraversalState.UNVISITED).count();
-		long numClosedVertices = map.vertices().filter(v -> pf.getState(v) == TraversalState.COMPLETED).count();
-		runs.put(algorithm,
-				new PathFinderRun(pf, path, timeMillis, pf.getCost(target), numTouchedVertices, numClosedVertices));
-	}
-
-	public PathFinderRun getRun(PathFinderAlgorithm algorithm) {
-		return Optional.ofNullable(runs.get(algorithm)).orElse(NO_RUN);
+		long touched = map.vertices().filter(v -> pf.getState(v) != TraversalState.UNVISITED).count();
+		long closed = map.vertices().filter(v -> pf.getState(v) == TraversalState.COMPLETED).count();
+		results.put(algorithm, new PathFinderResult(pf, path, timeMillis, pf.getCost(target), touched, closed));
 	}
 
 	public GridGraph<Tile, Double> getMap() {
@@ -231,6 +228,16 @@ public class PathFinderModel {
 	public void setMapSize(int mapSize) {
 		if (mapSize != map.numRows()) {
 			newMap(mapSize, map.getTopology());
+		}
+	}
+
+	public Topology getTopology() {
+		return map.getTopology();
+	}
+
+	public void setTopology(Topology topology) {
+		if (topology != map.getTopology()) {
+			newMap(map.numRows(), topology);
 		}
 	}
 
@@ -248,15 +255,5 @@ public class PathFinderModel {
 
 	public void setTarget(int target) {
 		this.target = target;
-	}
-
-	public Topology getTopology() {
-		return map.getTopology();
-	}
-
-	public void setTopology(Topology topology) {
-		if (topology != map.getTopology()) {
-			newMap(map.numRows(), topology);
-		}
 	}
 }

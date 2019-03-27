@@ -95,7 +95,7 @@ public class Controller {
 	public void maybeRunPathFinder() {
 		switch (executionMode) {
 		case MANUAL:
-			runTaskAndUpdateView(model::newRuns);
+			runTaskAndUpdateView(model::clearResults);
 			break;
 		case AUTO_SELECTED:
 			runTaskAndUpdateView(() -> model.runPathFinder(selectedAlgorithm));
@@ -111,7 +111,7 @@ public class Controller {
 	// animated execution
 
 	public void runPathFinderAnimation() {
-		model.newRun(selectedAlgorithm);
+		model.clearResult(selectedAlgorithm);
 		getMainView().ifPresent(mainView -> mainView.updateMainView());
 		new PathFinderAnimationTask().execute();
 	}
@@ -120,7 +120,7 @@ public class Controller {
 
 	public void startSelectedPathFinder() {
 		runTaskAndUpdateView(() -> {
-			model.newRun(selectedAlgorithm);
+			model.clearResult(selectedAlgorithm);
 			GraphSearch pf = model.getPathFinder(selectedAlgorithm);
 			pf.start(model.getSource(), model.getTarget());
 		});
@@ -180,13 +180,11 @@ public class Controller {
 
 	public void setSource(int source) {
 		model.setSource(source);
-		model.newRuns();
 		maybeRunPathFinder();
 	}
 
 	public void setTarget(int target) {
 		model.setTarget(target);
-		model.newRuns();
 		maybeRunPathFinder();
 	}
 
