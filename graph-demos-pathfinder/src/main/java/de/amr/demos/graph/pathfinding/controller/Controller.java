@@ -135,12 +135,12 @@ public class Controller {
 			for (int n = numSteps; n > 0 && pf.canExplore(); --n) {
 				boolean found = pf.exploreVertex();
 				if (found) {
-					Path path = Path.extractPath(model.getSource(), model.getTarget(), pf);
+					Path path = pf.buildPath(model.getTarget());
 					model.storeResult(selectedAlgorithm, path, 0);
 					return path; // found path
 				}
 			}
-			return Path.NO_PATH;
+			return Path.NULL;
 		});
 	}
 
