@@ -2,7 +2,6 @@ package de.amr.demos.graph.pathfinding.view.renderer;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
@@ -24,12 +23,9 @@ import de.amr.graph.pathfinder.api.GraphSearch;
  */
 public abstract class PearlsCellRenderer implements GridCellRenderer {
 
-	private final Font font = new Font("Arial Narrow", Font.PLAIN, 12);
-	private final int inset;
 	private final Area needle;
 
 	public PearlsCellRenderer() {
-		this.inset = Math.max(getCellSize() / 20, 3);
 		this.needle = createNeedle();
 	}
 
@@ -75,7 +71,7 @@ public abstract class PearlsCellRenderer implements GridCellRenderer {
 		g.translate(-x - offset, -y - offset);
 		g.translate(x, y);
 		drawCellContent(g, grid, cell);
-		g.translate(-x,-y);
+		g.translate(-x, -y);
 	}
 
 	private void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
