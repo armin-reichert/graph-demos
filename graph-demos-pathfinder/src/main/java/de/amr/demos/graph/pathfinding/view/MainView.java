@@ -113,7 +113,7 @@ public class MainView extends JPanel {
 			JComponent source = (JComponent) e.getSource();
 			int numSteps = (Integer) source.getClientProperty("numSteps");
 			Path path = controller.runSelectedPathFinderSteps(numSteps);
-			boolean noPathFound = (path == Path.EMPTY_PATH);
+			boolean noPathFound = (path == Path.NO_PATH);
 			setEnabled(noPathFound);
 			actionFinishSelectedPathFinder.setEnabled(noPathFound);
 		}

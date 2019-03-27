@@ -140,7 +140,7 @@ public class Controller {
 					return path; // found path
 				}
 			}
-			return Path.EMPTY_PATH;
+			return Path.NO_PATH;
 		});
 	}
 

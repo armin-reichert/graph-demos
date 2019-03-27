@@ -22,7 +22,7 @@ public class PathFinderRun {
 
 	PathFinderRun(ObservableGraphSearch pathFinder) {
 		this.pathFinder = pathFinder;
-		path = Path.EMPTY_PATH;
+		path = Path.NO_PATH;
 		this.pathCells = new BitSet();
 		this.runningTimeMillis = 0;
 		this.cost = 0;
