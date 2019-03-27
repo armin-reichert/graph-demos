@@ -203,7 +203,7 @@ public class PathFinderModel {
 		GraphSearch pf = getPathFinder(algorithm);
 		StopWatch watch = new StopWatch();
 		watch.start();
-		Path path = Path.findPath(source, target, pf);
+		Path path = pf.findPath(source, target);
 		watch.stop();
 		storeResult(algorithm, path, watch.getNanos() / 1_000_000f);
 	}
