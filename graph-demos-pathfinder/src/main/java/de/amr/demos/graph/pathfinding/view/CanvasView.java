@@ -22,6 +22,7 @@ import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksMapRenderer;
+import de.amr.demos.graph.pathfinding.view.renderer.PearlsCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.PearlsMapRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
 import de.amr.graph.core.api.TraversalState;
@@ -41,7 +42,7 @@ import de.amr.graph.pathfinder.impl.BidiGraphSearch;
  */
 public class CanvasView extends JPanel {
 
-	private static final Color GRID_BACKGROUND = new Color(160, 160, 160);
+	private static final Color GRID_BACKGROUND = new Color(140, 140, 140);
 
 	private PathFinderModel model;
 	private Controller controller;
@@ -230,7 +231,7 @@ public class CanvasView extends JPanel {
 		canvas.clear();
 		canvas.drawGrid();
 	}
-	
+
 	public GridCanvas getCanvas() {
 		return canvas;
 	}
@@ -351,6 +352,55 @@ public class CanvasView extends JPanel {
 		}
 	}
 
+	private class PearlsCellRendererAdapter extends PearlsCellRenderer {
+
+		@Override
+		public int getCellSize() {
+			return canvas.getCellSize();
+		}
+
+		@Override
+		public Color getGridBackground() {
+			return GRID_BACKGROUND;
+		}
+
+		@Override
+		public Color getBackground(int cell) {
+			return computeCellBackground(cell);
+		}
+
+		@Override
+		public GraphSearch getPathFinder() {
+			return model.getPathFinder(controller.getSelectedAlgorithm());
+		}
+
+		@Override
+		public Color getTextColor(int cell) {
+			if (cell == model.getSource() || cell == model.getTarget() || isHighlighted(cell)) {
+				return Color.WHITE;
+			}
+			if (getPathFinder().getState(cell) == TraversalState.UNVISITED) {
+				return Color.LIGHT_GRAY;
+			}
+			return Color.BLUE;
+		}
+
+		@Override
+		public boolean isHighlighted(int cell) {
+			return partOfSolution(cell);
+		}
+
+		@Override
+		public boolean showCost() {
+			return showCost;
+		}
+
+		@Override
+		public boolean showParent() {
+			return showParent;
+		}
+	}
+
 	private GridRenderer createMapRenderer() {
 		if (style == RenderingStyle.BLOCKS) {
 			BlocksMapRenderer r = new BlocksMapRenderer(new BlocksCellRendererAdapter());
@@ -359,7 +409,7 @@ public class CanvasView extends JPanel {
 			return r;
 		}
 		if (style == RenderingStyle.PEARLS) {
-			PearlsMapRenderer r = new PearlsMapRenderer();
+			PearlsMapRenderer r = new PearlsMapRenderer(new PearlsCellRendererAdapter());
 			r.fnCellSize = canvas::getCellSize;
 			r.fnGridBgColor = () -> GRID_BACKGROUND;
 			r.fnCellBgColor = this::computeCellBackground;

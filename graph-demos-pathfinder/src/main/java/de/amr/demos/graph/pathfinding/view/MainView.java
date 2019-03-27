@@ -387,7 +387,6 @@ public class MainView extends JPanel {
 		scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
 
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
-		cbShowParent.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
 	public void updateMainView() {
