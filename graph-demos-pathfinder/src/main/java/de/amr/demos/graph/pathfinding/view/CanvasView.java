@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -19,6 +20,7 @@ import javax.swing.JPopupMenu;
 
 import de.amr.demos.graph.pathfinding.controller.Controller;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
+import de.amr.demos.graph.pathfinding.model.PathFinderResult;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksMapRenderer;
@@ -96,6 +98,9 @@ public class CanvasView extends JPanel {
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			cellUnderMouse = getCellUnderMouse(e);
+			if (model.getMap().get(cellUnderMouse) == Tile.WALL) {
+				return;
+			}
 			if (e.isShiftDown() && e.isAltDown() && cellUnderMouse != model.getSource()) {
 				controller.setSource(cellUnderMouse);
 			}
@@ -300,7 +305,11 @@ public class CanvasView extends JPanel {
 	}
 
 	private boolean partOfSolution(int cell) {
-		return model.getResult(controller.getSelectedAlgorithm()).pathContains(cell);
+		Optional<PathFinderResult> result = model.getResult(controller.getSelectedAlgorithm());
+		if (result.isPresent()) {
+			return result.get().pathContains(cell);
+		}
+		return false;
 	}
 
 	private class BlocksCellRendererAdapter extends BlocksCellRenderer {

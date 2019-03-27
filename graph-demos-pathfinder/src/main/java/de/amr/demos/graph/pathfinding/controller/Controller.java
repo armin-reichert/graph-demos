@@ -98,7 +98,10 @@ public class Controller {
 			runTaskAndUpdateView(model::clearResults);
 			break;
 		case AUTO_SELECTED:
-			runTaskAndUpdateView(() -> model.runPathFinder(selectedAlgorithm));
+			runTaskAndUpdateView(() -> {
+				model.clearResults();
+				model.runPathFinder(selectedAlgorithm);
+			});
 			break;
 		case AUTO_ALL:
 			runTaskAndUpdateView(model::runAllPathFinders);

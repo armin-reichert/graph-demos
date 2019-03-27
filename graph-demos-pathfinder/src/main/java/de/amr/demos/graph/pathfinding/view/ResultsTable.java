@@ -96,7 +96,7 @@ public class ResultsTable extends JTable {
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			PathFinderAlgorithm algorithm = PathFinderAlgorithm.values()[rowIndex];
-			PathFinderResult result = model.getResult(algorithm);
+			PathFinderResult result = model.getResult(algorithm).orElse(PathFinderResult.NO_RESULT);
 			switch (columnIndex) {
 			case 0:
 				return algorithm;
@@ -107,8 +107,14 @@ public class ResultsTable extends JTable {
 			case 3:
 				return result.getCost();
 			case 4:
-				double optimalCost = model.getResult(PathFinderAlgorithm.AStar).getCost();
-				return optimalCost != 0 ? 100 * (result.getCost() - optimalCost) / optimalCost : Path.INFINITE_COST;
+				if (model.getResult(PathFinderAlgorithm.AStar).isPresent()) {
+					double cost = result.getCost();
+					double optimum = model.getResult(PathFinderAlgorithm.AStar).get().getCost();
+					if (cost != 0 && optimum != 0) {
+						return 100 * (result.getCost() - optimum) / optimum;
+					}
+				}
+				return Path.INFINITE_COST;
 			case 5:
 				return result.getNumTouchedVertices();
 			case 6:

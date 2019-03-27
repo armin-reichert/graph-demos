@@ -382,10 +382,7 @@ public class MainView extends JPanel {
 		actionFinishSelectedPathFinder.setEnabled(manual);
 		actionRunSelectedPathFinderAnimation.setEnabled(manual);
 		sliderDelay.setEnabled(manual);
-
-		ExecutionMode executionMode = comboExecutionMode.getItemAt(comboExecutionMode.getSelectedIndex());
-		scrollPaneTableResults.setVisible(executionMode == ExecutionMode.AUTO_ALL);
-
+		scrollPaneTableResults.setVisible(!manual);
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 

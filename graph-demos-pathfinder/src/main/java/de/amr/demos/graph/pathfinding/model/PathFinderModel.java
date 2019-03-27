@@ -175,8 +175,8 @@ public class PathFinderModel {
 		});
 	}
 
-	public PathFinderResult getResult(PathFinderAlgorithm algorithm) {
-		return Optional.ofNullable(results.get(algorithm)).orElse(PathFinderResult.NO_RESULT);
+	public Optional<PathFinderResult> getResult(PathFinderAlgorithm algorithm) {
+		return Optional.ofNullable(results.get(algorithm));
 	}
 
 	public ObservableGraphSearch getPathFinder(PathFinderAlgorithm algorithm) {
