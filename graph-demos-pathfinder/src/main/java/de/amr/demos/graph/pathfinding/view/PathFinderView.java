@@ -35,14 +35,11 @@ import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;
 
 /**
- * Main view of path finder demo app.
+ * View with settings and results for the path finder demo application.
  * 
  * @author Armin Reichert
  */
 public class PathFinderView extends JPanel {
-
-	static final int MIN_GRID_SIZE = 2;
-	static final int MAX_GRID_SIZE = 316;
 
 	private Action actionSelectAlgorithm = new AbstractAction("Select Algorithm") {
 
@@ -74,7 +71,7 @@ public class PathFinderView extends JPanel {
 		}
 	};
 
-	private Action actionSelectMapStyle = new AbstractAction("Style") {
+	private Action actionSelectMapStyle = new AbstractAction("Map Style") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -205,12 +202,14 @@ public class PathFinderView extends JPanel {
 		panelActions.add(lblMapSize, "cell 0 1,alignx trailing");
 
 		spinnerMapSize = new JSpinner();
+		lblMapSize.setLabelFor(spinnerMapSize);
 		panelActions.add(spinnerMapSize, "flowx,cell 1 1");
 
 		lblNewLabel = new JLabel("Execution Mode");
 		panelActions.add(lblNewLabel, "cell 0 7,alignx trailing");
 
 		comboExecutionMode = new JComboBox<>();
+		lblNewLabel.setLabelFor(comboExecutionMode);
 		panelActions.add(comboExecutionMode, "cell 1 7,growx");
 
 		lblStepbystep = new JLabel("Step-By-Step Execution");
@@ -221,6 +220,7 @@ public class PathFinderView extends JPanel {
 		panelActions.add(panel, "flowx,cell 1 8,alignx left");
 
 		JButton btnStart = new JButton();
+		lblStepbystep.setLabelFor(btnStart);
 		btnStart.setAction(actionResetSelectedPathFinder);
 		panel.add(btnStart);
 
@@ -259,24 +259,27 @@ public class PathFinderView extends JPanel {
 		panelActions.add(lblAlgorithm, "cell 0 6,alignx trailing");
 
 		comboAlgorithm = new JComboBox<>();
+		lblAlgorithm.setLabelFor(comboAlgorithm);
 		panelActions.add(comboAlgorithm, "cell 1 6,growx");
 
 		JLabel lblTopology = new JLabel("Topology");
 		panelActions.add(lblTopology, "flowy,cell 0 2,alignx trailing");
 
 		comboTopology = new JComboBox<>();
+		lblTopology.setLabelFor(comboTopology);
 		panelActions.add(comboTopology, "cell 1 2,growx");
 
-		JLabel lblStyle = new JLabel("Display Style");
+		JLabel lblStyle = new JLabel("Style");
 		panelActions.add(lblStyle, "cell 0 3,alignx trailing");
 
 		comboStyle = new JComboBox<>();
+		lblStyle.setLabelFor(comboStyle);
 		comboStyle.setAction(actionSelectMapStyle);
 		comboStyle.setModel(new DefaultComboBoxModel<>(RenderingStyle.values()));
 		panelActions.add(comboStyle, "cell 1 3,growx");
 
 		scrollPaneTableResults = new JScrollPane();
-		panelActions.add(scrollPaneTableResults, "cell 0 10 2 1,growx,aligny top");
+		panelActions.add(scrollPaneTableResults, "cell 0 10 2 1,growx");
 
 		tableResults = new ResultsTable();
 		tableResults.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -288,8 +291,8 @@ public class PathFinderView extends JPanel {
 		scrollPaneTableResults.setViewportView(tableResults);
 
 		helpPanel = new HelpPanel();
-		helpPanel.setMinimumSize(new Dimension(500, 100));
-		panelActions.add(helpPanel, "cell 0 11 2 1,growx,aligny bottom");
+		helpPanel.setMinimumSize(new Dimension(500, 120));
+		panelActions.add(helpPanel, "cell 0 11 2 1,growx");
 
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
@@ -297,6 +300,7 @@ public class PathFinderView extends JPanel {
 		panel_1.setLayout(new MigLayout("", "[][grow]", "[]"));
 
 		JButton btnRun = new JButton();
+		lblAnimation.setLabelFor(btnRun);
 		panel_1.add(btnRun, "cell 0 0,aligny center");
 		btnRun.setAction(actionRunSelectedPathFinderAnimation);
 		btnRun.setText("Run");
@@ -324,7 +328,8 @@ public class PathFinderView extends JPanel {
 		scrollPaneTableResults.setSize(tableSize);
 
 		// others controls
-		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), MIN_GRID_SIZE, MAX_GRID_SIZE, 1));
+		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), PathFinderModel.MIN_MAP_SIZE,
+				PathFinderModel.MAX_MAP_SIZE, 1));
 		spinnerMapSize.addChangeListener(onMapSizeChange);
 
 		sliderDelay.setValue((sliderDelay.getModel().getMinimum() + sliderDelay.getModel().getMaximum()) / 2);

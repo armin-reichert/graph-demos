@@ -32,6 +32,9 @@ import de.amr.util.StopWatch;
  */
 public class PathFinderModel {
 
+	public static final int MIN_MAP_SIZE = 2;
+	public static final int MAX_MAP_SIZE = 316;
+
 	private final Map<PathFinderAlgorithm, PathFinderResult> results = new EnumMap<>(PathFinderAlgorithm.class);
 	private GridGraph<Tile, Double> map;
 	private int source;

@@ -107,12 +107,12 @@ public class Controller {
 	public ExecutionMode getExecutionMode() {
 		return executionMode;
 	}
-	
+
 	public int getMapCellSize() {
 		if (mapView != null) {
 			return mapView.getCanvas().getCellSize();
 		}
-		return 8; //TODO
+		return 8; // TODO
 	}
 
 	public void maybeRunPathFinder() {
@@ -138,6 +138,9 @@ public class Controller {
 
 	public void runPathFinderAnimation() {
 		model.clearResult(selectedAlgorithm);
+		if (mapView != null) {
+			mapView.updateView();
+		}
 		new PathFinderAnimationTask().execute();
 	}
 
@@ -208,19 +211,19 @@ public class Controller {
 		updateMap();
 		maybeRunPathFinder();
 	}
-	
+
 	public void setMapStyle(RenderingStyle style) {
 		if (mapView != null) {
 			mapView.setStyle(style);
 		}
 	}
-	
+
 	public void showCost(boolean show) {
 		if (mapView != null) {
 			mapView.setShowCost(show);
 		}
 	}
-	
+
 	public void showParent(boolean show) {
 		if (mapView != null) {
 			mapView.setShowParent(show);

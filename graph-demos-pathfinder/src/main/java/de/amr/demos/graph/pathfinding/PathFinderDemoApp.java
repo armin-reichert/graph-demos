@@ -48,12 +48,11 @@ public class PathFinderDemoApp {
 		controller.startSelectedPathFinder();
 		
 		mapWindow.pack();
-		mapWindow.setLocationRelativeTo(pathFinderWindow);
+		mapWindow.setLocationRelativeTo(null);
+		mapWindow.setVisible(true);
 		
 		pathFinderWindow.pack();
-		pathFinderWindow.setLocationRelativeTo(null);
-
-		mapWindow.setVisible(true);
+		pathFinderWindow.setLocation(20, 20);
 		pathFinderWindow.setVisible(true);
 	}
 }
