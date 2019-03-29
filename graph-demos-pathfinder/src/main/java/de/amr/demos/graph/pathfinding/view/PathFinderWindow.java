@@ -14,8 +14,8 @@ public class PathFinderWindow extends JFrame {
 		setAlwaysOnTop(true);
 	}
 
-	public void setView(PathFinderView view) {
-		getContentPane().removeAll();
-		getContentPane().add(view, BorderLayout.CENTER);
+	public PathFinderWindow(PathFinderView pathFinderView) {
+		this();
+		getContentPane().add(pathFinderView, BorderLayout.CENTER);
 	}
 }

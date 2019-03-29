@@ -63,6 +63,9 @@ public class Controller {
 		if (pathFinderView != null) {
 			pathFinderView.updateView();
 		}
+		if (mapView != null) {
+			mapView.updateView();
+		}
 		return result;
 	}
 
@@ -94,10 +97,12 @@ public class Controller {
 
 	public void setPathFinderView(PathFinderView view) {
 		this.pathFinderView = view;
+		pathFinderView.init(model, this);
 	}
 
 	public void setMapView(MapView mapView) {
 		this.mapView = mapView;
+		mapView.init(model, this);
 	}
 
 	public PathFinderAlgorithm getSelectedAlgorithm() {

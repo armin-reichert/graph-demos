@@ -313,9 +313,8 @@ public class PathFinderView extends JPanel {
 
 		lblTotalCells = new JLabel("(### cells)");
 		panelActions.add(lblTotalCells, "cell 1 1");
-
 	}
-
+	
 	public void init(PathFinderModel model, Controller controller) {
 		this.model = model;
 		this.controller = controller;
