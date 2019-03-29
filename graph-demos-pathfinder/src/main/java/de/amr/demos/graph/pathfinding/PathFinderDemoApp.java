@@ -7,8 +7,10 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import de.amr.demos.graph.pathfinding.controller.Controller;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
-import de.amr.demos.graph.pathfinding.view.MainView;
-import de.amr.demos.graph.pathfinding.view.MainWindow;
+import de.amr.demos.graph.pathfinding.view.PathFinderView;
+import de.amr.demos.graph.pathfinding.view.PathFinderWindow;
+import de.amr.demos.graph.pathfinding.view.MapView;
+import de.amr.demos.graph.pathfinding.view.MapWindow;
 import de.amr.graph.grid.impl.Top8;
 
 /**
@@ -30,12 +32,28 @@ public class PathFinderDemoApp {
 	public PathFinderDemoApp() {
 		PathFinderModel model = new PathFinderModel(23, Top8.get());
 		Controller controller = new Controller(model);
-		MainView view = new MainView();
-		view.init(model, controller);
-		controller.setMainView(view);
+		
+		PathFinderView pathFinderView = new PathFinderView();
+		pathFinderView.init(model, controller);
+		controller.setPathFinderView(pathFinderView);
+		PathFinderWindow pathFinderWindow = new PathFinderWindow();
+		pathFinderWindow.setView(pathFinderView);
+		
+		MapView mapView = new MapView();
+		mapView.init(model, controller);
+		controller.setMapView(mapView);
+		MapWindow mapWindow = new MapWindow();
+		mapWindow.setView(mapView);
+		
 		controller.startSelectedPathFinder();
-		MainWindow window = new MainWindow();
-		window.setView(view);
-		window.setVisible(true);
+		
+		mapWindow.pack();
+		mapWindow.setLocationRelativeTo(pathFinderWindow);
+		
+		pathFinderWindow.pack();
+		pathFinderWindow.setLocationRelativeTo(null);
+
+		mapWindow.setVisible(true);
+		pathFinderWindow.setVisible(true);
 	}
 }

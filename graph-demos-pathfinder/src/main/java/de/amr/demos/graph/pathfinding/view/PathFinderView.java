@@ -5,9 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.SystemColor;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.util.Optional;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -31,7 +29,7 @@ import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
-import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
+import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;
@@ -41,7 +39,7 @@ import net.miginfocom.swing.MigLayout;
  * 
  * @author Armin Reichert
  */
-public class MainView extends JPanel {
+public class PathFinderView extends JPanel {
 
 	static final int MIN_GRID_SIZE = 2;
 	static final int MAX_GRID_SIZE = 316;
@@ -80,10 +78,8 @@ public class MainView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			getCanvasView().ifPresent(canvas -> {
-				canvas.setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
-				updateViewState();
-			});
+			controller.setMapStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
+			updateViewState();
 		}
 	};
 
@@ -133,7 +129,7 @@ public class MainView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			getCanvasView().ifPresent(canvas -> canvas.setShowCost(cbShowCost.isSelected()));
+			controller.showCost(cbShowCost.isSelected());
 		}
 	};
 
@@ -141,7 +137,7 @@ public class MainView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			getCanvasView().ifPresent(canvas -> canvas.setShowParent(cbShowParent.isSelected()));
+			controller.showParent(cbShowParent.isSelected());
 		}
 	};
 
@@ -156,7 +152,6 @@ public class MainView extends JPanel {
 
 	private PathFinderModel model;
 	private Controller controller;
-	private CanvasView canvasView;
 
 	private JPanel panelActions;
 	private JSpinner spinnerMapSize;
@@ -178,22 +173,14 @@ public class MainView extends JPanel {
 	private JLabel lblNewLabel;
 	private JLabel lblTotalCells;
 
-	public MainView() {
+	public PathFinderView() {
 		setBackground(Color.WHITE);
-		setLayout(new MigLayout("", "[grow][]", "[grow,fill]"));
-
-		canvasView = new CanvasView();
-		int height = Toolkit.getDefaultToolkit().getScreenSize().height * 85 / 100;
-		canvasView.setSize(height, height);
-		canvasView.setPreferredSize(new Dimension(height, height));
-		add(canvasView, "cell 0 0,grow");
-		canvasView.setLayout(new BorderLayout(0, 0));
+		setLayout(new BorderLayout(0, 0));
 
 		panelActions = new JPanel();
 		panelActions.setOpaque(false);
 		panelActions.setMinimumSize(new Dimension(550, 10));
-		panelActions.setPreferredSize(new Dimension(500, 50));
-		add(panelActions, "cell 1 0,growy");
+		add(panelActions);
 		panelActions.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][grow,bottom]"));
 
 		JLabel lblMap = new JLabel("Map");
@@ -301,6 +288,7 @@ public class MainView extends JPanel {
 		scrollPaneTableResults.setViewportView(tableResults);
 
 		helpPanel = new HelpPanel();
+		helpPanel.setMinimumSize(new Dimension(500, 100));
 		panelActions.add(helpPanel, "cell 0 11 2 1,growx,aligny bottom");
 
 		panel_1 = new JPanel();
@@ -328,13 +316,12 @@ public class MainView extends JPanel {
 		this.model = model;
 		this.controller = controller;
 
-		// canvas
-		canvasView.init(model, controller);
-		canvasView.setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
-		canvasView.setShowCost(cbShowCost.isSelected());
-
 		// path finder results table
 		tableResults.init(model);
+		Dimension tableSize = new Dimension(500, PathFinderAlgorithm.values().length * 20);
+		scrollPaneTableResults.setMinimumSize(tableSize);
+		scrollPaneTableResults.setPreferredSize(tableSize);
+		scrollPaneTableResults.setSize(tableSize);
 
 		// others controls
 		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), MIN_GRID_SIZE, MAX_GRID_SIZE, 1));
@@ -356,19 +343,6 @@ public class MainView extends JPanel {
 		comboExecutionMode.setAction(actionSelectExecutionMode);
 
 		updateViewState();
-		updateMainView();
-	}
-
-	public Optional<CanvasView> getCanvasView() {
-		return Optional.ofNullable(canvasView);
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		super.setEnabled(enabled);
-		if (canvasView != null) {
-			canvasView.setEnabled(enabled);
-		}
 	}
 
 	public int getAnimationDelay() {
@@ -386,18 +360,9 @@ public class MainView extends JPanel {
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
-	public void updateMainView() {
+	public void updateView() {
 		tableResults.dataChanged();
 		lblTotalCells.setText(String.format("(%d cells - %d px/cell)", model.getMapSize() * model.getMapSize(),
-				canvasView != null ? canvasView.getCanvas().getCellSize() : 0));
-		if (canvasView != null) {
-			canvasView.updateView();
-		}
-	}
-
-	public void updateCanvasView() {
-		if (canvasView != null) {
-			canvasView.setGrid(model.getMap());
-		}
+				controller.getMapCellSize()));
 	}
 }

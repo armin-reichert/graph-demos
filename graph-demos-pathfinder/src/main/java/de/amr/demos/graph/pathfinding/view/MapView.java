@@ -5,6 +5,8 @@ import static java.lang.Math.min;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -21,12 +23,12 @@ import javax.swing.JPopupMenu;
 import de.amr.demos.graph.pathfinding.controller.Controller;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
+import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksMapRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.PearlsCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.PearlsMapRenderer;
-import de.amr.demos.graph.pathfinding.view.renderer.RenderingStyle;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.impl.GridGraph;
@@ -42,7 +44,7 @@ import de.amr.graph.pathfinder.impl.BidiGraphSearch;
  * 
  * @author Armin Reichert
  */
-public class CanvasView extends JPanel {
+public class MapView extends JPanel {
 
 	private static final Color GRID_BACKGROUND = new Color(140, 140, 140);
 
@@ -165,11 +167,14 @@ public class CanvasView extends JPanel {
 		}
 	};
 
-	public CanvasView() {
-		setBackground(Color.WHITE);
+	public MapView() {
 		style = RenderingStyle.BLOCKS;
 		cellUnderMouse = -1;
+		setBackground(Color.WHITE);
 		setLayout(new BorderLayout(0, 0));
+		int height = Toolkit.getDefaultToolkit().getScreenSize().height * 85 / 100;
+		setSize(height, height);
+		setPreferredSize(new Dimension(height, height));
 		canvas = new GridCanvas();
 		canvas.setBackground(Color.WHITE);
 		add(canvas);
@@ -186,6 +191,11 @@ public class CanvasView extends JPanel {
 		canvas.setCellSize(cellSize, false);
 		canvas.setGrid(model.getMap(), false);
 		replaceRenderer();
+
+		//TODO
+//		setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
+//		setShowCost(cbShowCost.isSelected());
+
 	}
 
 	private void replaceRenderer() {
@@ -235,6 +245,7 @@ public class CanvasView extends JPanel {
 	public void updateView() {
 		canvas.clear();
 		canvas.drawGrid();
+
 	}
 
 	public GridCanvas getCanvas() {

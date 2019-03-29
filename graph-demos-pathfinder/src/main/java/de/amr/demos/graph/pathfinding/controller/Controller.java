@@ -10,9 +10,11 @@ import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
+import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
-import de.amr.demos.graph.pathfinding.view.CanvasView.PathFinderAnimation;
-import de.amr.demos.graph.pathfinding.view.MainView;
+import de.amr.demos.graph.pathfinding.view.MapView;
+import de.amr.demos.graph.pathfinding.view.MapView.PathFinderAnimation;
+import de.amr.demos.graph.pathfinding.view.PathFinderView;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
@@ -27,7 +29,8 @@ import de.amr.graph.pathfinder.api.Path;
 public class Controller {
 
 	private final PathFinderModel model;
-	private MainView mainView;
+	private PathFinderView pathFinderView;
+	private MapView mapView;
 
 	private PathFinderAlgorithm selectedAlgorithm;
 	private ExecutionMode executionMode;
@@ -36,35 +39,40 @@ public class Controller {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			mainView.getCanvasView().ifPresent(canvasView -> {
-				PathFinderAnimation animation = canvasView.createAnimation();
-				animation.setFnDelay(mainView::getAnimationDelay);
+			if (mapView != null) {
+				PathFinderAnimation animation = mapView.createAnimation();
+				animation.setFnDelay(pathFinderView::getAnimationDelay);
 				model.getPathFinder(selectedAlgorithm).addObserver(animation);
 				model.runPathFinder(selectedAlgorithm);
 				model.getPathFinder(selectedAlgorithm).removeObserver(animation);
-			});
+			}
 			return null;
 		}
 
 		@Override
 		protected void done() {
-			// redraw canvas to show path
-			mainView.getCanvasView().ifPresent(canvas -> canvas.updateView());
+			// redraw map to show path
+			if (mapView != null) {
+				mapView.updateView();
+			}
 		}
 	}
 
 	private <T> T runTaskAndUpdateView(Supplier<T> task) {
 		T result = task.get();
-		if (mainView != null) {
-			mainView.updateMainView();
+		if (pathFinderView != null) {
+			pathFinderView.updateView();
 		}
 		return result;
 	}
 
 	private void runTaskAndUpdateView(Runnable task) {
 		task.run();
-		if (mainView != null) {
-			mainView.updateMainView();
+		if (pathFinderView != null) {
+			pathFinderView.updateView();
+		}
+		if (mapView != null) {
+			mapView.updateView();
 		}
 	}
 
@@ -76,12 +84,20 @@ public class Controller {
 
 	// end step-wise execution
 
-	public Optional<MainView> getMainView() {
-		return Optional.ofNullable(mainView);
+	public Optional<PathFinderView> getMainView() {
+		return Optional.ofNullable(pathFinderView);
 	}
 
-	public void setMainView(MainView view) {
-		this.mainView = view;
+	public Optional<MapView> getMapView() {
+		return Optional.ofNullable(mapView);
+	}
+
+	public void setPathFinderView(PathFinderView view) {
+		this.pathFinderView = view;
+	}
+
+	public void setMapView(MapView mapView) {
+		this.mapView = mapView;
 	}
 
 	public PathFinderAlgorithm getSelectedAlgorithm() {
@@ -90,6 +106,13 @@ public class Controller {
 
 	public ExecutionMode getExecutionMode() {
 		return executionMode;
+	}
+	
+	public int getMapCellSize() {
+		if (mapView != null) {
+			return mapView.getCanvas().getCellSize();
+		}
+		return 8; //TODO
 	}
 
 	public void maybeRunPathFinder() {
@@ -115,7 +138,6 @@ public class Controller {
 
 	public void runPathFinderAnimation() {
 		model.clearResult(selectedAlgorithm);
-		getMainView().ifPresent(mainView -> mainView.updateMainView());
 		new PathFinderAnimationTask().execute();
 	}
 
@@ -155,7 +177,7 @@ public class Controller {
 
 	public void resetScene() {
 		model.clearMap();
-		mainView.updateCanvasView();
+		updateMap();
 		maybeRunPathFinder();
 	}
 
@@ -171,14 +193,38 @@ public class Controller {
 
 	public void resizeMap(int size) {
 		model.resizeMap(size);
-		mainView.updateCanvasView();
+		updateMap();
 		maybeRunPathFinder();
+	}
+
+	public void updateMap() {
+		if (mapView != null) {
+			mapView.setGrid(model.getMap());
+		}
 	}
 
 	public void selectTopology(TopologySelection topology) {
 		model.setTopology(topology == TopologySelection._4_NEIGHBORS ? Top4.get() : Top8.get());
-		mainView.updateCanvasView();
+		updateMap();
 		maybeRunPathFinder();
+	}
+	
+	public void setMapStyle(RenderingStyle style) {
+		if (mapView != null) {
+			mapView.setStyle(style);
+		}
+	}
+	
+	public void showCost(boolean show) {
+		if (mapView != null) {
+			mapView.setShowCost(show);
+		}
+	}
+	
+	public void showParent(boolean show) {
+		if (mapView != null) {
+			mapView.setShowParent(show);
+		}
 	}
 
 	public void setSource(int source) {
