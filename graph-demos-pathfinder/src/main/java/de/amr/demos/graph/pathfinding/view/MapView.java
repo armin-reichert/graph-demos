@@ -20,7 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import de.amr.demos.graph.pathfinding.controller.Controller;
+import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
@@ -49,7 +49,7 @@ public class MapView extends JPanel {
 	private static final Color GRID_BACKGROUND = new Color(140, 140, 140);
 
 	private PathFinderModel model;
-	private Controller controller;
+	private PathFinderController controller;
 	private RenderingStyle style;
 	private boolean showCost;
 	private boolean showParent;
@@ -180,7 +180,12 @@ public class MapView extends JPanel {
 		add(canvas);
 	}
 
-	public void init(PathFinderModel model, Controller controller) {
+	public void updateView() {
+		canvas.clear();
+		canvas.drawGrid();
+	}
+
+	public void init(PathFinderModel model, PathFinderController controller) {
 		this.model = model;
 		this.controller = controller;
 		MouseHandler mouse = new MouseHandler();
@@ -192,9 +197,9 @@ public class MapView extends JPanel {
 		canvas.setGrid(model.getMap(), false);
 		replaceRenderer();
 
-		//TODO
-//		setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
-//		setShowCost(cbShowCost.isSelected());
+		// TODO
+		// setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
+		// setShowCost(cbShowCost.isSelected());
 
 	}
 
@@ -240,12 +245,6 @@ public class MapView extends JPanel {
 
 	public boolean isShowParent() {
 		return showParent;
-	}
-
-	public void updateView() {
-		canvas.clear();
-		canvas.drawGrid();
-
 	}
 
 	public GridCanvas getCanvas() {

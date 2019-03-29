@@ -26,12 +26,11 @@ import de.amr.graph.pathfinder.api.Path;
  * 
  * @author Armin Reichert
  */
-public class Controller {
+public class PathFinderController {
 
 	private final PathFinderModel model;
 	private PathFinderView pathFinderView;
 	private MapView mapView;
-
 	private PathFinderAlgorithm selectedAlgorithm;
 	private ExecutionMode executionMode;
 
@@ -58,28 +57,27 @@ public class Controller {
 		}
 	}
 
-	private <T> T runTaskAndUpdateView(Supplier<T> task) {
-		T result = task.get();
+	private void updateViews() {
 		if (pathFinderView != null) {
 			pathFinderView.updateView();
 		}
 		if (mapView != null) {
 			mapView.updateView();
 		}
+	}
+
+	private <T> T runTaskAndUpdateView(Supplier<T> task) {
+		T result = task.get();
+		updateViews();
 		return result;
 	}
 
 	private void runTaskAndUpdateView(Runnable task) {
 		task.run();
-		if (pathFinderView != null) {
-			pathFinderView.updateView();
-		}
-		if (mapView != null) {
-			mapView.updateView();
-		}
+		updateViews();
 	}
 
-	public Controller(PathFinderModel model) {
+	public PathFinderController(PathFinderModel model) {
 		this.model = model;
 		selectedAlgorithm = PathFinderAlgorithm.values()[0];
 		executionMode = ExecutionMode.MANUAL;
@@ -143,9 +141,7 @@ public class Controller {
 
 	public void runPathFinderAnimation() {
 		model.clearResult(selectedAlgorithm);
-		if (mapView != null) {
-			mapView.updateView();
-		}
+		updateViews();
 		new PathFinderAnimationTask().execute();
 	}
 

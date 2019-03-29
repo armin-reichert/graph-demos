@@ -5,7 +5,7 @@ import java.awt.EventQueue;
 import javax.swing.UIManager;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
-import de.amr.demos.graph.pathfinding.controller.Controller;
+import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.view.MapView;
 import de.amr.demos.graph.pathfinding.view.MapWindow;
@@ -35,7 +35,7 @@ public class PathFinderDemoApp {
 		PathFinderView pathFinderView = new PathFinderView();
 		MapView mapView = new MapView();
 
-		Controller controller = new Controller(model);
+		PathFinderController controller = new PathFinderController(model);
 		controller.setPathFinderView(pathFinderView);
 		controller.setMapView(mapView);
 		controller.startSelectedPathFinder();

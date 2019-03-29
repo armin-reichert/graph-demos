@@ -24,7 +24,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.amr.demos.graph.pathfinding.controller.Controller;
+import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
@@ -47,7 +47,6 @@ public class PathFinderView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			PathFinderAlgorithm algorithm = comboAlgorithm.getItemAt(comboAlgorithm.getSelectedIndex());
 			controller.selectAlgorithm(algorithm);
-			updateViewState();
 		}
 	};
 
@@ -57,7 +56,6 @@ public class PathFinderView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			TopologySelection topology = comboTopology.getItemAt(comboTopology.getSelectedIndex());
 			controller.selectTopology(topology);
-			updateViewState();
 		}
 	};
 
@@ -67,7 +65,6 @@ public class PathFinderView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			ExecutionMode executionMode = comboExecutionMode.getItemAt(comboExecutionMode.getSelectedIndex());
 			controller.setExecutionMode(executionMode);
-			updateViewState();
 		}
 	};
 
@@ -76,7 +73,6 @@ public class PathFinderView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			controller.setMapStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
-			updateViewState();
 		}
 	};
 
@@ -93,9 +89,9 @@ public class PathFinderView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			controller.startSelectedPathFinder();
-			updateViewState();
 			actionStepSelectedPathFinder.setEnabled(true);
 			actionFinishSelectedPathFinder.setEnabled(true);
+			updateViewState();
 		}
 	};
 
@@ -109,6 +105,7 @@ public class PathFinderView extends JPanel {
 			boolean noPathFound = (path == Path.NULL);
 			setEnabled(noPathFound);
 			actionFinishSelectedPathFinder.setEnabled(noPathFound);
+			updateViewState();
 		}
 	};
 
@@ -119,6 +116,7 @@ public class PathFinderView extends JPanel {
 			controller.finishSelectedPathFinder();
 			setEnabled(false);
 			actionStepSelectedPathFinder.setEnabled(false);
+			updateViewState();
 		}
 	};
 
@@ -148,7 +146,7 @@ public class PathFinderView extends JPanel {
 	};
 
 	private PathFinderModel model;
-	private Controller controller;
+	private PathFinderController controller;
 
 	private JPanel panelActions;
 	private JSpinner spinnerMapSize;
@@ -315,7 +313,14 @@ public class PathFinderView extends JPanel {
 		panelActions.add(lblTotalCells, "cell 1 1");
 	}
 	
-	public void init(PathFinderModel model, Controller controller) {
+	public void updateView() {
+		tableResults.dataChanged();
+		lblTotalCells.setText(String.format("(%d cells - %d px/cell)", model.getMapSize() * model.getMapSize(),
+				controller.getMapCellSize()));
+		updateViewState();
+	}
+
+	public void init(PathFinderModel model, PathFinderController controller) {
 		this.model = model;
 		this.controller = controller;
 
@@ -362,11 +367,5 @@ public class PathFinderView extends JPanel {
 		sliderDelay.setEnabled(manual);
 		scrollPaneTableResults.setVisible(!manual);
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
-	}
-
-	public void updateView() {
-		tableResults.dataChanged();
-		lblTotalCells.setText(String.format("(%d cells - %d px/cell)", model.getMapSize() * model.getMapSize(),
-				controller.getMapCellSize()));
 	}
 }
