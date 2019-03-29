@@ -31,29 +31,27 @@ public class PathFinderController {
 	private final PathFinderModel model;
 	private PathFinderView pathFinderView;
 	private MapView mapView;
-	private PathFinderAlgorithm selectedAlgorithm;
+
+	// controller state
+	private PathFinderAlgorithm algorithm;
 	private ExecutionMode executionMode;
+	private int animationDelay;
 
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			if (mapView != null) {
-				PathFinderAnimation animation = mapView.createAnimation();
-				animation.setFnDelay(pathFinderView::getAnimationDelay);
-				model.getPathFinder(selectedAlgorithm).addObserver(animation);
-				model.runPathFinder(selectedAlgorithm);
-				model.getPathFinder(selectedAlgorithm).removeObserver(animation);
-			}
+			PathFinderAnimation animation = mapView.new PathFinderAnimation();
+			animation.setFnDelay(() -> (int) Math.sqrt(animationDelay));
+			model.getPathFinder(algorithm).addObserver(animation);
+			model.runPathFinder(algorithm);
+			model.getPathFinder(algorithm).removeObserver(animation);
 			return null;
 		}
 
 		@Override
 		protected void done() {
-			// redraw map to show path
-			if (mapView != null) {
-				mapView.updateView();
-			}
+			mapView.updateView();
 		}
 	}
 
@@ -79,8 +77,9 @@ public class PathFinderController {
 
 	public PathFinderController(PathFinderModel model) {
 		this.model = model;
-		selectedAlgorithm = PathFinderAlgorithm.values()[0];
+		algorithm = PathFinderAlgorithm.values()[0];
 		executionMode = ExecutionMode.MANUAL;
+		animationDelay = 0;
 	}
 
 	// end step-wise execution
@@ -104,7 +103,7 @@ public class PathFinderController {
 	}
 
 	public PathFinderAlgorithm getSelectedAlgorithm() {
-		return selectedAlgorithm;
+		return algorithm;
 	}
 
 	public ExecutionMode getExecutionMode() {
@@ -126,7 +125,7 @@ public class PathFinderController {
 		case AUTO_SELECTED:
 			runTaskAndUpdateView(() -> {
 				model.clearResults();
-				model.runPathFinder(selectedAlgorithm);
+				model.runPathFinder(algorithm);
 			});
 			break;
 		case AUTO_ALL:
@@ -139,25 +138,35 @@ public class PathFinderController {
 
 	// animated execution
 
+	public int getAnimationDelay() {
+		return animationDelay;
+	}
+
+	public void setAnimationDelay(int animationDelay) {
+		this.animationDelay = animationDelay;
+	}
+
 	public void runPathFinderAnimation() {
-		model.clearResult(selectedAlgorithm);
-		updateViews();
-		new PathFinderAnimationTask().execute();
+		if (mapView != null) {
+			model.clearResult(algorithm);
+			mapView.updateView();
+			new PathFinderAnimationTask().execute();
+		}
 	}
 
 	// step-wise execution
 
 	public void startSelectedPathFinder() {
 		runTaskAndUpdateView(() -> {
-			model.clearResult(selectedAlgorithm);
-			GraphSearch pf = model.getPathFinder(selectedAlgorithm);
+			model.clearResult(algorithm);
+			GraphSearch pf = model.getPathFinder(algorithm);
 			pf.start(model.getSource(), model.getTarget());
 		});
 	}
 
 	public Path runSelectedPathFinderSteps(int numSteps) {
 		return runTaskAndUpdateView(() -> {
-			GraphSearch pf = model.getPathFinder(selectedAlgorithm);
+			GraphSearch pf = model.getPathFinder(algorithm);
 			if (pf.getState(model.getSource()) == TraversalState.UNVISITED) {
 				startSelectedPathFinder();
 			}
@@ -165,7 +174,7 @@ public class PathFinderController {
 				boolean found = pf.exploreVertex();
 				if (found) {
 					Path path = pf.buildPath(model.getTarget());
-					model.storeResult(selectedAlgorithm, path, 0);
+					model.storeResult(algorithm, path, 0);
 					return path; // found path
 				}
 			}
@@ -185,8 +194,8 @@ public class PathFinderController {
 		maybeRunPathFinder();
 	}
 
-	public void selectAlgorithm(PathFinderAlgorithm algorithm) {
-		selectedAlgorithm = algorithm;
+	public void selectAlgorithm(PathFinderAlgorithm pfa) {
+		algorithm = pfa;
 		maybeRunPathFinder();
 	}
 

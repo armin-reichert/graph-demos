@@ -216,10 +216,6 @@ public class MapView extends JPanel {
 		replaceRenderer();
 	}
 
-	public PathFinderAnimation createAnimation() {
-		return new PathFinderAnimation();
-	}
-
 	public void setStyle(RenderingStyle style) {
 		this.style = style;
 		replaceRenderer();

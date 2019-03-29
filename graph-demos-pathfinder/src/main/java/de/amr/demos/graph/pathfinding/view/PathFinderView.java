@@ -312,12 +312,23 @@ public class PathFinderView extends JPanel {
 		lblTotalCells = new JLabel("(### cells)");
 		panelActions.add(lblTotalCells, "cell 1 1");
 	}
-	
+
 	public void updateView() {
 		tableResults.dataChanged();
 		lblTotalCells.setText(String.format("(%d cells - %d px/cell)", model.getMapSize() * model.getMapSize(),
 				controller.getMapCellSize()));
 		updateViewState();
+	}
+
+	private void updateViewState() {
+		boolean manual = comboExecutionMode.getSelectedItem() == ExecutionMode.MANUAL;
+		actionResetSelectedPathFinder.setEnabled(manual);
+		actionStepSelectedPathFinder.setEnabled(manual);
+		actionFinishSelectedPathFinder.setEnabled(manual);
+		actionRunSelectedPathFinderAnimation.setEnabled(manual);
+		sliderDelay.setEnabled(manual);
+		scrollPaneTableResults.setVisible(!manual);
+		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
 	public void init(PathFinderModel model, PathFinderController controller) {
@@ -336,7 +347,16 @@ public class PathFinderView extends JPanel {
 				PathFinderModel.MAX_MAP_SIZE, 1));
 		spinnerMapSize.addChangeListener(onMapSizeChange);
 
-		sliderDelay.setValue((sliderDelay.getModel().getMinimum() + sliderDelay.getModel().getMaximum()) / 2);
+		sliderDelay.setValue(controller.getAnimationDelay());
+		sliderDelay.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (!sliderDelay.getValueIsAdjusting()) {
+					controller.setAnimationDelay(sliderDelay.getValue());
+				}
+			}
+		});
 
 		comboTopology.setModel(new DefaultComboBoxModel<>(TopologySelection.values()));
 		comboTopology.setSelectedItem(model.getMap().getTopology() == Top4.get() ? TopologySelection._4_NEIGHBORS
@@ -352,20 +372,5 @@ public class PathFinderView extends JPanel {
 		comboExecutionMode.setAction(actionSelectExecutionMode);
 
 		updateViewState();
-	}
-
-	public int getAnimationDelay() {
-		return (int) Math.round(Math.sqrt(sliderDelay.getValue()));
-	}
-
-	private void updateViewState() {
-		boolean manual = comboExecutionMode.getSelectedItem() == ExecutionMode.MANUAL;
-		actionResetSelectedPathFinder.setEnabled(manual);
-		actionStepSelectedPathFinder.setEnabled(manual);
-		actionFinishSelectedPathFinder.setEnabled(manual);
-		actionRunSelectedPathFinderAnimation.setEnabled(manual);
-		sliderDelay.setEnabled(manual);
-		scrollPaneTableResults.setVisible(!manual);
-		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 }
