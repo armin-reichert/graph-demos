@@ -45,7 +45,6 @@ import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.BidiAStarSearch;
-import de.amr.graph.pathfinder.impl.BidiDijkstraSearch;
 import de.amr.graph.pathfinder.impl.BidiGraphSearch;
 
 /**
@@ -307,9 +306,6 @@ public class MapView extends JPanel {
 		case BidiAStar:
 			BidiAStarSearch bidiAStar = (BidiAStarSearch) model.getPathFinder(algorithm);
 			return new FGH_Cell(bidiAStar::getScore, bidiAStar::getCost, bidiAStar::getEstimatedCost);
-		case BidiDijkstra:
-			BidiDijkstraSearch bidiDijkstra = (BidiDijkstraSearch) model.getPathFinder(algorithm);
-			return new G_Cell(bidiDijkstra::getCost);
 		case GreedyBestFirst:
 			BestFirstSearch bestFirst = (BestFirstSearch) model.getPathFinder(algorithm);
 			return new GH_Cell(bestFirst::getCost, bestFirst::getEstimatedCost);
