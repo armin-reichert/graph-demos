@@ -36,6 +36,8 @@ public class PathFinderController {
 	private PathFinderAlgorithm algorithm;
 	private ExecutionMode executionMode;
 	private int animationDelay;
+	private boolean showCost;
+	private boolean showParent;
 
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
 
@@ -82,8 +84,6 @@ public class PathFinderController {
 		animationDelay = 0;
 	}
 
-	// end step-wise execution
-
 	public Optional<PathFinderView> getMainView() {
 		return Optional.ofNullable(pathFinderView);
 	}
@@ -118,13 +118,13 @@ public class PathFinderController {
 	}
 
 	public void maybeRunPathFinder() {
+		model.clearResults();
+		mapView.replaceRenderer();
 		switch (executionMode) {
 		case MANUAL:
-			runTaskAndUpdateView(model::clearResults);
 			break;
 		case AUTO_SELECTED:
 			runTaskAndUpdateView(() -> {
-				model.clearResults();
 				model.runPathFinder(algorithm);
 			});
 			break;
@@ -147,11 +147,10 @@ public class PathFinderController {
 	}
 
 	public void runPathFinderAnimation() {
-		if (mapView != null) {
-			model.clearResult(algorithm);
-			mapView.updateView();
-			new PathFinderAnimationTask().execute();
-		}
+		model.clearResult(algorithm);
+		mapView.replaceRenderer();
+		mapView.updateView();
+		new PathFinderAnimationTask().execute();
 	}
 
 	// step-wise execution
@@ -194,8 +193,8 @@ public class PathFinderController {
 		maybeRunPathFinder();
 	}
 
-	public void selectAlgorithm(PathFinderAlgorithm pfa) {
-		algorithm = pfa;
+	public void selectAlgorithm(PathFinderAlgorithm algorithm) {
+		this.algorithm = algorithm;
 		maybeRunPathFinder();
 	}
 
@@ -226,18 +225,31 @@ public class PathFinderController {
 		if (mapView != null) {
 			mapView.setStyle(style);
 		}
+		if (pathFinderView != null) {
+			pathFinderView.updateView();
+		}
 	}
 
 	public void showCost(boolean show) {
+		this.showCost = show;
 		if (mapView != null) {
-			mapView.setShowCost(show);
+			mapView.updateView();
 		}
 	}
 
+	public boolean isShowCost() {
+		return showCost;
+	}
+
 	public void showParent(boolean show) {
+		this.showParent = show;
 		if (mapView != null) {
-			mapView.setShowParent(show);
+			mapView.updateView();
 		}
+	}
+
+	public boolean isShowParent() {
+		return showParent;
 	}
 
 	public void setSource(int source) {

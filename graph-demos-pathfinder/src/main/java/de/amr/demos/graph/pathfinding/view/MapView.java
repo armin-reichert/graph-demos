@@ -21,12 +21,16 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
+import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
-import de.amr.demos.graph.pathfinding.view.renderer.BlocksCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.BlocksMapRenderer;
+import de.amr.demos.graph.pathfinding.view.renderer.FGH_Cell;
+import de.amr.demos.graph.pathfinding.view.renderer.GH_Cell;
+import de.amr.demos.graph.pathfinding.view.renderer.G_Cell;
+import de.amr.demos.graph.pathfinding.view.renderer.MapCell;
 import de.amr.demos.graph.pathfinding.view.renderer.PearlsCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.PearlsMapRenderer;
 import de.amr.graph.core.api.TraversalState;
@@ -37,6 +41,11 @@ import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
 import de.amr.graph.pathfinder.api.GraphSearch;
 import de.amr.graph.pathfinder.api.GraphSearchObserver;
+import de.amr.graph.pathfinder.api.ObservableGraphSearch;
+import de.amr.graph.pathfinder.impl.AStarSearch;
+import de.amr.graph.pathfinder.impl.BestFirstSearch;
+import de.amr.graph.pathfinder.impl.BidiAStarSearch;
+import de.amr.graph.pathfinder.impl.BidiDijkstraSearch;
 import de.amr.graph.pathfinder.impl.BidiGraphSearch;
 
 /**
@@ -46,13 +55,9 @@ import de.amr.graph.pathfinder.impl.BidiGraphSearch;
  */
 public class MapView extends JPanel {
 
-	private static final Color GRID_BACKGROUND = new Color(140, 140, 140);
-
 	private PathFinderModel model;
 	private PathFinderController controller;
 	private RenderingStyle style;
-	private boolean showCost;
-	private boolean showParent;
 	private int cellUnderMouse;
 	private GridCanvas canvas;
 	private JPopupMenu contextMenu;
@@ -196,14 +201,9 @@ public class MapView extends JPanel {
 		canvas.setCellSize(cellSize, false);
 		canvas.setGrid(model.getMap(), false);
 		replaceRenderer();
-
-		// TODO
-		// setStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
-		// setShowCost(cbShowCost.isSelected());
-
 	}
 
-	private void replaceRenderer() {
+	public void replaceRenderer() {
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.clear();
 		canvas.drawGrid();
@@ -223,24 +223,6 @@ public class MapView extends JPanel {
 
 	public RenderingStyle getStyle() {
 		return style;
-	}
-
-	public void setShowCost(boolean showCost) {
-		this.showCost = showCost;
-		canvas.drawGrid();
-	}
-
-	public boolean isShowCost() {
-		return showCost;
-	}
-
-	public void setShowParent(boolean showParent) {
-		this.showParent = showParent;
-		canvas.drawGrid();
-	}
-
-	public boolean isShowParent() {
-		return showParent;
 	}
 
 	public GridCanvas getCanvas() {
@@ -272,42 +254,116 @@ public class MapView extends JPanel {
 		contextMenu.add(actionResetScene);
 	}
 
-	// Renderer
+	// Rendering
+
+	private static final Color MAP_BACKGROUND = new Color(140, 140, 140);
+	private static final Color WALL_BACKGROUND = new Color(139, 69, 19);
+	private static final Color SOURCE_BACKGROUND = Color.BLUE;
+	private static final Color TARGET_BACKGROUND = Color.GREEN.darker();
+	private static final Color MEETING_POINT_BACKGROUND = Color.GRAY;
+	private static final Color SOLUTION_BACKGROUND = Color.RED.brighter();
+	private static final Color NEXT_CELL_BACKGROUND = new Color(152, 255, 152);
+	private static final Color UNVISITED_CELL_BACKGROUND = Color.WHITE;
+	private static final Color VISITED_CELL_BACKGROUND = Color.YELLOW;
+	private static final Color COMPLETED_CELL_BACKGROUND = Color.ORANGE;
+
+	private GridRenderer createMapRenderer() {
+		ObservableGraphSearch pathFinder = model.getPathFinder(controller.getSelectedAlgorithm());
+		if (style == RenderingStyle.BLOCKS) {
+			MapCell cell = createMapCell(controller.getSelectedAlgorithm());
+			cell.parent = pathFinder::getParent;
+			cell.showCost = controller::isShowCost;
+			cell.showParent = controller::isShowParent;
+			cell.cellTextColor = this::computeTextColor;
+			cell.gridBackground = MAP_BACKGROUND;
+			cell.fontFamily = "Arial Narrow";
+			cell.cellSize = canvas::getCellSize;
+			cell.cellBackground = this::computeCellBackground;
+			BlocksMapRenderer blocksMap = new BlocksMapRenderer(cell);
+			blocksMap.fnCellSize = canvas::getCellSize;
+			blocksMap.fnGridBgColor = () -> MAP_BACKGROUND;
+			return blocksMap;
+		}
+		else if (style == RenderingStyle.PEARLS) {
+			PearlsMapRenderer pearlsMap = new PearlsMapRenderer(new PearlsCellRendererAdapter());
+			pearlsMap.fnCellSize = canvas::getCellSize;
+			pearlsMap.fnGridBgColor = () -> MAP_BACKGROUND;
+			pearlsMap.fnCellBgColor = this::computeCellBackground;
+			pearlsMap.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
+			pearlsMap.fnPassageColor = (cell,
+					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).getAsInt())
+							? Color.RED.brighter()
+							: Color.WHITE;
+			return pearlsMap;
+		}
+		throw new IllegalArgumentException("Unknown style: " + style);
+	}
+
+	private MapCell createMapCell(PathFinderAlgorithm algorithm) {
+		switch (algorithm) {
+		case AStar:
+			AStarSearch astar = (AStarSearch) model.getPathFinder(algorithm);
+			return new FGH_Cell(astar::getScore, astar::getCost, astar::getEstimatedCost);
+		case BidiAStar:
+			BidiAStarSearch bidiAStar = (BidiAStarSearch) model.getPathFinder(algorithm);
+			return new FGH_Cell(bidiAStar::getScore, bidiAStar::getCost, bidiAStar::getEstimatedCost);
+		case BidiDijkstra:
+			BidiDijkstraSearch bidiDijkstra = (BidiDijkstraSearch) model.getPathFinder(algorithm);
+			return new G_Cell(bidiDijkstra::getCost);
+		case GreedyBestFirst:
+			BestFirstSearch bestFirst = (BestFirstSearch) model.getPathFinder(algorithm);
+			return new GH_Cell(bestFirst::getCost, bestFirst::getEstimatedCost);
+		default:
+			ObservableGraphSearch pathFinder = model.getPathFinder(algorithm);
+			return new G_Cell(pathFinder::getCost);
+		}
+	}
 
 	private Color computeCellBackground(int cell) {
 		if (cell < 0 || cell >= model.getMap().numVertices()) {
 			throw new IllegalArgumentException("Illegal cell " + cell);
 		}
-		GraphSearch pf = model.getPathFinder(controller.getSelectedAlgorithm());
+		GraphSearch pathFinder = model.getPathFinder(controller.getSelectedAlgorithm());
 		if (model.getMap().get(cell) == Tile.WALL) {
-			return new Color(139, 69, 19);
+			return WALL_BACKGROUND;
 		}
 		if (cell == model.getSource()) {
-			return Color.BLUE;
+			return SOURCE_BACKGROUND;
 		}
 		if (cell == model.getTarget()) {
-			return Color.GREEN.darker();
+			return TARGET_BACKGROUND;
 		}
-		if (pf instanceof BidiGraphSearch) {
-			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) pf;
+		if (pathFinder instanceof BidiGraphSearch) {
+			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) pathFinder;
 			if (cell == bidi.getMeetingPoint()) {
-				return Color.GRAY;
+				return MEETING_POINT_BACKGROUND;
 			}
 		}
 		if (partOfSolution(cell)) {
-			return Color.RED.brighter();
+			return SOLUTION_BACKGROUND;
 		}
-		if (pf.getState(model.getTarget()) == TraversalState.UNVISITED && pf.getNextVertex().isPresent()
-				&& cell == pf.getNextVertex().getAsInt()) {
-			return new Color(152, 255, 152);
+		if (pathFinder.getState(model.getTarget()) == TraversalState.UNVISITED
+				&& pathFinder.getNextVertex().isPresent() && cell == pathFinder.getNextVertex().getAsInt()) {
+			return NEXT_CELL_BACKGROUND;
 		}
-		if (pf.getState(cell) == TraversalState.COMPLETED) {
-			return Color.ORANGE;
+		if (pathFinder.getState(cell) == TraversalState.COMPLETED) {
+			return COMPLETED_CELL_BACKGROUND;
 		}
-		if (pf.getState(cell) == TraversalState.VISITED) {
-			return Color.YELLOW;
+		if (pathFinder.getState(cell) == TraversalState.VISITED) {
+			return VISITED_CELL_BACKGROUND;
 		}
-		return Color.WHITE;
+		return UNVISITED_CELL_BACKGROUND;
+	}
+
+	private Color computeTextColor(int cell) {
+		GraphSearch pathFinder = model.getPathFinder(controller.getSelectedAlgorithm());
+		if (cell == model.getSource() || cell == model.getTarget() || partOfSolution(cell)) {
+			return Color.WHITE;
+		}
+		if (pathFinder.getState(cell) == TraversalState.UNVISITED) {
+			return Color.LIGHT_GRAY;
+		}
+		return Color.BLUE;
 	}
 
 	private boolean partOfSolution(int cell) {
@@ -316,55 +372,6 @@ public class MapView extends JPanel {
 			return result.get().pathContains(cell);
 		}
 		return false;
-	}
-
-	private class BlocksCellRendererAdapter extends BlocksCellRenderer {
-
-		@Override
-		public int getCellSize() {
-			return canvas.getCellSize();
-		}
-
-		@Override
-		public Color getGridBackground() {
-			return GRID_BACKGROUND;
-		}
-
-		@Override
-		public Color getBackground(int cell) {
-			return computeCellBackground(cell);
-		}
-
-		@Override
-		public GraphSearch getPathFinder() {
-			return model.getPathFinder(controller.getSelectedAlgorithm());
-		}
-
-		@Override
-		public Color getTextColor(int cell) {
-			if (cell == model.getSource() || cell == model.getTarget() || isHighlighted(cell)) {
-				return Color.WHITE;
-			}
-			if (getPathFinder().getState(cell) == TraversalState.UNVISITED) {
-				return Color.LIGHT_GRAY;
-			}
-			return Color.BLUE;
-		}
-
-		@Override
-		public boolean isHighlighted(int cell) {
-			return partOfSolution(cell);
-		}
-
-		@Override
-		public boolean showCost() {
-			return showCost;
-		}
-
-		@Override
-		public boolean showParent() {
-			return showParent;
-		}
 	}
 
 	private class PearlsCellRendererAdapter extends PearlsCellRenderer {
@@ -376,7 +383,7 @@ public class MapView extends JPanel {
 
 		@Override
 		public Color getGridBackground() {
-			return GRID_BACKGROUND;
+			return MAP_BACKGROUND;
 		}
 
 		@Override
@@ -407,34 +414,12 @@ public class MapView extends JPanel {
 
 		@Override
 		public boolean showCost() {
-			return showCost;
+			return controller.isShowCost();
 		}
 
 		@Override
 		public boolean showParent() {
-			return showParent;
+			return controller.isShowParent();
 		}
-	}
-
-	private GridRenderer createMapRenderer() {
-		if (style == RenderingStyle.BLOCKS) {
-			BlocksMapRenderer r = new BlocksMapRenderer(new BlocksCellRendererAdapter());
-			r.fnCellSize = canvas::getCellSize;
-			r.fnGridBgColor = () -> GRID_BACKGROUND;
-			return r;
-		}
-		if (style == RenderingStyle.PEARLS) {
-			PearlsMapRenderer r = new PearlsMapRenderer(new PearlsCellRendererAdapter());
-			r.fnCellSize = canvas::getCellSize;
-			r.fnGridBgColor = () -> GRID_BACKGROUND;
-			r.fnCellBgColor = this::computeCellBackground;
-			r.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
-			r.fnPassageColor = (cell,
-					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).getAsInt())
-							? Color.RED.brighter()
-							: Color.WHITE;
-			return r;
-		}
-		throw new IllegalArgumentException("Unknown style: " + style);
 	}
 }

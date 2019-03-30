@@ -370,6 +370,9 @@ public class PathFinderView extends JPanel {
 		comboExecutionMode.setModel(new DefaultComboBoxModel<>(ExecutionMode.values()));
 		comboExecutionMode.setSelectedItem(controller.getExecutionMode());
 		comboExecutionMode.setAction(actionSelectExecutionMode);
+		
+		cbShowCost.setSelected(controller.isShowCost());
+		cbShowParent.setSelected(controller.isShowParent());
 
 		updateViewState();
 	}
