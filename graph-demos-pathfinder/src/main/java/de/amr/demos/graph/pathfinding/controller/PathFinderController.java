@@ -119,7 +119,6 @@ public class PathFinderController {
 	public void updatePathFinderResults() {
 		switch (executionMode) {
 		case MANUAL:
-			model.clearResult(algorithm);
 			break;
 		case AUTO_SELECTED:
 			model.runPathFinder(algorithm);
@@ -202,7 +201,6 @@ public class PathFinderController {
 
 	public void selectMapSize(int size) {
 		model.setMapSize(size);
-		model.clearResults();
 		updateMap();
 		updatePathFinderResults();
 	}
@@ -255,12 +253,12 @@ public class PathFinderController {
 	public void setTileAt(int cell, Tile tile) {
 		if (cell != model.getSource() && cell != model.getTarget()) {
 			model.setMapContent(cell, tile);
+			model.clearResult(algorithm);
 			updatePathFinderResults();
 		}
 	}
 
 	public void flipTileAt(int cell) {
-		Tile flippedTile = model.getMap().get(cell) == WALL ? BLANK : WALL;
-		setTileAt(cell, flippedTile);
+		setTileAt(cell, model.getMap().get(cell) == WALL ? BLANK : WALL);
 	}
 }
