@@ -1,10 +1,10 @@
 package de.amr.demos.graph.pathfinding.model;
 
-import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import de.amr.graph.core.api.TraversalState;
@@ -12,8 +12,7 @@ import de.amr.graph.core.api.UndirectedEdge;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.api.Topology;
 import de.amr.graph.grid.impl.GridGraph;
-import de.amr.graph.grid.impl.Top8;
-import de.amr.graph.pathfinder.api.GraphSearch;
+import de.amr.graph.pathfinder.api.GraphSearchObserver;
 import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
 import de.amr.graph.pathfinder.impl.AStarSearch;
@@ -35,14 +34,10 @@ public class PathFinderModel {
 	public static final int MIN_MAP_SIZE = 2;
 	public static final int MAX_MAP_SIZE = 316;
 
-	private final Map<PathFinderAlgorithm, PathFinderResult> results = new EnumMap<>(PathFinderAlgorithm.class);
 	private GridGraph<Tile, Double> map;
 	private int source;
 	private int target;
-
-	public PathFinderModel() {
-		this(10, Top8.get());
-	}
+	private Map<PathFinderAlgorithm, PathFinderResult> results = new EnumMap<>(PathFinderAlgorithm.class);
 
 	public PathFinderModel(int mapSize, Topology topology) {
 		newMap(mapSize, topology);
@@ -50,33 +45,31 @@ public class PathFinderModel {
 		target = map.cell(mapSize * 3 / 4, mapSize / 2);
 	}
 
-	private double distance(int u, int v) {
-		return map.euclidean(u, v);
-	}
-
 	private ObservableGraphSearch newPathFinder(PathFinderAlgorithm algorithm) {
 		switch (algorithm) {
 		case AStar:
-			return new AStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), this::distance);
+			return new AStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), map::euclidean);
 		case BFS:
-			return new BreadthFirstSearch(map, this::distance);
+			return new BreadthFirstSearch(map, map::euclidean);
 		case Dijkstra:
 			return new DijkstraSearch(map, (u, v) -> map.getEdgeLabel(u, v));
 		case GreedyBestFirst:
-			return new BestFirstSearch(map, v -> distance(v, target), this::distance);
+			return new BestFirstSearch(map, v -> map.euclidean(v, target), map::euclidean);
 		case BidiBFS:
-			return new BidiBreadthFirstSearch(map, this::distance);
+			return new BidiBreadthFirstSearch(map, map::euclidean);
 		case BidiAStar:
-			return new BidiAStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), this::distance, this::distance);
+			return new BidiAStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), map::euclidean, map::euclidean);
 		case BidiDijkstra:
-			return new BidiDijkstraSearch(map, this::distance);
+			return new BidiDijkstraSearch(map, map::euclidean);
 		}
 		throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
 	}
 
 	private void newMap(int mapSize, Topology topology) {
 		GridGraph<Tile, Double> oldMap = map;
-		map = new GridGraph<>(mapSize, mapSize, topology, v -> Tile.BLANK, this::distance, UndirectedEdge::new);
+		map = new GridGraph<>(mapSize, mapSize, topology, v -> null, (u, v) -> 0.0, UndirectedEdge::new);
+		map.setDefaultVertexLabel(cell -> Tile.BLANK);
+		map.setDefaultEdgeLabel(map::euclidean);
 		map.fill();
 		if (oldMap == null) {
 			return;
@@ -88,7 +81,7 @@ public class PathFinderModel {
 			int oldRow = oldMap.row(oldCell), oldCol = oldMap.col(oldCell);
 			int row = scaledCoord(oldRow, scalingFactor), col = scaledCoord(oldCol, scalingFactor);
 			if (map.isValidRow(row) && map.isValidCol(col)) {
-				setTile(map.cell(col, row), oldMap.get(oldCell));
+				setMapContent(map.cell(col, row), oldMap.get(oldCell));
 			}
 		}
 
@@ -140,88 +133,26 @@ public class PathFinderModel {
 			target = map.numVertices() - 1;
 		}
 
-		setTile(source, Tile.BLANK);
-		setTile(target, Tile.BLANK);
+		setMapContent(source, Tile.BLANK);
+		setMapContent(target, Tile.BLANK);
 	}
 
 	private static int scaledCoord(int coord, float scaling) {
 		return (int) (scaling * coord);
 	}
 
-	public void resizeMap(int size) {
-		if (size != map.numRows()) {
-			newMap(size, map.getTopology());
-			clearResults();
-		}
-	}
-
-	public void clearMap() {
-		map.vertices().forEach(cell -> setTile(cell, Tile.BLANK));
-	}
-
-	public void setTile(int cell, Tile tile) {
-		if (map.get(cell) == tile) {
-			return;
-		}
-		map.set(cell, tile);
-		map.neighbors(cell).filter(neighbor -> map.get(neighbor) != WALL).forEach(neighbor -> {
-			if (tile == BLANK) {
-				if (!map.adjacent(cell, neighbor)) {
-					map.addEdge(cell, neighbor);
-				}
-			}
-			else {
-				if (map.adjacent(cell, neighbor)) {
-					map.removeEdge(cell, neighbor);
-				}
-			}
-		});
-	}
-
-	public Optional<PathFinderResult> getResult(PathFinderAlgorithm algorithm) {
-		return Optional.ofNullable(results.get(algorithm));
-	}
-
-	public ObservableGraphSearch getPathFinder(PathFinderAlgorithm algorithm) {
-		if (!results.containsKey(algorithm)) {
-			clearResult(algorithm);
-		}
-		return results.get(algorithm).getPathFinder();
-	}
-
-	public void clearResults() {
-		results.clear();
-	}
-
-	public void clearResult(PathFinderAlgorithm algorithm) {
-		results.put(algorithm, new PathFinderResult(newPathFinder(algorithm)));
-	}
-
-	public void runAllPathFinders() {
-		results.clear();
-		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
-			runPathFinder(algorithm);
-		}
-	}
-
-	public void runPathFinder(PathFinderAlgorithm algorithm) {
-		GraphSearch pf = getPathFinder(algorithm);
-		StopWatch watch = new StopWatch();
-		watch.start();
-		Path path = pf.findPath(source, target);
-		watch.stop();
-		storeResult(algorithm, path, watch.getNanos() / 1_000_000f);
-	}
-
-	public void storeResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
-		ObservableGraphSearch pf = getPathFinder(algorithm);
-		long touched = map.vertices().filter(v -> pf.getState(v) != TraversalState.UNVISITED).count();
-		long closed = map.vertices().filter(v -> pf.getState(v) == TraversalState.COMPLETED).count();
-		results.put(algorithm, new PathFinderResult(pf, path, timeMillis, pf.getCost(target), touched, closed));
-	}
-
 	public GridGraph<Tile, Double> getMap() {
 		return map;
+	}
+
+	public Topology getMapTopology() {
+		return map.getTopology();
+	}
+
+	public void setMapTopology(Topology topology) {
+		if (topology != map.getTopology()) {
+			newMap(map.numRows(), topology);
+		}
 	}
 
 	public int getMapSize() {
@@ -234,14 +165,49 @@ public class PathFinderModel {
 		}
 	}
 
-	public Topology getTopology() {
-		return map.getTopology();
+	public void clearMap() {
+		map.clearVertexLabels();
 	}
 
-	public void setTopology(Topology topology) {
-		if (topology != map.getTopology()) {
-			newMap(map.numRows(), topology);
+	public void setMapContent(int cell, Tile tile) {
+		Objects.requireNonNull(tile);
+		map.set(cell, tile);
+		switch (tile) {
+		case BLANK:
+			map.neighbors(cell).filter(neighbor -> map.get(neighbor) != WALL)
+					.filter(neighbor -> !map.adjacent(cell, neighbor)).forEach(neighbor -> map.addEdge(cell, neighbor));
+			break;
+		case WALL:
+			map.neighbors(cell).filter(neighbor -> map.get(neighbor) != WALL)
+					.filter(neighbor -> map.adjacent(cell, neighbor))
+					.forEach(neighbor -> map.removeEdge(cell, neighbor));
+			break;
+		default:
+			throw new IllegalArgumentException("Unknown tile " + tile);
 		}
+	}
+
+	public Optional<PathFinderResult> getResult(PathFinderAlgorithm algorithm) {
+		return Optional.ofNullable(results.get(algorithm));
+	}
+
+	public void setResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
+		ObservableGraphSearch pathFinder = getPathFinder(algorithm);
+		long touched = map.vertices().filter(v -> pathFinder.getState(v) != TraversalState.UNVISITED).count();
+		long closed = map.vertices().filter(v -> pathFinder.getState(v) == TraversalState.COMPLETED).count();
+		results.put(algorithm,
+				new PathFinderResult(pathFinder, path, timeMillis, pathFinder.getCost(target), touched, closed));
+	}
+
+	public void clearResults() {
+		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
+			clearResult(algorithm);
+		}
+	}
+
+	public void clearResult(PathFinderAlgorithm algorithm) {
+		ObservableGraphSearch pathFinder = newPathFinder(algorithm);
+		results.put(algorithm, new PathFinderResult(pathFinder));
 	}
 
 	public int getSource() {
@@ -258,5 +224,39 @@ public class PathFinderModel {
 
 	public void setTarget(int target) {
 		this.target = target;
+	}
+
+	public ObservableGraphSearch getPathFinder(PathFinderAlgorithm algorithm) {
+		if (!results.containsKey(algorithm)) {
+			clearResult(algorithm);
+		}
+		return results.get(algorithm).getPathFinder();
+	}
+
+	public void runAllPathFinders() {
+		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
+			runPathFinder(algorithm);
+		}
+	}
+
+	public void runPathFinder(PathFinderAlgorithm algorithm, GraphSearchObserver observer) {
+		clearResult(algorithm);
+		ObservableGraphSearch pathFinder = getPathFinder(algorithm);
+		if (observer != null) {
+			pathFinder.addObserver(observer);
+		}
+		StopWatch watch = new StopWatch();
+		watch.start();
+		Path path = pathFinder.findPath(source, target);
+		watch.stop();
+		if (observer != null) {
+			pathFinder.removeObserver(observer);
+		}
+		setResult(algorithm, path, watch.getNanos() / 1_000_000f);
+
+	}
+
+	public void runPathFinder(PathFinderAlgorithm algorithm) {
+		runPathFinder(algorithm, null);
 	}
 }

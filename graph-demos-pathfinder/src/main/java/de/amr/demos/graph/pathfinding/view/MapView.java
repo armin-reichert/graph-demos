@@ -1,5 +1,6 @@
 package de.amr.demos.graph.pathfinding.view;
 
+import static de.amr.graph.pathfinder.api.GraphSearch.NO_VERTEX;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -48,7 +49,7 @@ import de.amr.graph.pathfinder.impl.BidiAStarSearch;
 import de.amr.graph.pathfinder.impl.BidiGraphSearch;
 
 /**
- * View showing the map with the path finder data and animations.
+ * View showing the map and the information from the currently selected path finder.
  * 
  * @author Armin Reichert
  */
@@ -56,10 +57,9 @@ public class MapView extends JPanel {
 
 	private PathFinderModel model;
 	private PathFinderController controller;
-	private RenderingStyle style;
-	private int cellUnderMouse;
-	private GridCanvas canvas;
+	private MouseController mouse;
 	private JPopupMenu contextMenu;
+	private GridCanvas canvas;
 
 	public class PathFinderAnimation extends AbstractAnimation implements GraphSearchObserver {
 
@@ -75,19 +75,25 @@ public class MapView extends JPanel {
 
 		@Override
 		public void vertexRemovedFromFrontier(int v) {
-			canvas.drawGridCell(v);
+			delayed(() -> canvas.drawGridCell(v));
 		}
 	}
 
-	private class MouseHandler extends MouseAdapter {
+	private class MouseController extends MouseAdapter {
 
+		private int cellUnderMouse;
 		private int draggedCell;
 
-		public MouseHandler() {
-			draggedCell = -1;
+		public MouseController() {
+			draggedCell = NO_VERTEX;
+			cellUnderMouse = NO_VERTEX;
 		}
 
-		private int getCellUnderMouse(MouseEvent e) {
+		public int getCellUnderMouse() {
+			return cellUnderMouse;
+		}
+
+		private int computeCellUnderMouse(MouseEvent e) {
 			int col = max(0, min(e.getX() / canvas.getCellSize(), model.getMap().numCols() - 1));
 			int row = max(0, min(e.getY() / canvas.getCellSize(), model.getMap().numRows() - 1));
 			return model.getMap().cell(col, row);
@@ -96,14 +102,14 @@ public class MapView extends JPanel {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			if (e.getButton() == MouseEvent.BUTTON1) {
-				int cell = getCellUnderMouse(e);
+				int cell = computeCellUnderMouse(e);
 				controller.flipTileAt(cell);
 			}
 		}
 
 		@Override
 		public void mouseMoved(MouseEvent e) {
-			cellUnderMouse = getCellUnderMouse(e);
+			cellUnderMouse = computeCellUnderMouse(e);
 			if (model.getMap().get(cellUnderMouse) == Tile.WALL) {
 				return;
 			}
@@ -117,11 +123,11 @@ public class MapView extends JPanel {
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			cellUnderMouse = getCellUnderMouse(e);
-			if (draggedCell != -1) {
+			cellUnderMouse = computeCellUnderMouse(e);
+			if (draggedCell != NO_VERTEX) {
 				// end of dragging
-				draggedCell = -1;
-				controller.maybeRunPathFinder();
+				draggedCell = NO_VERTEX;
+				controller.updatePathFinderResults();
 			}
 			else if (e.isPopupTrigger()) {
 				boolean noWall = model.getMap().get(cellUnderMouse) != Tile.WALL;
@@ -133,14 +139,13 @@ public class MapView extends JPanel {
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			int cell = getCellUnderMouse(e);
+			int cell = computeCellUnderMouse(e);
 			if (cell != draggedCell) {
 				// dragged mouse into new cell
 				draggedCell = cell;
 				controller.setTileAt(cell, e.isShiftDown() ? Tile.BLANK : Tile.WALL);
 			}
 		}
-
 	}
 
 	private Action actionSetSource = new AbstractAction("Search From Here") {
@@ -149,7 +154,7 @@ public class MapView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			JComponent trigger = (JComponent) e.getSource();
 			GridPosition position = (GridPosition) trigger.getClientProperty("position");
-			controller.setSource(position != null ? model.getMap().cell(position) : cellUnderMouse);
+			controller.setSource(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
 		}
 	};
 
@@ -159,7 +164,7 @@ public class MapView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			JComponent trigger = (JComponent) e.getSource();
 			GridPosition position = (GridPosition) trigger.getClientProperty("position");
-			controller.setTarget(position != null ? model.getMap().cell(position) : cellUnderMouse);
+			controller.setTarget(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
 		}
 	};
 
@@ -172,56 +177,39 @@ public class MapView extends JPanel {
 	};
 
 	public MapView() {
-		style = RenderingStyle.BLOCKS;
-		cellUnderMouse = -1;
 		setBackground(Color.WHITE);
 		setLayout(new BorderLayout(0, 0));
-		int height = Toolkit.getDefaultToolkit().getScreenSize().height * 85 / 100;
-		setSize(height, height);
-		setPreferredSize(new Dimension(height, height));
 		canvas = new GridCanvas();
 		canvas.setBackground(Color.WHITE);
 		add(canvas);
 	}
 
-	public void updateView() {
-		canvas.clear();
-		canvas.drawGrid();
-	}
-
 	public void init(PathFinderModel model, PathFinderController controller) {
 		this.model = model;
 		this.controller = controller;
-		MouseHandler mouse = new MouseHandler();
+		mouse = new MouseController();
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
 		createContextMenu();
-		int cellSize = getHeight() / model.getMapSize();
-		canvas.setCellSize(cellSize, false);
-		canvas.setGrid(model.getMap(), false);
-		replaceRenderer();
+		int height = Toolkit.getDefaultToolkit().getScreenSize().height * 85 / 100;
+		setSize(height, height);
+		setPreferredSize(new Dimension(height, height));
+		updateMap(model.getMap());
 	}
 
-	public void replaceRenderer() {
-		canvas.replaceRenderer(createMapRenderer());
+	public void updateView() {
 		canvas.clear();
+		canvas.replaceRenderer(createMapRenderer(controller.getSelectedAlgorithm(), controller.getStyle()));
 		canvas.drawGrid();
 	}
 
-	public void setGrid(GridGraph<?, ?> grid) {
-		int cellSize = getHeight() / grid.numCols();
-		canvas.setGrid(grid, false);
+	public void updateMap(GridGraph<?, ?> grid) {
+		int cellSize = getHeight() / model.getMapSize();
 		canvas.setCellSize(cellSize, false);
-		replaceRenderer();
-	}
-
-	public void setStyle(RenderingStyle style) {
-		this.style = style;
-		replaceRenderer();
-	}
-
-	public RenderingStyle getStyle() {
-		return style;
+		canvas.setGrid(model.getMap(), false);
+		canvas.replaceRenderer(createMapRenderer(controller.getSelectedAlgorithm(), controller.getStyle()));
+		canvas.clear();
+		canvas.drawGrid();
 	}
 
 	public GridCanvas getCanvas() {
@@ -266,8 +254,8 @@ public class MapView extends JPanel {
 	private static final Color VISITED_CELL_BACKGROUND = Color.YELLOW;
 	private static final Color COMPLETED_CELL_BACKGROUND = Color.ORANGE;
 
-	private GridRenderer createMapRenderer() {
-		ObservableGraphSearch pathFinder = model.getPathFinder(controller.getSelectedAlgorithm());
+	private GridRenderer createMapRenderer(PathFinderAlgorithm algorithm, RenderingStyle style) {
+		ObservableGraphSearch pathFinder = model.getPathFinder(algorithm);
 		if (style == RenderingStyle.BLOCKS) {
 			MapCell cell = createMapCell(controller.getSelectedAlgorithm());
 			cell.parent = pathFinder::getParent;
@@ -301,17 +289,18 @@ public class MapView extends JPanel {
 	private MapCell createMapCell(PathFinderAlgorithm algorithm) {
 		switch (algorithm) {
 		case AStar:
-			AStarSearch astar = (AStarSearch) model.getPathFinder(algorithm);
-			return new FGH_Cell(astar::getScore, astar::getCost, astar::getEstimatedCost);
+			return new FGH_Cell(cell -> ((AStarSearch) model.getPathFinder(algorithm)).getScore(cell),
+					cell -> ((AStarSearch) model.getPathFinder(algorithm)).getCost(cell),
+					cell -> ((AStarSearch) model.getPathFinder(algorithm)).getEstimatedCost(cell));
 		case BidiAStar:
-			BidiAStarSearch bidiAStar = (BidiAStarSearch) model.getPathFinder(algorithm);
-			return new FGH_Cell(bidiAStar::getScore, bidiAStar::getCost, bidiAStar::getEstimatedCost);
+			return new FGH_Cell(cell -> ((BidiAStarSearch) model.getPathFinder(algorithm)).getScore(cell),
+					cell -> ((BidiAStarSearch) model.getPathFinder(algorithm)).getCost(cell),
+					cell -> ((BidiAStarSearch) model.getPathFinder(algorithm)).getEstimatedCost(cell));
 		case GreedyBestFirst:
-			BestFirstSearch bestFirst = (BestFirstSearch) model.getPathFinder(algorithm);
-			return new GH_Cell(bestFirst::getCost, bestFirst::getEstimatedCost);
+			return new GH_Cell(cell -> model.getPathFinder(algorithm).getCost(cell),
+					cell -> ((BestFirstSearch) model.getPathFinder(algorithm)).getEstimatedCost(cell));
 		default:
-			ObservableGraphSearch pathFinder = model.getPathFinder(algorithm);
-			return new G_Cell(pathFinder::getCost);
+			return new G_Cell(cell -> model.getPathFinder(algorithm).getCost(cell));
 		}
 	}
 

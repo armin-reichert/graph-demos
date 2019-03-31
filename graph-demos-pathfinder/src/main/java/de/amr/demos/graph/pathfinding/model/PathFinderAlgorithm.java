@@ -8,6 +8,11 @@ import de.amr.graph.pathfinder.impl.BidiDijkstraSearch;
 import de.amr.graph.pathfinder.impl.BreadthFirstSearch;
 import de.amr.graph.pathfinder.impl.DijkstraSearch;
 
+/**
+ * Enum type for available pathfinder algorithms.
+ * 
+ * @author Armin Reichert
+ */
 public enum PathFinderAlgorithm {
 	BFS("Breadth-First Search", BreadthFirstSearch.class),
 	Dijkstra("Dijkstra", DijkstraSearch.class),

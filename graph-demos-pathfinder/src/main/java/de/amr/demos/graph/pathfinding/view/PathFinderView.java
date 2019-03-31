@@ -24,8 +24,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
+import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
@@ -41,12 +41,15 @@ import net.miginfocom.swing.MigLayout;
  */
 public class PathFinderView extends JPanel {
 
+	private static <T> T selection(JComboBox<T> combo) {
+		return combo.getItemAt(combo.getSelectedIndex());
+	}
+
 	private Action actionSelectAlgorithm = new AbstractAction("Select Algorithm") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			PathFinderAlgorithm algorithm = comboAlgorithm.getItemAt(comboAlgorithm.getSelectedIndex());
-			controller.selectAlgorithm(algorithm);
+			controller.selectAlgorithm(selection(comboAlgorithm));
 		}
 	};
 
@@ -54,25 +57,23 @@ public class PathFinderView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			TopologySelection topology = comboTopology.getItemAt(comboTopology.getSelectedIndex());
-			controller.selectTopology(topology);
+			controller.selectTopology(selection(comboTopology));
 		}
 	};
 
-	private Action actionSelectExecutionMode = new AbstractAction("Set Execution Mode") {
+	private Action actionSelectExecutionMode = new AbstractAction("Select Execution Mode") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			ExecutionMode executionMode = comboExecutionMode.getItemAt(comboExecutionMode.getSelectedIndex());
-			controller.setExecutionMode(executionMode);
+			controller.selectExecutionMode(selection(comboExecutionMode));
 		}
 	};
 
-	private Action actionSelectMapStyle = new AbstractAction("Map Style") {
+	private Action actionSelectStyle = new AbstractAction("Select Map Style") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.setMapStyle(comboStyle.getItemAt(comboStyle.getSelectedIndex()));
+			controller.selectStyle(selection(comboStyle));
 		}
 	};
 
@@ -84,7 +85,7 @@ public class PathFinderView extends JPanel {
 		}
 	};
 
-	private Action actionResetSelectedPathFinder = new AbstractAction("Start") {
+	private Action actionStartSelectedPathFinder = new AbstractAction("Start") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -102,6 +103,7 @@ public class PathFinderView extends JPanel {
 			JComponent source = (JComponent) e.getSource();
 			int numSteps = (Integer) source.getClientProperty("numSteps");
 			Path path = controller.runSelectedPathFinderSteps(numSteps);
+			// TODO needs reworking
 			boolean noPathFound = (path == Path.NULL);
 			setEnabled(noPathFound);
 			actionFinishSelectedPathFinder.setEnabled(noPathFound);
@@ -115,6 +117,7 @@ public class PathFinderView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			controller.finishSelectedPathFinder();
 			setEnabled(false);
+			// TODO needs reworking
 			actionStepSelectedPathFinder.setEnabled(false);
 			updateViewState();
 		}
@@ -141,7 +144,7 @@ public class PathFinderView extends JPanel {
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			int newSize = (int) spinnerMapSize.getValue();
-			controller.resizeMap(newSize);
+			controller.selectMapSize(newSize);
 		}
 	};
 
@@ -219,7 +222,7 @@ public class PathFinderView extends JPanel {
 
 		JButton btnStart = new JButton();
 		lblStepbystep.setLabelFor(btnStart);
-		btnStart.setAction(actionResetSelectedPathFinder);
+		btnStart.setAction(actionStartSelectedPathFinder);
 		panel.add(btnStart);
 
 		JButton btnStep1 = new JButton();
@@ -272,7 +275,7 @@ public class PathFinderView extends JPanel {
 
 		comboStyle = new JComboBox<>();
 		lblStyle.setLabelFor(comboStyle);
-		comboStyle.setAction(actionSelectMapStyle);
+		comboStyle.setAction(actionSelectStyle);
 		comboStyle.setModel(new DefaultComboBoxModel<>(RenderingStyle.values()));
 		panelActions.add(comboStyle, "cell 1 3,growx");
 
@@ -281,8 +284,7 @@ public class PathFinderView extends JPanel {
 
 		tableResults = new ResultsTable();
 		tableResults.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-		tableResults
-				.setPreferredScrollableViewportSize(new Dimension(500, PathFinderAlgorithm.values().length * 16));
+		tableResults.setPreferredScrollableViewportSize(new Dimension(500, 300));
 		tableResults.setFillsViewportHeight(true);
 		tableResults.setEnabled(false);
 		tableResults.setShowVerticalLines(false);
@@ -322,7 +324,7 @@ public class PathFinderView extends JPanel {
 
 	private void updateViewState() {
 		boolean manual = comboExecutionMode.getSelectedItem() == ExecutionMode.MANUAL;
-		actionResetSelectedPathFinder.setEnabled(manual);
+		actionStartSelectedPathFinder.setEnabled(manual);
 		actionStepSelectedPathFinder.setEnabled(manual);
 		actionFinishSelectedPathFinder.setEnabled(manual);
 		actionRunSelectedPathFinderAnimation.setEnabled(manual);
@@ -352,9 +354,7 @@ public class PathFinderView extends JPanel {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				if (!sliderDelay.getValueIsAdjusting()) {
-					controller.setAnimationDelay(sliderDelay.getValue());
-				}
+				controller.setAnimationDelay(sliderDelay.getValue());
 			}
 		});
 
@@ -370,7 +370,7 @@ public class PathFinderView extends JPanel {
 		comboExecutionMode.setModel(new DefaultComboBoxModel<>(ExecutionMode.values()));
 		comboExecutionMode.setSelectedItem(controller.getExecutionMode());
 		comboExecutionMode.setAction(actionSelectExecutionMode);
-		
+
 		cbShowCost.setSelected(controller.isShowCost());
 		cbShowParent.setSelected(controller.isShowParent());
 
