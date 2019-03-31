@@ -259,8 +259,8 @@ public class MapView extends JPanel {
 		if (style == RenderingStyle.BLOCKS) {
 			MapCell cell = createMapCell(controller.getSelectedAlgorithm());
 			cell.parent = pathFinder::getParent;
-			cell.showCost = controller::isShowCost;
-			cell.showParent = controller::isShowParent;
+			cell.showCost = controller::isShowingCost;
+			cell.showParent = controller::isShowingParent;
 			cell.cellTextColor = this::computeTextColor;
 			cell.gridBackground = MAP_BACKGROUND;
 			cell.fontFamily = "Arial Narrow";
@@ -399,12 +399,12 @@ public class MapView extends JPanel {
 
 		@Override
 		public boolean showCost() {
-			return controller.isShowCost();
+			return controller.isShowingCost();
 		}
 
 		@Override
 		public boolean showParent() {
-			return controller.isShowParent();
+			return controller.isShowingParent();
 		}
 	}
 }

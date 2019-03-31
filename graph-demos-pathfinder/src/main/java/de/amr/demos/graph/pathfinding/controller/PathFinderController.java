@@ -4,7 +4,6 @@ import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import javax.swing.SwingWorker;
 
@@ -37,8 +36,8 @@ public class PathFinderController {
 	private ExecutionMode executionMode;
 	private int animationDelay;
 	private RenderingStyle style;
-	private boolean showCost;
-	private boolean showParent;
+	private boolean showingCost;
+	private boolean showingParent;
 
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
 
@@ -62,6 +61,8 @@ public class PathFinderController {
 		style = RenderingStyle.BLOCKS;
 		executionMode = ExecutionMode.MANUAL;
 		animationDelay = 0;
+		showingCost = true;
+		showingParent = false;
 	}
 
 	private void updateViews() {
@@ -73,10 +74,10 @@ public class PathFinderController {
 		}
 	}
 
-	private <T> T runTaskAndUpdateView(Supplier<T> task) {
-		T result = task.get();
-		updateViews();
-		return result;
+	private void fireMapChange() {
+		if (mapView != null) {
+			mapView.updateMap(model.getMap());
+		}
 	}
 
 	public Optional<PathFinderView> getMainView() {
@@ -158,7 +159,6 @@ public class PathFinderController {
 	}
 
 	public Path runSelectedPathFinderSteps(int numSteps) {
-		return runTaskAndUpdateView(() -> {
 			GraphSearch pf = model.getPathFinder(algorithm);
 			if (pf.getState(model.getSource()) == TraversalState.UNVISITED) {
 				startSelectedPathFinder();
@@ -168,11 +168,12 @@ public class PathFinderController {
 				if (found) {
 					Path path = pf.buildPath(model.getTarget());
 					model.setResult(algorithm, path, 0);
+					mapView.updateView();
 					return path; // found path
 				}
 			}
+			mapView.updateView();
 			return Path.NULL;
-		});
 	}
 
 	public Path finishSelectedPathFinder() {
@@ -183,7 +184,7 @@ public class PathFinderController {
 
 	public void resetScene() {
 		model.clearMap();
-		updateMap();
+		fireMapChange();
 		updatePathFinderResults();
 	}
 
@@ -201,19 +202,14 @@ public class PathFinderController {
 
 	public void selectMapSize(int size) {
 		model.setMapSize(size);
-		updateMap();
+		fireMapChange();
+		model.clearResult(algorithm);
 		updatePathFinderResults();
-	}
-
-	public void updateMap() {
-		if (mapView != null) {
-			mapView.updateMap(model.getMap());
-		}
 	}
 
 	public void selectTopology(TopologySelection topology) {
 		model.setMapTopology(topology == TopologySelection._4_NEIGHBORS ? Top4.get() : Top8.get());
-		updateMap();
+		fireMapChange();
 		updatePathFinderResults();
 	}
 
@@ -222,31 +218,33 @@ public class PathFinderController {
 		updateViews();
 	}
 
-	public void showCost(boolean show) {
-		this.showCost = show;
+	public void showCost(boolean b) {
+		this.showingCost = b;
 		updateViews();
 	}
 
-	public boolean isShowCost() {
-		return showCost;
+	public boolean isShowingCost() {
+		return showingCost;
 	}
 
-	public void showParent(boolean show) {
-		this.showParent = show;
+	public void showParent(boolean b) {
+		this.showingParent = b;
 		updateViews();
 	}
 
-	public boolean isShowParent() {
-		return showParent;
+	public boolean isShowingParent() {
+		return showingParent;
 	}
 
 	public void setSource(int source) {
 		model.setSource(source);
+		model.clearResult(algorithm);
 		updatePathFinderResults();
 	}
 
 	public void setTarget(int target) {
 		model.setTarget(target);
+		model.clearResult(algorithm);
 		updatePathFinderResults();
 	}
 

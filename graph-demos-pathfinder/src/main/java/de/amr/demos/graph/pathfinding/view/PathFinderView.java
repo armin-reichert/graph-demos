@@ -90,9 +90,9 @@ public class PathFinderView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			controller.startSelectedPathFinder();
+			updateViewState();
 			actionStepSelectedPathFinder.setEnabled(true);
 			actionFinishSelectedPathFinder.setEnabled(true);
-			updateViewState();
 		}
 	};
 
@@ -103,11 +103,9 @@ public class PathFinderView extends JPanel {
 			JComponent source = (JComponent) e.getSource();
 			int numSteps = (Integer) source.getClientProperty("numSteps");
 			Path path = controller.runSelectedPathFinderSteps(numSteps);
-			// TODO needs reworking
-			boolean noPathFound = (path == Path.NULL);
-			setEnabled(noPathFound);
-			actionFinishSelectedPathFinder.setEnabled(noPathFound);
 			updateViewState();
+			setEnabled(path == Path.NULL);
+			actionFinishSelectedPathFinder.setEnabled(path == Path.NULL);
 		}
 	};
 
@@ -116,10 +114,9 @@ public class PathFinderView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			controller.finishSelectedPathFinder();
-			setEnabled(false);
-			// TODO needs reworking
-			actionStepSelectedPathFinder.setEnabled(false);
 			updateViewState();
+			setEnabled(false);
+			actionStepSelectedPathFinder.setEnabled(false);
 		}
 	};
 
@@ -371,8 +368,8 @@ public class PathFinderView extends JPanel {
 		comboExecutionMode.setSelectedItem(controller.getExecutionMode());
 		comboExecutionMode.setAction(actionSelectExecutionMode);
 
-		cbShowCost.setSelected(controller.isShowCost());
-		cbShowParent.setSelected(controller.isShowParent());
+		cbShowCost.setSelected(controller.isShowingCost());
+		cbShowParent.setSelected(controller.isShowingParent());
 
 		updateViewState();
 	}
