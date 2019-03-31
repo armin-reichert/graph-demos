@@ -246,9 +246,13 @@ public class MapView extends JPanel {
 	private static final Color MAP_BACKGROUND = new Color(140, 140, 140);
 	private static final Color WALL_BACKGROUND = new Color(139, 69, 19);
 	private static final Color SOURCE_BACKGROUND = Color.BLUE;
+	private static final Color SOURCE_FOREGROUND = Color.WHITE;
 	private static final Color TARGET_BACKGROUND = Color.GREEN.darker();
+	private static final Color TARGET_FOREGROUND = Color.WHITE;
 	private static final Color MEETING_POINT_BACKGROUND = Color.GRAY;
+	private static final Color MEETING_POINT_FOREGROUND = Color.WHITE;
 	private static final Color SOLUTION_BACKGROUND = Color.RED.brighter();
+	private static final Color SOLUTION_FOREGROUND = Color.WHITE;
 	private static final Color NEXT_CELL_BACKGROUND = new Color(152, 255, 152);
 	private static final Color UNVISITED_CELL_BACKGROUND = Color.WHITE;
 	private static final Color VISITED_CELL_BACKGROUND = Color.YELLOW;
@@ -279,8 +283,8 @@ public class MapView extends JPanel {
 			pearlsMap.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
 			pearlsMap.fnPassageColor = (cell,
 					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).getAsInt())
-							? Color.RED.brighter()
-							: Color.WHITE;
+							? SOLUTION_BACKGROUND
+							: UNVISITED_CELL_BACKGROUND;
 			return pearlsMap;
 		}
 		throw new IllegalArgumentException("Unknown style: " + style);
@@ -318,14 +322,14 @@ public class MapView extends JPanel {
 		if (cell == model.getTarget()) {
 			return TARGET_BACKGROUND;
 		}
+		if (partOfSolution(cell)) {
+			return SOLUTION_BACKGROUND;
+		}
 		if (pathFinder instanceof BidiGraphSearch) {
 			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) pathFinder;
 			if (cell == bidi.getMeetingPoint()) {
 				return MEETING_POINT_BACKGROUND;
 			}
-		}
-		if (partOfSolution(cell)) {
-			return SOLUTION_BACKGROUND;
 		}
 		if (pathFinder.getState(model.getTarget()) == TraversalState.UNVISITED
 				&& pathFinder.getNextVertex().isPresent() && cell == pathFinder.getNextVertex().getAsInt()) {
@@ -341,14 +345,23 @@ public class MapView extends JPanel {
 	}
 
 	private Color computeTextColor(int cell) {
+		if (cell == model.getSource()) {
+			return SOURCE_FOREGROUND;
+		}
+		if (cell == model.getTarget()) {
+			return TARGET_FOREGROUND;
+		}
+		if (partOfSolution(cell)) {
+			return SOLUTION_FOREGROUND;
+		}
 		GraphSearch pathFinder = model.getPathFinder(controller.getSelectedAlgorithm());
-		if (cell == model.getSource() || cell == model.getTarget() || partOfSolution(cell)) {
-			return Color.WHITE;
+		if (pathFinder instanceof BidiGraphSearch) {
+			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) pathFinder;
+			if (cell == bidi.getMeetingPoint()) {
+				return MEETING_POINT_FOREGROUND;
+			}
 		}
-		if (pathFinder.getState(cell) == TraversalState.UNVISITED) {
-			return Color.LIGHT_GRAY;
-		}
-		return Color.BLUE;
+		return pathFinder.getState(cell) == TraversalState.UNVISITED ? Color.LIGHT_GRAY : Color.BLUE;
 	}
 
 	private boolean partOfSolution(int cell) {
