@@ -39,7 +39,7 @@ import net.miginfocom.swing.MigLayout;
  * 
  * @author Armin Reichert
  */
-public class PathFinderView extends JPanel {
+public class ConfigurationView extends JPanel {
 
 	private static <T> T selection(JComboBox<T> combo) {
 		return combo.getItemAt(combo.getSelectedIndex());
@@ -168,7 +168,7 @@ public class PathFinderView extends JPanel {
 	private JLabel lblNewLabel;
 	private JLabel lblTotalCells;
 
-	public PathFinderView() {
+	public ConfigurationView() {
 		setBackground(Color.WHITE);
 		setLayout(new BorderLayout(0, 0));
 

@@ -9,8 +9,8 @@ import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.view.MapView;
 import de.amr.demos.graph.pathfinding.view.MapWindow;
-import de.amr.demos.graph.pathfinding.view.PathFinderView;
-import de.amr.demos.graph.pathfinding.view.PathFinderWindow;
+import de.amr.demos.graph.pathfinding.view.ConfigurationView;
+import de.amr.demos.graph.pathfinding.view.ConfigurationWindow;
 import de.amr.graph.grid.impl.Top8;
 
 /**
@@ -32,7 +32,7 @@ public class PathFinderDemoApp {
 	public PathFinderDemoApp() {
 		PathFinderModel model = new PathFinderModel(23, Top8.get());
 
-		PathFinderView pathFinderView = new PathFinderView();
+		ConfigurationView pathFinderView = new ConfigurationView();
 		MapView mapView = new MapView();
 
 		PathFinderController controller = new PathFinderController(model);
@@ -45,7 +45,7 @@ public class PathFinderDemoApp {
 		mapWindow.setLocationRelativeTo(null);
 		mapWindow.setVisible(true);
 
-		PathFinderWindow pathFinderWindow = new PathFinderWindow(pathFinderView);
+		ConfigurationWindow pathFinderWindow = new ConfigurationWindow(pathFinderView);
 		pathFinderWindow.pack();
 		pathFinderWindow.setLocation(20, 20);
 		pathFinderWindow.setVisible(true);

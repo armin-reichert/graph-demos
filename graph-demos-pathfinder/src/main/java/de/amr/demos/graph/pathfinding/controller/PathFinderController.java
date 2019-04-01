@@ -13,7 +13,7 @@ import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.MapView;
 import de.amr.demos.graph.pathfinding.view.MapView.PathFinderAnimation;
-import de.amr.demos.graph.pathfinding.view.PathFinderView;
+import de.amr.demos.graph.pathfinding.view.ConfigurationView;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
@@ -28,7 +28,7 @@ import de.amr.graph.pathfinder.api.Path;
 public class PathFinderController {
 
 	private final PathFinderModel model;
-	private PathFinderView pathFinderView;
+	private ConfigurationView pathFinderView;
 	private MapView mapView;
 
 	// controller state
@@ -80,7 +80,7 @@ public class PathFinderController {
 		}
 	}
 
-	public Optional<PathFinderView> getMainView() {
+	public Optional<ConfigurationView> getMainView() {
 		return Optional.ofNullable(pathFinderView);
 	}
 
@@ -88,7 +88,7 @@ public class PathFinderController {
 		return Optional.ofNullable(mapView);
 	}
 
-	public void setPathFinderView(PathFinderView view) {
+	public void setPathFinderView(ConfigurationView view) {
 		this.pathFinderView = view;
 		pathFinderView.init(model, this);
 	}
