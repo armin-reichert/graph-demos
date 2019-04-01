@@ -197,6 +197,7 @@ public class PathFinderController {
 
 	public void selectExecutionMode(ExecutionMode executionMode) {
 		this.executionMode = executionMode;
+		model.clearResults();
 		updatePathFinderResults();
 	}
 
