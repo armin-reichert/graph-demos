@@ -1,4 +1,4 @@
-package de.amr.demos.graph.pathfinding.view.renderer;
+package de.amr.demos.graph.pathfinding.view.renderer.blocks;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

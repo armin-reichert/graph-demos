@@ -1,4 +1,4 @@
-package de.amr.demos.graph.pathfinding.view.renderer;
+package de.amr.demos.graph.pathfinding.view.renderer.blocks;
 
 import java.awt.Graphics2D;
 import java.util.Objects;
@@ -8,11 +8,11 @@ import de.amr.graph.grid.ui.rendering.ConfigurableGridRenderer;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
 
-public class BlocksMapRenderer extends ConfigurableGridRenderer implements GridRenderer {
+public class BlocksMap extends ConfigurableGridRenderer implements GridRenderer {
 
 	private GridCellRenderer cellRenderer;
 
-	public BlocksMapRenderer(GridCellRenderer cellRenderer) {
+	public BlocksMap(GridCellRenderer cellRenderer) {
 		this.cellRenderer = Objects.requireNonNull(cellRenderer);
 	}
 

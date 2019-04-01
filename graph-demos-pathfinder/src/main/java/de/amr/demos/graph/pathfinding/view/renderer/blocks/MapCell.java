@@ -1,4 +1,4 @@
-package de.amr.demos.graph.pathfinding.view.renderer;
+package de.amr.demos.graph.pathfinding.view.renderer.blocks;
 
 import static de.amr.graph.pathfinder.api.GraphSearch.NO_VERTEX;
 import static de.amr.graph.pathfinder.api.Path.INFINITE_COST;
