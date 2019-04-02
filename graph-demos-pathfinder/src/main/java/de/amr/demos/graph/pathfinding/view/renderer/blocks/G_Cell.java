@@ -22,10 +22,11 @@ public class G_Cell extends MapCell {
 	@Override
 	protected void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
 		String gCostText = formatScaledValue(gValue.apply(cell), 10);
-		textSize(g, 50);
-		Rectangle2D textBounds = getBounds(g, gCostText);
-		g.setColor(cellTextColor.apply(cell));
-		g.drawString(gCostText, (int) (cellSize.getAsInt() - textBounds.getWidth()) / 2,
-				(int) (cellSize.getAsInt() + textBounds.getHeight() - g.getFontMetrics().getDescent()) / 2);
+		if (adjustFontSize(g, 0.5f) >= MIN_FONT_SIZE) {
+			Rectangle2D textBounds = getBounds(g, gCostText);
+			g.setColor(cellTextColor.apply(cell));
+			g.drawString(gCostText, (int) (cellSize.getAsInt() - textBounds.getWidth()) / 2,
+					(int) (cellSize.getAsInt() + textBounds.getHeight() - g.getFontMetrics().getDescent()) / 2);
+		}
 	}
 }

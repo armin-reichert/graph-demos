@@ -354,11 +354,12 @@ public class MapView extends JPanel {
 				return MEETING_POINT_BACKGROUND;
 			}
 		}
-		if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED
-				&& getPathFinder().getNextVertex().isPresent()
-				&& cell == getPathFinder().getNextVertex().getAsInt()) {
-			return NEXT_CELL_BACKGROUND;
-		}
+		//TODO this code causes strange exceptions
+//		if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED
+//				&& getPathFinder().getNextVertex().isPresent()
+//				&& cell == getPathFinder().getNextVertex().getAsInt()) {
+//			return NEXT_CELL_BACKGROUND;
+//		}
 		if (getPathFinder().getState(cell) == TraversalState.COMPLETED) {
 			return COMPLETED_CELL_BACKGROUND;
 		}

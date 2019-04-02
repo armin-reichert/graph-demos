@@ -23,6 +23,8 @@ import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 
 public abstract class MapCell implements GridCellRenderer {
+	
+	public static final int MIN_FONT_SIZE = 8;
 
 	public Function<Integer, Integer> parent;
 	public BooleanSupplier showCost;
@@ -37,10 +39,11 @@ public abstract class MapCell implements GridCellRenderer {
 		return value == INFINITE_COST ? "\u221e" : String.format("%.0f", factor * value);
 	}
 
-	protected void textSize(Graphics2D g, int percent) {
+	protected int adjustFontSize(Graphics2D g, float fraction) {
 		Font baseFont = new Font(fontFamily, Font.PLAIN, 10);
-		float size = (float) cellSize.getAsInt() * percent / 100;
+		float size = fraction * cellSize.getAsInt();
 		g.setFont(baseFont.deriveFont(size));
+		return (int) size;
 	}
 
 	protected Rectangle2D getBounds(Graphics2D g, String text) {

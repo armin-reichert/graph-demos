@@ -32,23 +32,26 @@ public class FGH_Cell extends MapCell {
 
 		// G-value
 		String gValueText = formatScaledValue(gValue.apply(cell), 10);
-		textSize(g, 30);
-		textBounds = getBounds(g, gValueText);
-		g.setColor(textColor);
-		g.drawString(gValueText, margin, (int) textBounds.getHeight());
+		if (adjustFontSize(g, 0.3f) >= MIN_FONT_SIZE) {
+			textBounds = getBounds(g, gValueText);
+			g.setColor(textColor);
+			g.drawString(gValueText, margin, (int) textBounds.getHeight());
+		}
 
 		// H-value
 		String hValueText = formatScaledValue(hValue.apply(cell), 10);
-		textSize(g, 30);
-		textBounds = getBounds(g, hValueText);
-		g.setColor(textColor);
-		g.drawString(hValueText, (int) (cs - textBounds.getWidth() - margin), (int) textBounds.getHeight());
+		if (adjustFontSize(g, 0.3f) >= MIN_FONT_SIZE) {
+			textBounds = getBounds(g, hValueText);
+			g.setColor(textColor);
+			g.drawString(hValueText, (int) (cs - textBounds.getWidth() - margin), (int) textBounds.getHeight());
+		}
 
 		// F-value
 		String fValueText = formatScaledValue(fValue.apply(cell), 10);
-		textSize(g, showParent.getAsBoolean() ? 30 : 50);
-		textBounds = getBounds(g, fValueText);
-		g.setColor(textColor);
-		g.drawString(fValueText, (int) (cs - textBounds.getWidth()) / 2, cs - margin);
+		if (adjustFontSize(g, showParent.getAsBoolean() ? 0.3f : 0.5f) >= MIN_FONT_SIZE) {
+			textBounds = getBounds(g, fValueText);
+			g.setColor(textColor);
+			g.drawString(fValueText, (int) (cs - textBounds.getWidth()) / 2, cs - margin);
+		}
 	}
 }
