@@ -3,21 +3,14 @@ package de.amr.demos.graph.pathfinding.controller;
 import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
-import java.util.Optional;
-
-import javax.swing.SwingWorker;
-
-import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
-import de.amr.demos.graph.pathfinding.view.MapView;
-import de.amr.demos.graph.pathfinding.view.MapView.PathFinderAnimation;
 import de.amr.demos.graph.pathfinding.view.ConfigurationView;
-import de.amr.graph.core.api.TraversalState;
+import de.amr.demos.graph.pathfinding.view.MapView;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
-import de.amr.graph.pathfinder.api.GraphSearch;
+import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
 
 /**
@@ -28,89 +21,87 @@ import de.amr.graph.pathfinder.api.Path;
 public class PathFinderController {
 
 	private final PathFinderModel model;
-	private ConfigurationView pathFinderView;
-	private MapView mapView;
+	private int leftPathFinderIndex;
+	private int rightPathFinderIndex;
+
+	private final ConfigurationView configurationView;
+	private final MapView leftMapView;
+	private final MapView rightMapView;
 
 	// controller state
-	private PathFinderAlgorithm algorithm;
+	private RenderingStyle style;
 	private ExecutionMode executionMode;
 	private int animationDelay;
-	private RenderingStyle style;
 	private boolean showingCost;
 	private boolean showingParent;
 
-	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
-
-		@Override
-		protected Void doInBackground() throws Exception {
-			PathFinderAnimation animation = mapView.new PathFinderAnimation();
-			animation.setFnDelay(() -> (int) Math.sqrt(animationDelay));
-			model.runPathFinder(algorithm, animation);
-			return null;
-		}
-
-		@Override
-		protected void done() {
-			mapView.updateView();
-		}
-	}
-
-	public PathFinderController(PathFinderModel model) {
+	public PathFinderController(PathFinderModel model, int leftPathFinderIndex, int rightPathFinderIndex) {
 		this.model = model;
-		algorithm = PathFinderAlgorithm.values()[0];
+		this.leftPathFinderIndex = leftPathFinderIndex;
+		this.rightPathFinderIndex = rightPathFinderIndex;
 		style = RenderingStyle.BLOCKS;
 		executionMode = ExecutionMode.MANUAL;
 		animationDelay = 0;
 		showingCost = true;
 		showingParent = false;
+		configurationView = new ConfigurationView();
+		leftMapView = new MapView();
+		leftMapView.init(model, this, this::getLeftPathFinderIndex);
+		rightMapView = new MapView();
+		rightMapView.init(model, this, this::getRightPathFinderIndex);
+	}
+
+	public int getLeftPathFinderIndex() {
+		return leftPathFinderIndex;
+	}
+
+	public int getRightPathFinderIndex() {
+		return rightPathFinderIndex;
+	}
+
+	public ObservableGraphSearch getLeftPathFinder() {
+		return model.getPathFinder(leftPathFinderIndex);
+	}
+
+	public ObservableGraphSearch getRightPathFinder() {
+		return model.getPathFinder(rightPathFinderIndex);
+	}
+
+	public void changeLeftPathFinder(int pathFinderIndex) {
+		leftPathFinderIndex = pathFinderIndex;
+		updatePathFinderResults();
+	}
+
+	public void changeRightPathFinder(int pathFinderIndex) {
+		rightPathFinderIndex = pathFinderIndex;
+		updatePathFinderResults();
+	}
+
+	public MapView getLeftMapView() {
+		return leftMapView;
+	}
+
+	public MapView getRightMapView() {
+		return rightMapView;
+	}
+
+	public ConfigurationView getConfigurationView() {
+		return configurationView;
 	}
 
 	private void updateViews() {
-		if (pathFinderView != null) {
-			pathFinderView.updateView();
-		}
-		if (mapView != null) {
-			mapView.updateView();
-		}
+		configurationView.updateView();
+		leftMapView.updateView();
+		rightMapView.updateView();
 	}
 
-	private void fireMapChange() {
-		if (mapView != null) {
-			mapView.updateMap(model.getMap());
-		}
-	}
-
-	public Optional<ConfigurationView> getMainView() {
-		return Optional.ofNullable(pathFinderView);
-	}
-
-	public Optional<MapView> getMapView() {
-		return Optional.ofNullable(mapView);
-	}
-
-	public void setPathFinderView(ConfigurationView view) {
-		this.pathFinderView = view;
-		pathFinderView.init(model, this);
-	}
-
-	public void setMapView(MapView mapView) {
-		this.mapView = mapView;
-		mapView.init(model, this);
-	}
-
-	public PathFinderAlgorithm getSelectedAlgorithm() {
-		return algorithm;
+	private void updateMaps() {
+		leftMapView.updateMap();
+		rightMapView.updateMap();
 	}
 
 	public ExecutionMode getExecutionMode() {
 		return executionMode;
-	}
-
-	public int getMapCellSize() {
-		if (mapView != null) {
-			return mapView.getCanvas().getCellSize();
-		}
-		return 8; // TODO
 	}
 
 	public RenderingStyle getStyle() {
@@ -120,15 +111,20 @@ public class PathFinderController {
 	public void updatePathFinderResults() {
 		switch (executionMode) {
 		case MANUAL:
+			model.clearResult(leftPathFinderIndex);
+			model.clearResult(rightPathFinderIndex);
+			getLeftPathFinder().start(model.getSource(), model.getTarget());
+			getRightPathFinder().start(model.getSource(), model.getTarget());
 			break;
-		case AUTO_SELECTED:
-			model.runPathFinder(algorithm);
+		case VISIBLE:
+			model.clearResult(leftPathFinderIndex);
+			model.clearResult(rightPathFinderIndex);
+			leftMapView.runPathFinderAnimation();
+			rightMapView.runPathFinderAnimation();
 			break;
-		case AUTO_ALL:
+		case ALL:
 			model.runAllPathFinders();
 			break;
-		default:
-			throw new IllegalStateException("Illegal execution mode: " + executionMode);
 		}
 		updateViews();
 	}
@@ -139,82 +135,86 @@ public class PathFinderController {
 		return animationDelay;
 	}
 
-	public void setAnimationDelay(int animationDelay) {
+	public synchronized void setAnimationDelay(int animationDelay) {
 		this.animationDelay = animationDelay;
 	}
 
-	public void runPathFinderAnimation() {
-		model.clearResult(algorithm);
-		mapView.updateView();
-		new PathFinderAnimationTask().execute();
+	public void runPathFinderAnimations() {
+		model.clearResult(leftPathFinderIndex);
+		model.clearResult(rightPathFinderIndex);
+		leftMapView.updateView();
+		rightMapView.updateView();
+		leftMapView.runPathFinderAnimation();
+		rightMapView.runPathFinderAnimation();
 	}
 
 	// step-wise execution
 
-	public void startSelectedPathFinder() {
-		model.clearResult(algorithm);
-		GraphSearch pf = model.getPathFinder(algorithm);
-		pf.start(model.getSource(), model.getTarget());
+	public void startPathFinders() {
+		startPathFinder(leftPathFinderIndex);
+		startPathFinder(rightPathFinderIndex);
 		updateViews();
 	}
 
-	public Path runSelectedPathFinderSteps(int numSteps) {
-			GraphSearch pf = model.getPathFinder(algorithm);
-			if (pf.getState(model.getSource()) == TraversalState.UNVISITED) {
-				startSelectedPathFinder();
-			}
-			for (int n = numSteps; n > 0 && pf.canExplore(); --n) {
-				boolean found = pf.exploreVertex();
-				if (found) {
-					Path path = pf.buildPath(model.getTarget());
-					model.setResult(algorithm, path, 0);
-					mapView.updateView();
-					return path; // found path
-				}
-			}
-			mapView.updateView();
-			return Path.NULL;
+	private void startPathFinder(int pathFinder) {
+		model.clearResult(pathFinder);
+		model.getPathFinder(pathFinder).start(model.getSource(), model.getTarget());
 	}
 
-	public Path finishSelectedPathFinder() {
-		return runSelectedPathFinderSteps(Integer.MAX_VALUE);
+	public Path[] runPathFinderSteps(int numSteps) {
+		Path leftPath = runPathFinderSteps(leftPathFinderIndex, true, numSteps);
+		Path rightPath = runPathFinderSteps(rightPathFinderIndex, false, numSteps);
+		return new Path[] { leftPath, rightPath };
+	}
+
+	private Path runPathFinderSteps(int i, boolean left, int numSteps) {
+		ObservableGraphSearch pathFinder = model.getPathFinder(i);
+		for (int n = numSteps; n > 0 && pathFinder.canExplore(); --n) {
+			boolean found = pathFinder.exploreVertex();
+			if (found) {
+				Path path = pathFinder.buildPath(model.getTarget());
+				model.setResult(pathFinder, path, 0);
+				(left ? leftMapView : rightMapView).updateView();
+				return path; // found path
+			}
+		}
+		leftMapView.updateView();
+		return Path.NULL;
+	}
+
+	public Path[] finishPathFinders() {
+		return runPathFinderSteps(Integer.MAX_VALUE);
 	}
 
 	// other actions
 
 	public void resetScene() {
 		model.clearMap();
-		fireMapChange();
-		updatePathFinderResults();
-	}
-
-	public void selectAlgorithm(PathFinderAlgorithm algorithm) {
-		this.algorithm = algorithm;
-		model.clearResult(algorithm);
-		model.getPathFinder(algorithm).start(model.getSource(), model.getTarget());
-		updatePathFinderResults();
-	}
-
-	public void selectExecutionMode(ExecutionMode executionMode) {
-		this.executionMode = executionMode;
 		model.clearResults();
+		updateMaps();
 		updatePathFinderResults();
 	}
 
-	public void selectMapSize(int size) {
+	public void changeExecutionMode(ExecutionMode executionMode) {
+		this.executionMode = executionMode;
+		updatePathFinderResults();
+	}
+
+	public void changeMapSize(int size) {
 		model.setMapSize(size);
-		fireMapChange();
-		model.clearResult(algorithm);
+		model.clearResults();
+		updateMaps();
 		updatePathFinderResults();
 	}
 
-	public void selectTopology(TopologySelection topology) {
+	public void changeTopology(TopologySelection topology) {
 		model.setMapTopology(topology == TopologySelection._4_NEIGHBORS ? Top4.get() : Top8.get());
-		fireMapChange();
+		model.clearResults();
+		updateMaps();
 		updatePathFinderResults();
 	}
 
-	public void selectStyle(RenderingStyle style) {
+	public void changeStyle(RenderingStyle style) {
 		this.style = style;
 		updateViews();
 	}
@@ -239,20 +239,17 @@ public class PathFinderController {
 
 	public void setSource(int source) {
 		model.setSource(source);
-		model.clearResult(algorithm);
 		updatePathFinderResults();
 	}
 
 	public void setTarget(int target) {
 		model.setTarget(target);
-		model.clearResult(algorithm);
 		updatePathFinderResults();
 	}
 
 	public void setTileAt(int cell, Tile tile) {
 		if (cell != model.getSource() && cell != model.getTarget()) {
 			model.setMapContent(cell, tile);
-			model.clearResult(algorithm);
 			updatePathFinderResults();
 		}
 	}

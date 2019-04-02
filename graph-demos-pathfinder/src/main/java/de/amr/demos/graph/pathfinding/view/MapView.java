@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
+import java.util.function.IntSupplier;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -20,9 +21,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
-import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
@@ -36,7 +37,6 @@ import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsMapRenderer;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
-import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.grid.ui.animation.AbstractAnimation;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
@@ -49,7 +49,7 @@ import de.amr.graph.pathfinder.impl.BidiAStarSearch;
 import de.amr.graph.pathfinder.impl.BidiGraphSearch;
 
 /**
- * View showing the map and the information from the currently selected path finder.
+ * Displays the map together with the information computed during the path finder execution.
  * 
  * @author Armin Reichert
  */
@@ -60,6 +60,27 @@ public class MapView extends JPanel {
 	private MouseController mouse;
 	private JPopupMenu contextMenu;
 	private GridCanvas canvas;
+	private IntSupplier fnPathFinderIndex;
+
+	private int getPathFinderIndex() {
+		return fnPathFinderIndex.getAsInt();
+	}
+
+	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			PathFinderAnimation animation = new PathFinderAnimation();
+			animation.setFnDelay(() -> (int) Math.sqrt(controller.getAnimationDelay()));
+			model.runPathFinder(getPathFinderIndex(), animation);
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			updateView();
+		}
+	}
 
 	public class PathFinderAnimation extends AbstractAnimation implements GraphSearchObserver {
 
@@ -184,36 +205,39 @@ public class MapView extends JPanel {
 		add(canvas);
 	}
 
-	public void init(PathFinderModel model, PathFinderController controller) {
+	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex) {
 		this.model = model;
 		this.controller = controller;
+		this.fnPathFinderIndex = fnPathFinderIndex;
 		mouse = new MouseController();
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
 		createContextMenu();
-		int height = Toolkit.getDefaultToolkit().getScreenSize().height * 85 / 100;
-		setSize(height, height);
-		setPreferredSize(new Dimension(height, height));
-		updateMap(model.getMap());
+		int size = Toolkit.getDefaultToolkit().getScreenSize().width * 33 / 100;
+		setSize(size, size);
+		setPreferredSize(new Dimension(size, size));
+		updateMap();
+	}
+
+	public void runPathFinderAnimation() {
+		new PathFinderAnimationTask().execute();
 	}
 
 	public void updateView() {
 		canvas.clear();
-		canvas.replaceRenderer(createMapRenderer(controller.getSelectedAlgorithm(), controller.getStyle()));
+		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
 	}
 
-	public void updateMap(GridGraph<?, ?> grid) {
+	public void updateMap() {
 		int cellSize = getHeight() / model.getMapSize();
 		canvas.setCellSize(cellSize, false);
 		canvas.setGrid(model.getMap(), false);
-		canvas.replaceRenderer(createMapRenderer(controller.getSelectedAlgorithm(), controller.getStyle()));
-		canvas.clear();
-		canvas.drawGrid();
+		updateView();
 	}
 
-	public GridCanvas getCanvas() {
-		return canvas;
+	public ObservableGraphSearch getPathFinder() {
+		return model.getPathFinder(getPathFinderIndex());
 	}
 
 	// Context menu
@@ -258,11 +282,11 @@ public class MapView extends JPanel {
 	private static final Color VISITED_CELL_BACKGROUND = Color.YELLOW;
 	private static final Color COMPLETED_CELL_BACKGROUND = Color.ORANGE;
 
-	private GridRenderer createMapRenderer(PathFinderAlgorithm algorithm, RenderingStyle style) {
-		ObservableGraphSearch pathFinder = model.getPathFinder(algorithm);
+	private GridRenderer createMapRenderer() {
+		RenderingStyle style = controller.getStyle();
 		if (style == RenderingStyle.BLOCKS) {
-			MapCell cell = createMapCell(controller.getSelectedAlgorithm());
-			cell.parent = pathFinder::getParent;
+			MapCell cell = createMapCell();
+			cell.parent = getPathFinder()::getParent;
 			cell.showCost = controller::isShowingCost;
 			cell.showParent = controller::isShowingParent;
 			cell.cellTextColor = this::computeTextColor;
@@ -290,29 +314,28 @@ public class MapView extends JPanel {
 		throw new IllegalArgumentException("Unknown style: " + style);
 	}
 
-	private MapCell createMapCell(PathFinderAlgorithm algorithm) {
-		switch (algorithm) {
-		case AStar:
-			return new FGH_Cell(cell -> ((AStarSearch) model.getPathFinder(algorithm)).getScore(cell),
-					cell -> ((AStarSearch) model.getPathFinder(algorithm)).getCost(cell),
-					cell -> ((AStarSearch) model.getPathFinder(algorithm)).getEstimatedCost(cell));
-		case BidiAStar:
-			return new FGH_Cell(cell -> ((BidiAStarSearch) model.getPathFinder(algorithm)).getScore(cell),
-					cell -> ((BidiAStarSearch) model.getPathFinder(algorithm)).getCost(cell),
-					cell -> ((BidiAStarSearch) model.getPathFinder(algorithm)).getEstimatedCost(cell));
-		case GreedyBestFirst:
-			return new GH_Cell(cell -> model.getPathFinder(algorithm).getCost(cell),
-					cell -> ((BestFirstSearch) model.getPathFinder(algorithm)).getEstimatedCost(cell));
-		default:
-			return new G_Cell(cell -> model.getPathFinder(algorithm).getCost(cell));
+	private MapCell createMapCell() {
+		if (getPathFinder().getClass() == AStarSearch.class) {
+			AStarSearch pathFinder = (AStarSearch) getPathFinder();
+			return new FGH_Cell(cell -> pathFinder.getScore(cell), cell -> pathFinder.getCost(cell),
+					cell -> pathFinder.getEstimatedCost(cell));
 		}
+		if (getPathFinder().getClass() == BidiAStarSearch.class) {
+			BidiAStarSearch pathFinder = (BidiAStarSearch) getPathFinder();
+			return new FGH_Cell(cell -> pathFinder.getScore(cell), cell -> pathFinder.getCost(cell),
+					cell -> pathFinder.getEstimatedCost(cell));
+		}
+		if (getPathFinder().getClass() == BestFirstSearch.class) {
+			BestFirstSearch pathFinder = (BestFirstSearch) getPathFinder();
+			return new GH_Cell(cell -> pathFinder.getCost(cell), cell -> pathFinder.getEstimatedCost(cell));
+		}
+		return new G_Cell(cell -> getPathFinder().getCost(cell));
 	}
 
 	private Color computeCellBackground(int cell) {
 		if (cell < 0 || cell >= model.getMap().numVertices()) {
 			throw new IllegalArgumentException("Illegal cell " + cell);
 		}
-		GraphSearch pathFinder = model.getPathFinder(controller.getSelectedAlgorithm());
 		if (model.getMap().get(cell) == Tile.WALL) {
 			return WALL_BACKGROUND;
 		}
@@ -325,20 +348,21 @@ public class MapView extends JPanel {
 		if (partOfSolution(cell)) {
 			return SOLUTION_BACKGROUND;
 		}
-		if (pathFinder instanceof BidiGraphSearch) {
-			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) pathFinder;
+		if (getPathFinder() instanceof BidiGraphSearch) {
+			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) getPathFinder();
 			if (cell == bidi.getMeetingPoint()) {
 				return MEETING_POINT_BACKGROUND;
 			}
 		}
-		if (pathFinder.getState(model.getTarget()) == TraversalState.UNVISITED
-				&& pathFinder.getNextVertex().isPresent() && cell == pathFinder.getNextVertex().getAsInt()) {
+		if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED
+				&& getPathFinder().getNextVertex().isPresent()
+				&& cell == getPathFinder().getNextVertex().getAsInt()) {
 			return NEXT_CELL_BACKGROUND;
 		}
-		if (pathFinder.getState(cell) == TraversalState.COMPLETED) {
+		if (getPathFinder().getState(cell) == TraversalState.COMPLETED) {
 			return COMPLETED_CELL_BACKGROUND;
 		}
-		if (pathFinder.getState(cell) == TraversalState.VISITED) {
+		if (getPathFinder().getState(cell) == TraversalState.VISITED) {
 			return VISITED_CELL_BACKGROUND;
 		}
 		return UNVISITED_CELL_BACKGROUND;
@@ -354,18 +378,17 @@ public class MapView extends JPanel {
 		if (partOfSolution(cell)) {
 			return SOLUTION_FOREGROUND;
 		}
-		GraphSearch pathFinder = model.getPathFinder(controller.getSelectedAlgorithm());
-		if (pathFinder instanceof BidiGraphSearch) {
-			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) pathFinder;
+		if (getPathFinder() instanceof BidiGraphSearch) {
+			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) getPathFinder();
 			if (cell == bidi.getMeetingPoint()) {
 				return MEETING_POINT_FOREGROUND;
 			}
 		}
-		return pathFinder.getState(cell) == TraversalState.UNVISITED ? Color.LIGHT_GRAY : Color.BLUE;
+		return getPathFinder().getState(cell) == TraversalState.UNVISITED ? Color.LIGHT_GRAY : Color.BLUE;
 	}
 
 	private boolean partOfSolution(int cell) {
-		Optional<PathFinderResult> result = model.getResult(controller.getSelectedAlgorithm());
+		Optional<PathFinderResult> result = model.getResult(getPathFinder());
 		if (result.isPresent()) {
 			return result.get().pathContains(cell);
 		}
@@ -391,7 +414,7 @@ public class MapView extends JPanel {
 
 		@Override
 		public GraphSearch getPathFinder() {
-			return model.getPathFinder(controller.getSelectedAlgorithm());
+			return MapView.this.getPathFinder();
 		}
 
 		@Override

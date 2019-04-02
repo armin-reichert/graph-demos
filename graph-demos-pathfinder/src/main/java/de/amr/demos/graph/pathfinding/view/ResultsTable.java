@@ -1,6 +1,7 @@
 package de.amr.demos.graph.pathfinding.view;
 
 import java.awt.Component;
+import java.util.Optional;
 import java.util.function.Function;
 
 import javax.swing.JTable;
@@ -10,7 +11,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
+import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
+import de.amr.graph.pathfinder.impl.AStarSearch;
 
 /**
  * Table with path finder results.
@@ -95,11 +98,10 @@ public class ResultsTable extends JTable {
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
-			PathFinderAlgorithm algorithm = PathFinderAlgorithm.values()[rowIndex];
-			PathFinderResult result = model.getResult(algorithm).orElse(PathFinderResult.NO_RESULT);
+			PathFinderResult result = model.getResult(rowIndex);
 			switch (columnIndex) {
 			case 0:
-				return algorithm;
+				return result.getPathFinderName();
 			case 1:
 				return result.getRunningTimeMillis();
 			case 2:
@@ -107,9 +109,10 @@ public class ResultsTable extends JTable {
 			case 3:
 				return result.getCost();
 			case 4:
-				if (model.getResult(PathFinderAlgorithm.AStar).isPresent()) {
+				Optional<ObservableGraphSearch> astar = model.getPathFinderByClass(AStarSearch.class);
+				if (astar.isPresent()) {
 					double cost = result.getCost();
-					double optimum = model.getResult(PathFinderAlgorithm.AStar).get().getCost();
+					double optimum = model.getResult(astar.get()).get().getCost();
 					if (cost != 0 && optimum != 0) {
 						return 100 * (result.getCost() - optimum) / optimum;
 					}

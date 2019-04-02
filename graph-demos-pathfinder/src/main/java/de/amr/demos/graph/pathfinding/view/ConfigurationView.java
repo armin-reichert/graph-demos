@@ -31,7 +31,6 @@ import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.graph.grid.impl.Top4;
-import de.amr.graph.pathfinder.api.Path;
 import net.miginfocom.swing.MigLayout;
 
 /**
@@ -41,15 +40,10 @@ import net.miginfocom.swing.MigLayout;
  */
 public class ConfigurationView extends JPanel {
 
-	private static <T> T selection(JComboBox<T> combo) {
-		return combo.getItemAt(combo.getSelectedIndex());
-	}
-
-	private Action actionSelectAlgorithm = new AbstractAction("Select Algorithm") {
+	private Action actionNone = new AbstractAction() {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.selectAlgorithm(selection(comboAlgorithm));
 		}
 	};
 
@@ -57,7 +51,23 @@ public class ConfigurationView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.selectTopology(selection(comboTopology));
+			controller.changeTopology(selection(comboTopology));
+		}
+	};
+
+	private Action actionSelectAlgorithmLeft = new AbstractAction("Select Left Algorithm") {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			controller.changeLeftPathFinder(comboAlgorithmLeft.getSelectedIndex());
+		}
+	};
+
+	private Action actionSelectAlgorithmRight = new AbstractAction("Select Right Algorithm") {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			controller.changeRightPathFinder(comboAlgorithmRight.getSelectedIndex());
 		}
 	};
 
@@ -65,7 +75,7 @@ public class ConfigurationView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.selectExecutionMode(selection(comboExecutionMode));
+			controller.changeExecutionMode(selection(comboExecutionMode));
 		}
 	};
 
@@ -73,15 +83,15 @@ public class ConfigurationView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.selectStyle(selection(comboStyle));
+			controller.changeStyle(selection(comboStyle));
 		}
 	};
 
-	private Action actionRunSelectedPathFinderAnimation = new AbstractAction("Animate") {
+	private Action actionRunPathFinderAnimations = new AbstractAction("Animate") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.runPathFinderAnimation();
+			controller.runPathFinderAnimations();
 		}
 	};
 
@@ -89,34 +99,28 @@ public class ConfigurationView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.startSelectedPathFinder();
+			controller.startPathFinders();
 			updateViewState();
-			actionStepSelectedPathFinder.setEnabled(true);
-			actionFinishSelectedPathFinder.setEnabled(true);
 		}
 	};
 
-	private Action actionStepSelectedPathFinder = new AbstractAction("Steps") {
+	private Action actionStepPathFinders = new AbstractAction("Steps") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JComponent source = (JComponent) e.getSource();
 			int numSteps = (Integer) source.getClientProperty("numSteps");
-			Path path = controller.runSelectedPathFinderSteps(numSteps);
+			controller.runPathFinderSteps(numSteps);
 			updateViewState();
-			setEnabled(path == Path.NULL);
-			actionFinishSelectedPathFinder.setEnabled(path == Path.NULL);
 		}
 	};
 
-	private Action actionFinishSelectedPathFinder = new AbstractAction("Finish") {
+	private Action actionFinishPathFinders = new AbstractAction("Finish") {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.finishSelectedPathFinder();
+			controller.finishPathFinders();
 			updateViewState();
-			setEnabled(false);
-			actionStepSelectedPathFinder.setEnabled(false);
 		}
 	};
 
@@ -141,7 +145,7 @@ public class ConfigurationView extends JPanel {
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			int newSize = (int) spinnerMapSize.getValue();
-			controller.selectMapSize(newSize);
+			controller.changeMapSize(newSize);
 		}
 	};
 
@@ -150,7 +154,6 @@ public class ConfigurationView extends JPanel {
 
 	private JPanel panelActions;
 	private JSpinner spinnerMapSize;
-	private JComboBox<PathFinderAlgorithm> comboAlgorithm;
 	private JComboBox<TopologySelection> comboTopology;
 	private JComboBox<ExecutionMode> comboExecutionMode;
 	private ResultsTable tableResults;
@@ -167,6 +170,8 @@ public class ConfigurationView extends JPanel {
 	private JPanel panel_1;
 	private JLabel lblNewLabel;
 	private JLabel lblTotalCells;
+	private JComboBox<String> comboAlgorithmRight;
+	private JComboBox<String> comboAlgorithmLeft;
 
 	public ConfigurationView() {
 		setBackground(Color.WHITE);
@@ -203,6 +208,12 @@ public class ConfigurationView extends JPanel {
 		lblMapSize.setLabelFor(spinnerMapSize);
 		panelActions.add(spinnerMapSize, "flowx,cell 1 1");
 
+		comboAlgorithmLeft = new JComboBox<>();
+		panelActions.add(comboAlgorithmLeft, "flowx,cell 1 6,growx");
+
+		comboAlgorithmRight = new JComboBox<>();
+		panelActions.add(comboAlgorithmRight, "cell 1 6,growx");
+
 		lblNewLabel = new JLabel("Execution Mode");
 		panelActions.add(lblNewLabel, "cell 0 7,alignx trailing");
 
@@ -223,42 +234,38 @@ public class ConfigurationView extends JPanel {
 		panel.add(btnStart);
 
 		JButton btnStep1 = new JButton();
-		btnStep1.setAction(actionStepSelectedPathFinder);
+		btnStep1.setAction(actionStepPathFinders);
 		btnStep1.putClientProperty("numSteps", 1);
 		btnStep1.setText("+1");
 		panel.add(btnStep1);
 
 		JButton btnSteps5 = new JButton();
-		btnSteps5.setAction(actionStepSelectedPathFinder);
+		btnSteps5.setAction(actionStepPathFinders);
 		btnSteps5.putClientProperty("numSteps", 5);
 		btnSteps5.setText("+5");
 		panel.add(btnSteps5);
 
 		JButton btnSteps10 = new JButton();
-		btnSteps10.setAction(actionStepSelectedPathFinder);
+		btnSteps10.setAction(actionStepPathFinders);
 		btnSteps10.putClientProperty("numSteps", 10);
 		btnSteps10.setText("+10");
 		panel.add(btnSteps10);
 
 		JButton btnSteps50 = new JButton();
-		btnSteps50.setAction(actionStepSelectedPathFinder);
+		btnSteps50.setAction(actionStepPathFinders);
 		btnSteps50.putClientProperty("numSteps", 50);
 		btnSteps50.setText("+50");
 		panel.add(btnSteps50);
 
 		btnFinish = new JButton();
-		btnFinish.setAction(actionFinishSelectedPathFinder);
+		btnFinish.setAction(actionFinishPathFinders);
 		panel.add(btnFinish);
 
 		lblAnimation = new JLabel("Animated Execution");
 		panelActions.add(lblAnimation, "cell 0 9,alignx trailing,aligny center");
 
-		JLabel lblAlgorithm = new JLabel("Algorithm");
+		JLabel lblAlgorithm = new JLabel("Algorithms");
 		panelActions.add(lblAlgorithm, "cell 0 6,alignx trailing");
-
-		comboAlgorithm = new JComboBox<>();
-		lblAlgorithm.setLabelFor(comboAlgorithm);
-		panelActions.add(comboAlgorithm, "cell 1 6,growx");
 
 		JLabel lblTopology = new JLabel("Topology");
 		panelActions.add(lblTopology, "flowy,cell 0 2,alignx trailing");
@@ -299,7 +306,7 @@ public class ConfigurationView extends JPanel {
 		JButton btnRun = new JButton();
 		lblAnimation.setLabelFor(btnRun);
 		panel_1.add(btnRun, "cell 0 0,aligny center");
-		btnRun.setAction(actionRunSelectedPathFinderAnimation);
+		btnRun.setAction(actionRunPathFinderAnimations);
 		btnRun.setText("Run");
 
 		sliderDelay = new JSlider();
@@ -312,21 +319,34 @@ public class ConfigurationView extends JPanel {
 		panelActions.add(lblTotalCells, "cell 1 1");
 	}
 
+	private static <T> T selection(JComboBox<T> combo) {
+		return combo.getItemAt(combo.getSelectedIndex());
+	}
+
+	// TODO hack to avoid firing action events
+	private void selectComboNoAction(JComboBox<?> combo, int index) {
+		Action action = combo.getAction();
+		combo.setAction(actionNone);
+		combo.setSelectedIndex(index);
+		combo.setAction(action);
+	}
+
 	public void updateView() {
 		tableResults.dataChanged();
-		lblTotalCells.setText(String.format("(%d cells - %d px/cell)", model.getMapSize() * model.getMapSize(),
-				controller.getMapCellSize()));
+		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
+		selectComboNoAction(comboAlgorithmLeft, controller.getLeftPathFinderIndex());
+		selectComboNoAction(comboAlgorithmRight, controller.getRightPathFinderIndex());
 		updateViewState();
 	}
 
 	private void updateViewState() {
-		boolean manual = comboExecutionMode.getSelectedItem() == ExecutionMode.MANUAL;
+		boolean manual = controller.getExecutionMode() == ExecutionMode.MANUAL;
 		actionStartSelectedPathFinder.setEnabled(manual);
-		actionStepSelectedPathFinder.setEnabled(manual);
-		actionFinishSelectedPathFinder.setEnabled(manual);
-		actionRunSelectedPathFinderAnimation.setEnabled(manual);
+		actionStepPathFinders.setEnabled(manual);
+		actionFinishPathFinders.setEnabled(manual);
+		actionRunPathFinderAnimations.setEnabled(manual);
 		sliderDelay.setEnabled(manual);
-		scrollPaneTableResults.setVisible(!manual);
+		scrollPaneTableResults.setVisible(controller.getExecutionMode() == ExecutionMode.ALL);
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
@@ -360,9 +380,13 @@ public class ConfigurationView extends JPanel {
 				: TopologySelection._8_NEIGHBORS);
 		comboTopology.setAction(actionSelectTopology);
 
-		comboAlgorithm.setModel(new DefaultComboBoxModel<>(PathFinderAlgorithm.values()));
-		comboAlgorithm.setSelectedItem(controller.getSelectedAlgorithm());
-		comboAlgorithm.setAction(actionSelectAlgorithm);
+		comboAlgorithmLeft.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
+		comboAlgorithmLeft.setSelectedIndex(model.getPathFinderIndex(controller.getLeftPathFinder()));
+		comboAlgorithmLeft.setAction(actionSelectAlgorithmLeft);
+
+		comboAlgorithmRight.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
+		comboAlgorithmRight.setSelectedIndex(model.getPathFinderIndex(controller.getRightPathFinder()));
+		comboAlgorithmRight.setAction(actionSelectAlgorithmRight);
 
 		comboExecutionMode.setModel(new DefaultComboBoxModel<>(ExecutionMode.values()));
 		comboExecutionMode.setSelectedItem(controller.getExecutionMode());

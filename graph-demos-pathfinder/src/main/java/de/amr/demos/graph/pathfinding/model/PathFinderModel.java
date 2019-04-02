@@ -2,8 +2,8 @@ package de.amr.demos.graph.pathfinding.model;
 
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -37,12 +37,20 @@ public class PathFinderModel {
 	private GridGraph<Tile, Double> map;
 	private int source;
 	private int target;
-	private Map<PathFinderAlgorithm, PathFinderResult> results = new EnumMap<>(PathFinderAlgorithm.class);
+	private List<PathFinderResult> results;
 
 	public PathFinderModel(int mapSize, Topology topology) {
 		newMap(mapSize, topology);
 		source = map.cell(mapSize / 4, mapSize / 2);
 		target = map.cell(mapSize * 3 / 4, mapSize / 2);
+		results = new ArrayList<>();
+		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
+			results.add(newResult(algorithm));
+		}
+	}
+
+	private PathFinderResult newResult(PathFinderAlgorithm algorithm) {
+		return new PathFinderResult(newPathFinder(algorithm), algorithm.getDisplayName());
 	}
 
 	private ObservableGraphSearch newPathFinder(PathFinderAlgorithm algorithm) {
@@ -54,7 +62,7 @@ public class PathFinderModel {
 		case Dijkstra:
 			return new DijkstraSearch(map, (u, v) -> map.getEdgeLabel(u, v));
 		case GreedyBestFirst:
-			return new BestFirstSearch(map, v -> map.euclidean(v, target), map::euclidean);
+			return new BestFirstSearch(map, v -> map.euclidean(v, getTarget()), map::euclidean);
 		case BidiBFS:
 			return new BidiBreadthFirstSearch(map, map::euclidean);
 		case BidiAStar:
@@ -187,27 +195,42 @@ public class PathFinderModel {
 		}
 	}
 
-	public Optional<PathFinderResult> getResult(PathFinderAlgorithm algorithm) {
-		return Optional.ofNullable(results.get(algorithm));
+	public Optional<PathFinderResult> getResult(ObservableGraphSearch pathFinder) {
+		return results.stream().filter(result -> result.getPathFinder() == pathFinder).findFirst();
 	}
 
-	public void setResult(PathFinderAlgorithm algorithm, Path path, float timeMillis) {
-		ObservableGraphSearch pathFinder = getPathFinder(algorithm);
+	public int numResults() {
+		return results.size();
+	}
+
+	public PathFinderResult getResult(int i) {
+		return results.get(i);
+	}
+
+	public void setResult(ObservableGraphSearch pathFinder, Path path, float timeMillis) {
 		long touched = map.vertices().filter(v -> pathFinder.getState(v) != TraversalState.UNVISITED).count();
 		long closed = map.vertices().filter(v -> pathFinder.getState(v) == TraversalState.COMPLETED).count();
-		results.put(algorithm,
-				new PathFinderResult(pathFinder, path, timeMillis, pathFinder.getCost(target), touched, closed));
+		getResult(pathFinder).ifPresent(result -> {
+			result.setPath(path);
+			result.setRunningTimeMillis(timeMillis);
+			result.setCost(pathFinder.getCost(target));
+			result.setNumTouchedVertices(touched);
+			result.setNumClosedVertices(closed);
+		});
 	}
 
 	public void clearResults() {
-		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
-			clearResult(algorithm);
+		for (int i = 0; i < results.size(); ++i) {
+			clearResult(i);
 		}
 	}
 
-	public void clearResult(PathFinderAlgorithm algorithm) {
-		ObservableGraphSearch pathFinder = newPathFinder(algorithm);
-		results.put(algorithm, new PathFinderResult(pathFinder));
+	public void clearResult(int i) {
+		results.set(i, newResult(getAlgorithm(i)));
+	}
+
+	private PathFinderAlgorithm getAlgorithm(int i) {
+		return PathFinderAlgorithm.values()[i];
 	}
 
 	public int getSource() {
@@ -226,22 +249,37 @@ public class PathFinderModel {
 		this.target = target;
 	}
 
-	public ObservableGraphSearch getPathFinder(PathFinderAlgorithm algorithm) {
-		if (!results.containsKey(algorithm)) {
-			clearResult(algorithm);
+	public Optional<ObservableGraphSearch> getPathFinderByClass(Class<? extends ObservableGraphSearch> clazz) {
+		return results.stream().filter(result -> result.getPathFinder().getClass() == clazz)
+				.map(PathFinderResult::getPathFinder).findFirst();
+	}
+
+	public ObservableGraphSearch getPathFinder(int i) {
+		return results.get(i).getPathFinder();
+	}
+
+	public int getPathFinderIndex(ObservableGraphSearch pathFinder) {
+		for (int i = 0; i < results.size(); i++) {
+			if (results.get(i).getPathFinder() == pathFinder) {
+				return i;
+			}
 		}
-		return results.get(algorithm).getPathFinder();
+		return -1;
+	}
+
+	public String[] getPathFinderNames() {
+		return results.stream().map(PathFinderResult::getPathFinderName).toArray(String[]::new);
 	}
 
 	public void runAllPathFinders() {
-		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
-			runPathFinder(algorithm);
+		for (int i = 0; i < results.size(); ++i) {
+			runPathFinder(i);
 		}
 	}
 
-	public void runPathFinder(PathFinderAlgorithm algorithm, GraphSearchObserver observer) {
-		clearResult(algorithm);
-		ObservableGraphSearch pathFinder = getPathFinder(algorithm);
+	public void runPathFinder(int i, GraphSearchObserver observer) {
+		clearResult(i);
+		ObservableGraphSearch pathFinder = getPathFinder(i);
 		if (observer != null) {
 			pathFinder.addObserver(observer);
 		}
@@ -252,11 +290,10 @@ public class PathFinderModel {
 		if (observer != null) {
 			pathFinder.removeObserver(observer);
 		}
-		setResult(algorithm, path, watch.getNanos() / 1_000_000f);
-
+		setResult(pathFinder, path, watch.getNanos() / 1_000_000f);
 	}
 
-	public void runPathFinder(PathFinderAlgorithm algorithm) {
-		runPathFinder(algorithm, null);
+	public void runPathFinder(int i) {
+		runPathFinder(i, null);
 	}
 }

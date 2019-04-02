@@ -12,18 +12,24 @@ import de.amr.graph.pathfinder.api.Path;
  */
 public class PathFinderResult {
 
-	public static final PathFinderResult NO_RESULT = new PathFinderResult(null);
+	public static final PathFinderResult NO_RESULT = new PathFinderResult(null, "");
 
 	private final ObservableGraphSearch pathFinder;
+	private final String pathFinderName;
 	private Path path;
-	private final BitSet pathSet;
-	private final float runningTimeMillis;
-	private final double cost;
-	private final long numTouchedVertices;
-	private final long numClosedVertices;
+	private BitSet pathSet;
+	private float runningTimeMillis;
+	private double cost;
+	private long numTouchedVertices;
+	private long numClosedVertices;
 
-	PathFinderResult(ObservableGraphSearch pathFinder) {
+	public PathFinderResult(ObservableGraphSearch pathFinder, String pathFinderName) {
 		this.pathFinder = pathFinder;
+		this.pathFinderName = pathFinderName;
+		clear();
+	}
+
+	public void clear() {
 		path = Path.NULL;
 		this.pathSet = new BitSet();
 		this.runningTimeMillis = 0;
@@ -32,20 +38,12 @@ public class PathFinderResult {
 		this.numClosedVertices = 0;
 	}
 
-	PathFinderResult(ObservableGraphSearch pathFinder, Path path, float runningTimeMillis, double cost,
-			long numTouchedVertices, long numClosedVertices) {
-		this.pathFinder = pathFinder;
-		this.path = path;
-		this.pathSet = new BitSet();
-		path.forEach(pathSet::set);
-		this.runningTimeMillis = runningTimeMillis;
-		this.cost = cost;
-		this.numTouchedVertices = numTouchedVertices;
-		this.numClosedVertices = numClosedVertices;
-	}
-
 	public ObservableGraphSearch getPathFinder() {
 		return pathFinder;
+	}
+
+	public String getPathFinderName() {
+		return pathFinderName;
 	}
 
 	public boolean pathContains(int cell) {
@@ -70,5 +68,31 @@ public class PathFinderResult {
 
 	public long getNumClosedVertices() {
 		return numClosedVertices;
+	}
+
+	public Path getPath() {
+		return path;
+	}
+
+	public void setPath(Path path) {
+		this.path = path;
+		pathSet.clear();
+		path.forEach(pathSet::set);
+	}
+
+	public void setRunningTimeMillis(float runningTimeMillis) {
+		this.runningTimeMillis = runningTimeMillis;
+	}
+
+	public void setCost(double cost) {
+		this.cost = cost;
+	}
+
+	public void setNumTouchedVertices(long numTouchedVertices) {
+		this.numTouchedVertices = numTouchedVertices;
+	}
+
+	public void setNumClosedVertices(long numClosedVertices) {
+		this.numClosedVertices = numClosedVertices;
 	}
 }
