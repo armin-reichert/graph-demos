@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.function.BiConsumer;
 import java.util.function.IntSupplier;
 
 import javax.swing.AbstractAction;
@@ -173,25 +174,29 @@ public class MapView extends JPanel {
 		}
 	}
 
-	private Action actionSetSource = new AbstractAction("Search From Here") {
+	// Actions
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			JComponent trigger = (JComponent) e.getSource();
-			GridPosition position = (GridPosition) trigger.getClientProperty("position");
-			controller.setSource(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
-		}
-	};
+	private Action action(String name, BiConsumer<PathFinderController, ActionEvent> handler) {
+		return new AbstractAction(name) {
 
-	private Action actionSetTarget = new AbstractAction("Search To Here") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				handler.accept(controller, e);
+			}
+		};
+	}
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			JComponent trigger = (JComponent) e.getSource();
-			GridPosition position = (GridPosition) trigger.getClientProperty("position");
-			controller.setTarget(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
-		}
-	};
+	private Action actionSetSource = action("Search From Here", (controller, e) -> {
+		JComponent trigger = (JComponent) e.getSource();
+		GridPosition position = (GridPosition) trigger.getClientProperty("position");
+		controller.setSource(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
+	});
+
+	private Action actionSetTarget = action("Search To Here", (controller, e) -> {
+		JComponent trigger = (JComponent) e.getSource();
+		GridPosition position = (GridPosition) trigger.getClientProperty("position");
+		controller.setTarget(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
+	});
 
 	public MapView() {
 		setBackground(Color.WHITE);
@@ -200,6 +205,8 @@ public class MapView extends JPanel {
 		canvas.setBackground(Color.WHITE);
 		add(canvas);
 	}
+
+	// Context menu
 
 	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex,
 			int size) {
@@ -223,8 +230,29 @@ public class MapView extends JPanel {
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('4'), "set4Neighbors");
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('8'), "set8Neighbors");
 
-		createContextMenu();
+		// context menu
+		contextMenu = new JPopupMenu();
+		contextMenu.add(actionSetSource);
+		JMenu sourceMenu = new JMenu("Search From");
+		for (GridPosition position : GridPosition.values()) {
+			JMenuItem item = sourceMenu.add(actionSetSource);
+			item.setText(position.toString());
+			item.putClientProperty("position", position);
+		}
+		contextMenu.add(sourceMenu);
+		contextMenu.addSeparator();
+		contextMenu.add(actionSetTarget);
+		JMenu targetMenu = new JMenu("Search To");
+		for (GridPosition position : GridPosition.values()) {
+			JMenuItem item = targetMenu.add(actionSetTarget);
+			item.setText(position.toString());
+			item.putClientProperty("position", position);
+		}
+		contextMenu.add(targetMenu);
+		contextMenu.addSeparator();
+		contextMenu.add(new ResetScene(controller));
 
+		// initial size
 		setSize(size, size);
 		setPreferredSize(new Dimension(size, size));
 		updateMap();
@@ -252,31 +280,6 @@ public class MapView extends JPanel {
 
 	public ObservableGraphSearch getPathFinder() {
 		return model.getPathFinder(getPathFinderIndex());
-	}
-
-	// Context menu
-
-	private void createContextMenu() {
-		contextMenu = new JPopupMenu();
-		contextMenu.add(actionSetSource);
-		JMenu sourceMenu = new JMenu("Search From");
-		for (GridPosition position : GridPosition.values()) {
-			JMenuItem item = sourceMenu.add(actionSetSource);
-			item.setText(position.toString());
-			item.putClientProperty("position", position);
-		}
-		contextMenu.add(sourceMenu);
-		contextMenu.addSeparator();
-		contextMenu.add(actionSetTarget);
-		JMenu targetMenu = new JMenu("Search To");
-		for (GridPosition position : GridPosition.values()) {
-			JMenuItem item = targetMenu.add(actionSetTarget);
-			item.setText(position.toString());
-			item.putClientProperty("position", position);
-		}
-		contextMenu.add(targetMenu);
-		contextMenu.addSeparator();
-		contextMenu.add(new ResetScene(controller));
 	}
 
 	// Rendering
