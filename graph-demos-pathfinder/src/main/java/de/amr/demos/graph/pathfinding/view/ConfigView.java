@@ -27,6 +27,7 @@ import javax.swing.event.ChangeListener;
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
+import de.amr.demos.graph.pathfinding.controller.action.RunPathFinderAnimations;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.graph.grid.impl.Top4;
@@ -83,14 +84,6 @@ public class ConfigView extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			controller.changeStyle(selection(comboStyle));
-		}
-	};
-
-	private Action actionRunPathFinderAnimations = new AbstractAction("Animate") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.runPathFinderAnimations();
 		}
 	};
 
@@ -163,6 +156,7 @@ public class ConfigView extends JPanel {
 	private JSlider sliderDelay;
 	private JScrollPane scrollPaneTableResults;
 	private HelpPanel helpPanel;
+	private JButton btnRun;
 	private JButton btnFinish;
 	private JLabel lblStepbystep;
 	private JLabel lblAnimation;
@@ -302,10 +296,9 @@ public class ConfigView extends JPanel {
 		panelLayout.add(panel_1, "flowx,cell 2 9,growx,aligny center");
 		panel_1.setLayout(new MigLayout("", "[][grow]", "[]"));
 
-		JButton btnRun = new JButton();
+		btnRun = new JButton();
 		lblAnimation.setLabelFor(btnRun);
 		panel_1.add(btnRun, "cell 0 0,aligny center");
-		btnRun.setAction(actionRunPathFinderAnimations);
 		btnRun.setText("Run");
 
 		sliderDelay = new JSlider();
@@ -344,7 +337,7 @@ public class ConfigView extends JPanel {
 		actionStartSelectedPathFinder.setEnabled(manual);
 		actionStepPathFinders.setEnabled(manual);
 		actionFinishPathFinders.setEnabled(manual);
-		actionRunPathFinderAnimations.setEnabled(manual);
+		btnRun.setEnabled(manual);
 		sliderDelay.setEnabled(manual);
 		scrollPaneTableResults.setVisible(controller.getExecutionMode() == ExecutionMode.ALL);
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
@@ -392,6 +385,8 @@ public class ConfigView extends JPanel {
 
 		cbShowCost.setSelected(controller.isShowingCost());
 		cbShowParent.setSelected(controller.isShowingParent());
+
+		btnRun.setAction(new RunPathFinderAnimations(controller));
 
 		updateViewState();
 	}
