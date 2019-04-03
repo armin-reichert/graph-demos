@@ -27,7 +27,6 @@ import javax.swing.event.ChangeListener;
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
-import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.graph.grid.impl.Top4;
@@ -38,7 +37,7 @@ import net.miginfocom.swing.MigLayout;
  * 
  * @author Armin Reichert
  */
-public class ConfigurationView extends JPanel {
+public class ConfigView extends JPanel {
 
 	private Action actionNone = new AbstractAction() {
 
@@ -152,7 +151,7 @@ public class ConfigurationView extends JPanel {
 	private PathFinderModel model;
 	private PathFinderController controller;
 
-	private JPanel panelActions;
+	private JPanel panelLayout;
 	private JSpinner spinnerMapSize;
 	private JComboBox<TopologySelection> comboTopology;
 	private JComboBox<ExecutionMode> comboExecutionMode;
@@ -173,60 +172,60 @@ public class ConfigurationView extends JPanel {
 	private JComboBox<String> comboAlgorithmRight;
 	private JComboBox<String> comboAlgorithmLeft;
 
-	public ConfigurationView() {
+	public ConfigView() {
 		setBackground(Color.WHITE);
 		setLayout(new BorderLayout(0, 0));
 
-		panelActions = new JPanel();
-		panelActions.setOpaque(false);
-		panelActions.setMinimumSize(new Dimension(550, 10));
-		add(panelActions);
-		panelActions.setLayout(new MigLayout("", "[grow,center][grow]", "[][][][][][][][][][][][grow,bottom]"));
+		panelLayout = new JPanel();
+		panelLayout.setOpaque(false);
+		panelLayout.setMinimumSize(new Dimension(550, 10));
+		add(panelLayout);
+		panelLayout.setLayout(new MigLayout("", "[][10:10:10][]", "[][][][][][][][][][][][grow,bottom]"));
 
 		JLabel lblMap = new JLabel("Map");
-		panelActions.add(lblMap, "cell 0 0 2 1,alignx leading");
+		panelLayout.add(lblMap, "cell 0 0 3 1,alignx leading");
 		lblMap.setForeground(SystemColor.textHighlight);
 		lblMap.setFont(new Font("Arial Black", Font.PLAIN, 14));
 
 		cbShowCost = new JCheckBox("Show Cost");
 		cbShowCost.setAction(actionShowCost);
-		panelActions.add(cbShowCost, "flowx,cell 1 4");
+		panelLayout.add(cbShowCost, "flowx,cell 2 4");
 
 		cbShowParent = new JCheckBox("Show Parent");
 		cbShowParent.setAction(actionShowParent);
-		panelActions.add(cbShowParent, "cell 1 4");
+		panelLayout.add(cbShowParent, "cell 2 4");
 
 		lblPathFinding = new JLabel("Path Finding");
 		lblPathFinding.setForeground(SystemColor.textHighlight);
 		lblPathFinding.setFont(new Font("Arial Black", Font.PLAIN, 14));
-		panelActions.add(lblPathFinding, "cell 0 5 2 1,alignx leading");
+		panelLayout.add(lblPathFinding, "cell 0 5 3 1,alignx leading");
 
 		JLabel lblMapSize = new JLabel("Rows/Cols");
-		panelActions.add(lblMapSize, "cell 0 1,alignx trailing");
+		panelLayout.add(lblMapSize, "cell 0 1,alignx trailing");
 
 		spinnerMapSize = new JSpinner();
 		lblMapSize.setLabelFor(spinnerMapSize);
-		panelActions.add(spinnerMapSize, "flowx,cell 1 1");
+		panelLayout.add(spinnerMapSize, "flowx,cell 2 1");
 
 		comboAlgorithmLeft = new JComboBox<>();
-		panelActions.add(comboAlgorithmLeft, "flowx,cell 1 6,growx");
+		panelLayout.add(comboAlgorithmLeft, "flowx,cell 2 6,growx");
 
 		comboAlgorithmRight = new JComboBox<>();
-		panelActions.add(comboAlgorithmRight, "cell 1 6,growx");
+		panelLayout.add(comboAlgorithmRight, "cell 2 6,growx");
 
 		lblNewLabel = new JLabel("Execution Mode");
-		panelActions.add(lblNewLabel, "cell 0 7,alignx trailing");
+		panelLayout.add(lblNewLabel, "cell 0 7,alignx trailing");
 
 		comboExecutionMode = new JComboBox<>();
 		lblNewLabel.setLabelFor(comboExecutionMode);
-		panelActions.add(comboExecutionMode, "cell 1 7,growx");
+		panelLayout.add(comboExecutionMode, "cell 2 7,growx");
 
-		lblStepbystep = new JLabel("Step-By-Step Execution");
-		panelActions.add(lblStepbystep, "cell 0 8,alignx trailing");
+		lblStepbystep = new JLabel("Step-By-Step");
+		panelLayout.add(lblStepbystep, "cell 0 8,alignx trailing");
 
 		JPanel panel = new JPanel();
 		panel.setOpaque(false);
-		panelActions.add(panel, "flowx,cell 1 8,alignx left");
+		panelLayout.add(panel, "flowx,cell 2 8,alignx left");
 
 		JButton btnStart = new JButton();
 		lblStepbystep.setLabelFor(btnStart);
@@ -261,30 +260,30 @@ public class ConfigurationView extends JPanel {
 		btnFinish.setAction(actionFinishPathFinders);
 		panel.add(btnFinish);
 
-		lblAnimation = new JLabel("Animated Execution");
-		panelActions.add(lblAnimation, "cell 0 9,alignx trailing,aligny center");
+		lblAnimation = new JLabel("Animation");
+		panelLayout.add(lblAnimation, "cell 0 9,alignx trailing,aligny center");
 
 		JLabel lblAlgorithm = new JLabel("Algorithms");
-		panelActions.add(lblAlgorithm, "cell 0 6,alignx trailing");
+		panelLayout.add(lblAlgorithm, "cell 0 6,alignx trailing");
 
 		JLabel lblTopology = new JLabel("Topology");
-		panelActions.add(lblTopology, "flowy,cell 0 2,alignx trailing");
+		panelLayout.add(lblTopology, "flowy,cell 0 2,alignx trailing");
 
 		comboTopology = new JComboBox<>();
 		lblTopology.setLabelFor(comboTopology);
-		panelActions.add(comboTopology, "cell 1 2,growx");
+		panelLayout.add(comboTopology, "cell 2 2,growx");
 
 		JLabel lblStyle = new JLabel("Style");
-		panelActions.add(lblStyle, "cell 0 3,alignx trailing");
+		panelLayout.add(lblStyle, "cell 0 3,alignx trailing");
 
 		comboStyle = new JComboBox<>();
 		lblStyle.setLabelFor(comboStyle);
 		comboStyle.setAction(actionSelectStyle);
 		comboStyle.setModel(new DefaultComboBoxModel<>(RenderingStyle.values()));
-		panelActions.add(comboStyle, "cell 1 3,growx");
+		panelLayout.add(comboStyle, "cell 2 3,growx");
 
 		scrollPaneTableResults = new JScrollPane();
-		panelActions.add(scrollPaneTableResults, "cell 0 10 2 1,growx");
+		panelLayout.add(scrollPaneTableResults, "cell 0 10 3 1,growx");
 
 		tableResults = new ResultsTable();
 		tableResults.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -295,12 +294,12 @@ public class ConfigurationView extends JPanel {
 		scrollPaneTableResults.setViewportView(tableResults);
 
 		helpPanel = new HelpPanel();
-		helpPanel.setMinimumSize(new Dimension(500, 120));
-		panelActions.add(helpPanel, "cell 0 11 2 1,growx");
+		helpPanel.setMinimumSize(new Dimension(2, 150));
+		panelLayout.add(helpPanel, "cell 0 11 3 1,growx");
 
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
-		panelActions.add(panel_1, "flowx,cell 1 9,growx,aligny center");
+		panelLayout.add(panel_1, "flowx,cell 2 9,growx,aligny center");
 		panel_1.setLayout(new MigLayout("", "[][grow]", "[]"));
 
 		JButton btnRun = new JButton();
@@ -316,7 +315,7 @@ public class ConfigurationView extends JPanel {
 		sliderDelay.setMaximum(100 * 100);
 
 		lblTotalCells = new JLabel("(### cells)");
-		panelActions.add(lblTotalCells, "cell 1 1");
+		panelLayout.add(lblTotalCells, "cell 2 1");
 	}
 
 	private static <T> T selection(JComboBox<T> combo) {
@@ -356,10 +355,8 @@ public class ConfigurationView extends JPanel {
 
 		// path finder results table
 		tableResults.init(model);
-		Dimension tableSize = new Dimension(500, PathFinderAlgorithm.values().length * 20);
-		scrollPaneTableResults.setMinimumSize(tableSize);
-		scrollPaneTableResults.setPreferredSize(tableSize);
-		scrollPaneTableResults.setSize(tableSize);
+		int minTableWidth = 400, minTableHeight = model.numResults() * 20; // TODO
+		scrollPaneTableResults.setPreferredSize(new Dimension(minTableWidth, minTableHeight));
 
 		// others controls
 		spinnerMapSize.setModel(new SpinnerNumberModel(model.getMapSize(), PathFinderModel.MIN_MAP_SIZE,

@@ -205,7 +205,7 @@ public class MapView extends JPanel {
 		add(canvas);
 	}
 
-	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex) {
+	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex, int size) {
 		this.model = model;
 		this.controller = controller;
 		this.fnPathFinderIndex = fnPathFinderIndex;
@@ -213,7 +213,6 @@ public class MapView extends JPanel {
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
 		createContextMenu();
-		int size = Toolkit.getDefaultToolkit().getScreenSize().width * 33 / 100;
 		setSize(size, size);
 		setPreferredSize(new Dimension(size, size));
 		updateMap();

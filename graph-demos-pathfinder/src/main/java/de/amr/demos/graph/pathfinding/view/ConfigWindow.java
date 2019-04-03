@@ -5,16 +5,16 @@ import java.awt.Color;
 
 import javax.swing.JFrame;
 
-public class ConfigurationWindow extends JFrame {
+public class ConfigWindow extends JFrame {
 
-	public ConfigurationWindow() {
+	public ConfigWindow() {
 		getContentPane().setBackground(Color.WHITE);
 		setTitle("Path Finder Demo");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setAlwaysOnTop(true);
 	}
 
-	public ConfigurationWindow(ConfigurationView pathFinderView) {
+	public ConfigWindow(ConfigView pathFinderView) {
 		this();
 		getContentPane().add(pathFinderView, BorderLayout.CENTER);
 	}

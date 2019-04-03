@@ -1,12 +1,13 @@
 package de.amr.demos.graph.pathfinding.controller;
 
+import static de.amr.demos.graph.pathfinding.PathFinderDemoApp.MAP_VIEW_SIZE;
 import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
-import de.amr.demos.graph.pathfinding.view.ConfigurationView;
+import de.amr.demos.graph.pathfinding.view.ConfigView;
 import de.amr.demos.graph.pathfinding.view.MapView;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
@@ -24,7 +25,7 @@ public class PathFinderController {
 	private int leftPathFinderIndex;
 	private int rightPathFinderIndex;
 
-	private final ConfigurationView configurationView;
+	private final ConfigView configurationView;
 	private final MapView leftMapView;
 	private final MapView rightMapView;
 
@@ -44,11 +45,11 @@ public class PathFinderController {
 		animationDelay = 0;
 		showingCost = true;
 		showingParent = false;
-		configurationView = new ConfigurationView();
+		configurationView = new ConfigView();
 		leftMapView = new MapView();
-		leftMapView.init(model, this, this::getLeftPathFinderIndex);
+		leftMapView.init(model, this, this::getLeftPathFinderIndex, MAP_VIEW_SIZE);
 		rightMapView = new MapView();
-		rightMapView.init(model, this, this::getRightPathFinderIndex);
+		rightMapView.init(model, this, this::getRightPathFinderIndex, MAP_VIEW_SIZE);
 	}
 
 	public int getLeftPathFinderIndex() {
@@ -85,7 +86,7 @@ public class PathFinderController {
 		return rightMapView;
 	}
 
-	public ConfigurationView getConfigurationView() {
+	public ConfigView getConfigView() {
 		return configurationView;
 	}
 

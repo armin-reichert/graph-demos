@@ -2,13 +2,14 @@ package de.amr.demos.graph.pathfinding;
 
 import java.awt.EventQueue;
 import java.awt.Point;
+import java.awt.Toolkit;
 
 import javax.swing.UIManager;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
-import de.amr.demos.graph.pathfinding.view.ConfigurationWindow;
+import de.amr.demos.graph.pathfinding.view.ConfigWindow;
 import de.amr.demos.graph.pathfinding.view.MapWindow;
 import de.amr.graph.grid.impl.Top8;
 
@@ -18,6 +19,8 @@ import de.amr.graph.grid.impl.Top8;
  * @author Armin Reichert
  */
 public class PathFinderDemoApp {
+
+	public static final int MAP_VIEW_SIZE = Toolkit.getDefaultToolkit().getScreenSize().width * 30 / 100;
 
 	public static void main(String[] args) {
 		try {
@@ -32,18 +35,18 @@ public class PathFinderDemoApp {
 		PathFinderModel model = new PathFinderModel(15, Top8.get());
 
 		PathFinderController controller = new PathFinderController(model, 0, 1);
-		controller.getConfigurationView().init(model, controller);
+		controller.getConfigView().init(model, controller);
 		controller.startPathFinders();
 
-		ConfigurationWindow pathFinderWindow = new ConfigurationWindow(controller.getConfigurationView());
-		pathFinderWindow.pack();
-		pathFinderWindow.setLocation(20, 20);
-		pathFinderWindow.setVisible(true);
-		
+		ConfigWindow configWindow = new ConfigWindow(controller.getConfigView());
+		configWindow.pack();
+		configWindow.setLocation(5, 5);
+		configWindow.setVisible(true);
+
 		MapWindow mapWindow = new MapWindow(controller.getLeftMapView(), controller.getRightMapView());
 		mapWindow.pack();
-		Point right = pathFinderWindow.getLocationOnScreen();
-		right.move(pathFinderWindow.getWidth() + 20, 20);
+		Point right = configWindow.getLocation();
+		right.move(configWindow.getWidth(), 5);
 		mapWindow.setLocation(right);
 		mapWindow.setVisible(true);
 	}
