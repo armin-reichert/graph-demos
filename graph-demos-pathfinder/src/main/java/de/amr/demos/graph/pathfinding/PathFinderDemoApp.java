@@ -36,7 +36,6 @@ public class PathFinderDemoApp {
 
 		PathFinderController controller = new PathFinderController(model, 0, 1);
 		controller.getConfigView().init(model, controller);
-		controller.runBothFirstStep();
 
 		ConfigWindow configWindow = new ConfigWindow(controller.getConfigView());
 		configWindow.pack();
@@ -49,5 +48,8 @@ public class PathFinderDemoApp {
 		right.move(configWindow.getWidth(), 5);
 		mapWindow.setLocation(right);
 		mapWindow.setVisible(true);
+		
+		controller.runBothFirstStep();
+		
 	}
 }
