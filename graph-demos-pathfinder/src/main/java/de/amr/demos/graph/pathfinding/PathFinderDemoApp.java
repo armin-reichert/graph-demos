@@ -10,7 +10,7 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.view.ConfigWindow;
-import de.amr.demos.graph.pathfinding.view.MapWindow;
+import de.amr.demos.graph.pathfinding.view.MapsWindow;
 import de.amr.graph.grid.impl.Top8;
 
 /**
@@ -43,7 +43,7 @@ public class PathFinderDemoApp {
 		configWindow.setLocation(5, 5);
 		configWindow.setVisible(true);
 
-		MapWindow mapWindow = new MapWindow(controller.getLeftMapView(), controller.getRightMapView());
+		MapsWindow mapWindow = new MapsWindow(controller.getLeftMapView(), controller.getRightMapView());
 		mapWindow.pack();
 		Point right = configWindow.getLocation();
 		right.move(configWindow.getWidth(), 5);

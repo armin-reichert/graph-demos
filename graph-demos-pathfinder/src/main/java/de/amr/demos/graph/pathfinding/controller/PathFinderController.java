@@ -25,7 +25,7 @@ public class PathFinderController {
 	private int leftPathFinderIndex;
 	private int rightPathFinderIndex;
 
-	private final ConfigView configurationView;
+	private final ConfigView configView;
 	private final MapView leftMapView;
 	private final MapView rightMapView;
 
@@ -45,7 +45,7 @@ public class PathFinderController {
 		animationDelay = 0;
 		showingCost = true;
 		showingParent = false;
-		configurationView = new ConfigView();
+		configView = new ConfigView();
 		leftMapView = new MapView();
 		leftMapView.init(model, this, this::getLeftPathFinderIndex, MAP_VIEW_SIZE);
 		rightMapView = new MapView();
@@ -87,11 +87,11 @@ public class PathFinderController {
 	}
 
 	public ConfigView getConfigView() {
-		return configurationView;
+		return configView;
 	}
 
 	private void updateViews() {
-		configurationView.updateView();
+		configView.updateView();
 		leftMapView.updateView();
 		rightMapView.updateView();
 	}
