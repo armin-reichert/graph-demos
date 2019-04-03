@@ -7,8 +7,9 @@ import static java.lang.Math.min;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
@@ -205,10 +206,33 @@ public class MapView extends JPanel {
 		add(canvas);
 	}
 
-	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex, int size) {
+	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex,
+			int size) {
 		this.model = model;
 		this.controller = controller;
 		this.fnPathFinderIndex = fnPathFinderIndex;
+		addComponentListener(new ComponentListener() {
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+			}
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				int size = Math.min(getWidth(), getHeight());
+				setSize(size, size);
+				setPreferredSize(new Dimension(size, size));
+				updateMap();
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+			}
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+			}
+		});
 		mouse = new MouseController();
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
@@ -353,12 +377,12 @@ public class MapView extends JPanel {
 				return MEETING_POINT_BACKGROUND;
 			}
 		}
-		//TODO this code causes strange exceptions
-//		if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED
-//				&& getPathFinder().getNextVertex().isPresent()
-//				&& cell == getPathFinder().getNextVertex().getAsInt()) {
-//			return NEXT_CELL_BACKGROUND;
-//		}
+		// TODO this code causes strange exceptions
+		// if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED
+		// && getPathFinder().getNextVertex().isPresent()
+		// && cell == getPathFinder().getNextVertex().getAsInt()) {
+		// return NEXT_CELL_BACKGROUND;
+		// }
 		if (getPathFinder().getState(cell) == TraversalState.COMPLETED) {
 			return COMPLETED_CELL_BACKGROUND;
 		}
