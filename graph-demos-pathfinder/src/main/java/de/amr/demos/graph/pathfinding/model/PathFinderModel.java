@@ -175,6 +175,7 @@ public class PathFinderModel {
 
 	public void clearMap() {
 		map.clearVertexLabels();
+		map.fill();
 	}
 
 	public void setMapContent(int cell, Tile tile) {
