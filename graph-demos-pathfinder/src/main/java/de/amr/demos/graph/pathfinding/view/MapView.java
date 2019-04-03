@@ -206,25 +206,25 @@ public class MapView extends JPanel {
 		this.model = model;
 		this.controller = controller;
 		this.fnPathFinderIndex = fnPathFinderIndex;
-		
+
 		mouse = new MouseController();
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
-		
+
 		canvas.getActionMap().put("increaseMapSize", new IncreaseMapeSize(controller));
 		canvas.getActionMap().put("decreaseMapSize", new DecreaseMapSize(controller));
 		canvas.getActionMap().put("runPathFinderAnimations", new RunPathFinderAnimations(controller));
 		canvas.getActionMap().put("set4Neighbors", new Set4NeighborTopology(controller));
 		canvas.getActionMap().put("set8Neighbors", new Set8NeighborTopology(controller));
-		
+
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('+'), "increaseMapSize");
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('-'), "decreaseMapSize");
 		canvas.getInputMap().put(KeyStroke.getKeyStroke(' '), "runPathFinderAnimations");
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('4'), "set4Neighbors");
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('8'), "set8Neighbors");
-		
+
 		createContextMenu();
-		
+
 		setSize(size, size);
 		setPreferredSize(new Dimension(size, size));
 		updateMap();

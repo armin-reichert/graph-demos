@@ -48,8 +48,8 @@ public class PathFinderDemoApp {
 		right.move(configWindow.getWidth(), 5);
 		mapWindow.setLocation(right);
 		mapWindow.setVisible(true);
-		
+
 		controller.runBothFirstStep();
-		
+
 	}
 }

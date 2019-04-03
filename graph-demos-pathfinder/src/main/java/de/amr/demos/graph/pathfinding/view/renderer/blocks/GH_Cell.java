@@ -35,7 +35,7 @@ public class GH_Cell extends MapCell {
 			g.setColor(textColor);
 			g.drawString(gValueText, (int) (cs - textBounds.getWidth()) / 2, cs - margin);
 		}
-		
+
 		// H-value
 		String hValueText = formatScaledValue(hValue.apply(cell), 10);
 		if (adjustFontSize(g, 0.3f) >= MIN_FONT_SIZE) {
