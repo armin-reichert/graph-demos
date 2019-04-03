@@ -23,7 +23,7 @@ import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 
 public abstract class MapCell implements GridCellRenderer {
-	
+
 	public static final int MIN_FONT_SIZE = 8;
 
 	public Function<Integer, Integer> parent;

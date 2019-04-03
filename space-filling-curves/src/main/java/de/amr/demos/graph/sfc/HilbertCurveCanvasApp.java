@@ -81,7 +81,8 @@ public class HilbertCurveCanvasApp extends Canvas {
 			buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
 			drawCurve(buffer.createGraphics());
 			repaint();
-		} else {
+		}
+		else {
 			timer.stop();
 		}
 	}
