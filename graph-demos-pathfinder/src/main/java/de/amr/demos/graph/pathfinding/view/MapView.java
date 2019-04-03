@@ -19,9 +19,13 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
+import de.amr.demos.graph.pathfinding.controller.action.DecreaseMapSize;
+import de.amr.demos.graph.pathfinding.controller.action.IncreaseMapeSize;
+import de.amr.demos.graph.pathfinding.controller.action.ResetScene;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
@@ -186,14 +190,6 @@ public class MapView extends JPanel {
 		}
 	};
 
-	private Action actionResetScene = new AbstractAction("Reset Scene") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.resetScene();
-		}
-	};
-
 	public MapView() {
 		setBackground(Color.WHITE);
 		setLayout(new BorderLayout(0, 0));
@@ -210,7 +206,13 @@ public class MapView extends JPanel {
 		mouse = new MouseController();
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
+		canvas.getActionMap().put("increaseMapSize", new IncreaseMapeSize(controller));
+		canvas.getActionMap().put("decreaseMapSize", new DecreaseMapSize(controller));
+		canvas.getInputMap().put(KeyStroke.getKeyStroke('+'), "increaseMapSize");
+		canvas.getInputMap().put(KeyStroke.getKeyStroke('-'), "decreaseMapSize");
+		
 		createContextMenu();
+		
 		setSize(size, size);
 		setPreferredSize(new Dimension(size, size));
 		updateMap();
@@ -262,7 +264,7 @@ public class MapView extends JPanel {
 		}
 		contextMenu.add(targetMenu);
 		contextMenu.addSeparator();
-		contextMenu.add(actionResetScene);
+		contextMenu.add(new ResetScene(controller));
 	}
 
 	// Rendering
@@ -354,12 +356,12 @@ public class MapView extends JPanel {
 				return MEETING_POINT_BACKGROUND;
 			}
 		}
-		// TODO this code causes strange exceptions
-		// if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED
-		// && getPathFinder().getNextVertex().isPresent()
-		// && cell == getPathFinder().getNextVertex().getAsInt()) {
-		// return NEXT_CELL_BACKGROUND;
-		// }
+		// TODO this code sometimes causes strange exceptions
+		if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED
+				&& getPathFinder().getNextVertex().isPresent()
+				&& cell == getPathFinder().getNextVertex().getAsInt()) {
+			return NEXT_CELL_BACKGROUND;
+		}
 		if (getPathFinder().getState(cell) == TraversalState.COMPLETED) {
 			return COMPLETED_CELL_BACKGROUND;
 		}

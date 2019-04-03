@@ -335,6 +335,7 @@ public class ConfigView extends JPanel {
 		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
 		selectComboNoAction(comboAlgorithmLeft, controller.getLeftPathFinderIndex());
 		selectComboNoAction(comboAlgorithmRight, controller.getRightPathFinderIndex());
+		spinnerMapSize.setValue(model.getMapSize());
 		updateViewState();
 	}
 

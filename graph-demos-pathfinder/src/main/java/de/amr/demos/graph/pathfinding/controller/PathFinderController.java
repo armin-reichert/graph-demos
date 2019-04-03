@@ -51,6 +51,10 @@ public class PathFinderController {
 		rightMapView = new MapView();
 		rightMapView.init(model, this, this::getRightPathFinderIndex, MAP_VIEW_SIZE);
 	}
+	
+	public PathFinderModel getModel() {
+		return model;
+	}
 
 	public int getLeftPathFinderIndex() {
 		return leftPathFinderIndex;
