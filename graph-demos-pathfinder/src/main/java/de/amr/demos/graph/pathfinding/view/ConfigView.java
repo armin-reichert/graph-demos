@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
+import java.util.function.BiConsumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -40,107 +41,6 @@ import net.miginfocom.swing.MigLayout;
  */
 public class ConfigView extends JPanel {
 
-	private Action actionNone = new AbstractAction() {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-		}
-	};
-
-	private Action actionSelectTopology = new AbstractAction("Select Topology") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.changeTopology(selection(comboTopology));
-		}
-	};
-
-	private Action actionSelectAlgorithmLeft = new AbstractAction("Select Left Algorithm") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.changeLeftPathFinder(comboAlgorithmLeft.getSelectedIndex());
-		}
-	};
-
-	private Action actionSelectAlgorithmRight = new AbstractAction("Select Right Algorithm") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.changeRightPathFinder(comboAlgorithmRight.getSelectedIndex());
-		}
-	};
-
-	private Action actionSelectExecutionMode = new AbstractAction("Select Execution Mode") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.changeExecutionMode(selection(comboExecutionMode));
-		}
-	};
-
-	private Action actionSelectStyle = new AbstractAction("Select Map Style") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.changeStyle(selection(comboStyle));
-		}
-	};
-
-	private Action actionStartSelectedPathFinder = new AbstractAction("Start") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.runBothFirstStep();
-			updateViewState();
-		}
-	};
-
-	private Action actionStepPathFinders = new AbstractAction("Steps") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			JComponent source = (JComponent) e.getSource();
-			int numSteps = (Integer) source.getClientProperty("numSteps");
-			controller.runBothNumSteps(numSteps);
-			updateViewState();
-		}
-	};
-
-	private Action actionFinishPathFinders = new AbstractAction("Finish") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.runBothRemainingSteps();
-			updateViewState();
-		}
-	};
-
-	private Action actionShowCost = new AbstractAction("Show Cost") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.showCost(cbShowCost.isSelected());
-		}
-	};
-
-	private Action actionShowParent = new AbstractAction("Show Parent") {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			controller.showParent(cbShowParent.isSelected());
-		}
-	};
-
-	private ChangeListener onMapSizeChange = new ChangeListener() {
-
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			int newSize = (int) spinnerMapSize.getValue();
-			controller.changeMapSize(newSize);
-		}
-	};
-
 	private PathFinderModel model;
 	private PathFinderController controller;
 
@@ -165,6 +65,75 @@ public class ConfigView extends JPanel {
 	private JLabel lblTotalCells;
 	private JComboBox<String> comboAlgorithmRight;
 	private JComboBox<String> comboAlgorithmLeft;
+
+	// Actions
+
+	private Action action(String name, BiConsumer<PathFinderController, ActionEvent> handler) {
+		return new AbstractAction(name) {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				handler.accept(controller, e);
+			}
+		};
+	}
+
+	private Action actionDoNothing = action("Do Nothing", (controller, e) -> {
+	});
+
+	private Action actionSelectTopology = action("Select Topology", (controller, e) -> {
+		controller.changeTopology(selection(comboTopology));
+	});
+
+	private Action actionSelectAlgorithmLeft = action("Select Left Algorithm", (controller, e) -> {
+		controller.changeLeftPathFinder(comboAlgorithmLeft.getSelectedIndex());
+	});
+
+	private Action actionSelectAlgorithmRight = action("Select Right Algorithm", (controller, e) -> {
+		controller.changeRightPathFinder(comboAlgorithmRight.getSelectedIndex());
+	});
+
+	private Action actionSelectExecutionMode = action("Select Execution Mode", (controller, e) -> {
+		controller.changeExecutionMode(selection(comboExecutionMode));
+	});
+
+	private Action actionSelectStyle = action("Select Map Style", (controller, e) -> {
+		controller.changeStyle(selection(comboStyle));
+	});
+
+	private Action actionStartSelectedPathFinder = action("Start", (controller, e) -> {
+		controller.runBothFirstStep();
+		updateViewState();
+	});
+
+	private Action actionStepPathFinders = action("Steps", (controller, e) -> {
+		JComponent source = (JComponent) e.getSource();
+		int numSteps = (Integer) source.getClientProperty("numSteps");
+		controller.runBothNumSteps(numSteps);
+		updateViewState();
+	});
+
+	private Action actionFinishPathFinders = action("Finish", (controller, e) -> {
+		controller.runBothRemainingSteps();
+		updateViewState();
+	});
+
+	private Action actionShowCost = action("Show Cost", (controller, e) -> {
+		controller.showCost(cbShowCost.isSelected());
+	});
+
+	private Action actionShowParent = action("Show Parent", (controller, e) -> {
+		controller.showParent(cbShowParent.isSelected());
+	});
+
+	private ChangeListener onMapSizeChange = new ChangeListener() {
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			int newSize = (int) spinnerMapSize.getValue();
+			controller.changeMapSize(newSize);
+		}
+	};
 
 	public ConfigView() {
 		setBackground(Color.WHITE);
@@ -311,39 +280,6 @@ public class ConfigView extends JPanel {
 		panelLayout.add(lblTotalCells, "cell 2 1");
 	}
 
-	private static <T> T selection(JComboBox<T> combo) {
-		return combo.getItemAt(combo.getSelectedIndex());
-	}
-
-	// TODO hack to avoid firing action events
-	private void selectComboNoAction(JComboBox<?> combo, int index) {
-		Action action = combo.getAction();
-		combo.setAction(actionNone);
-		combo.setSelectedIndex(index);
-		combo.setAction(action);
-	}
-
-	public void updateView() {
-		tableResults.dataChanged();
-		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
-		selectComboNoAction(comboAlgorithmLeft, controller.getLeftPathFinderIndex());
-		selectComboNoAction(comboAlgorithmRight, controller.getRightPathFinderIndex());
-		selectComboNoAction(comboTopology, model.getMap().getTopology() == Top4.get() ? 0 : 1);
-		spinnerMapSize.setValue(model.getMapSize());
-		updateViewState();
-	}
-
-	private void updateViewState() {
-		boolean manual = controller.getExecutionMode() == ExecutionMode.MANUAL;
-		actionStartSelectedPathFinder.setEnabled(manual);
-		actionStepPathFinders.setEnabled(manual);
-		actionFinishPathFinders.setEnabled(manual);
-		btnRun.setEnabled(manual);
-		sliderDelay.setEnabled(manual);
-		scrollPaneTableResults.setVisible(controller.getExecutionMode() == ExecutionMode.ALL);
-		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
-	}
-
 	public void init(PathFinderModel model, PathFinderController controller) {
 		this.model = model;
 		this.controller = controller;
@@ -390,5 +326,37 @@ public class ConfigView extends JPanel {
 		btnRun.setAction(new RunPathFinderAnimations(controller));
 
 		updateViewState();
+	}
+
+	public void updateView() {
+		tableResults.dataChanged();
+		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
+		selectComboNoAction(comboAlgorithmLeft, controller.getLeftPathFinderIndex());
+		selectComboNoAction(comboAlgorithmRight, controller.getRightPathFinderIndex());
+		selectComboNoAction(comboTopology, model.getMap().getTopology() == Top4.get() ? 0 : 1);
+		spinnerMapSize.setValue(model.getMapSize());
+		updateViewState();
+	}
+
+	private void updateViewState() {
+		boolean manual = controller.getExecutionMode() == ExecutionMode.MANUAL;
+		actionStartSelectedPathFinder.setEnabled(manual);
+		actionStepPathFinders.setEnabled(manual);
+		actionFinishPathFinders.setEnabled(manual);
+		btnRun.setEnabled(manual);
+		scrollPaneTableResults.setVisible(controller.getExecutionMode() == ExecutionMode.ALL);
+		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
+	}
+
+	private static <T> T selection(JComboBox<T> combo) {
+		return combo.getItemAt(combo.getSelectedIndex());
+	}
+
+	// TODO hack to avoid firing action events
+	private void selectComboNoAction(JComboBox<?> combo, int index) {
+		Action action = combo.getAction();
+		combo.setAction(actionDoNothing);
+		combo.setSelectedIndex(index);
+		combo.setAction(action);
 	}
 }
