@@ -12,7 +12,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Optional;
 import java.util.function.IntSupplier;
 
 import javax.swing.AbstractAction;
@@ -26,7 +25,6 @@ import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
-import de.amr.demos.graph.pathfinding.model.PathFinderResult;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.blocks.BlocksMap;
@@ -290,7 +288,7 @@ public class MapView extends JPanel {
 
 	// Rendering
 
-	private static final Color MAP_BACKGROUND = new Color(140, 140, 140);
+	private static final Color MAP_BACKGROUND = new Color(180, 180, 180);
 	private static final Color WALL_BACKGROUND = new Color(139, 69, 19);
 	private static final Color SOURCE_BACKGROUND = Color.BLUE;
 	private static final Color SOURCE_FOREGROUND = Color.WHITE;
@@ -412,11 +410,7 @@ public class MapView extends JPanel {
 	}
 
 	private boolean partOfSolution(int cell) {
-		Optional<PathFinderResult> result = model.getResult(getPathFinder());
-		if (result.isPresent()) {
-			return result.get().pathContains(cell);
-		}
-		return false;
+		return model.getResult(getPathFinderIndex()).pathContains(cell);
 	}
 
 	private class PearlsCellRendererAdapter extends PearlsCellRenderer {

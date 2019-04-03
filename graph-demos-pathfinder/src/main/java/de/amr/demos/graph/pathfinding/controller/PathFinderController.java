@@ -168,8 +168,8 @@ public class PathFinderController {
 		return new Path[] { leftPath, rightPath };
 	}
 
-	private Path runPathFinderSteps(int i, boolean left, int numSteps) {
-		ObservableGraphSearch pathFinder = model.getPathFinder(i);
+	private Path runPathFinderSteps(int pathFinderIndex, boolean left, int numSteps) {
+		ObservableGraphSearch pathFinder = model.getPathFinder(pathFinderIndex);
 		for (int n = numSteps; n > 0 && pathFinder.canExplore(); --n) {
 			boolean found = pathFinder.exploreVertex();
 			if (found) {
@@ -179,7 +179,7 @@ public class PathFinderController {
 				return path; // found path
 			}
 		}
-		leftMapView.updateView();
+		updateViews();
 		return Path.NULL;
 	}
 
