@@ -36,7 +36,7 @@ public class PathFinderDemoApp {
 
 		PathFinderController controller = new PathFinderController(model, 0, 1);
 		controller.getConfigView().init(model, controller);
-		controller.startPathFinders();
+		controller.runBothFirstStep();
 
 		ConfigWindow configWindow = new ConfigWindow(controller.getConfigView());
 		configWindow.pack();

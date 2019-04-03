@@ -151,40 +151,37 @@ public class PathFinderController {
 
 	// step-wise execution
 
-	public void startPathFinders() {
-		startPathFinder(leftPathFinderIndex);
-		startPathFinder(rightPathFinderIndex);
+	public void runBothFirstStep() {
+		runSingleFirstStep(leftPathFinderIndex);
+		runSingleFirstStep(rightPathFinderIndex);
 		updateViews();
 	}
 
-	private void startPathFinder(int pathFinder) {
-		model.clearResult(pathFinder);
-		model.getPathFinder(pathFinder).start(model.getSource(), model.getTarget());
+	public void runBothNumSteps(int numSteps) {
+		runSingleNumSteps(leftMapView, model.getPathFinder(leftPathFinderIndex), numSteps);
+		runSingleNumSteps(rightMapView, model.getPathFinder(rightPathFinderIndex), numSteps);
 	}
 
-	public Path[] runPathFinderSteps(int numSteps) {
-		Path leftPath = runPathFinderSteps(leftPathFinderIndex, true, numSteps);
-		Path rightPath = runPathFinderSteps(rightPathFinderIndex, false, numSteps);
-		return new Path[] { leftPath, rightPath };
+	public void runBothRemainingSteps() {
+		runBothNumSteps(Integer.MAX_VALUE);
 	}
 
-	private Path runPathFinderSteps(int pathFinderIndex, boolean left, int numSteps) {
-		ObservableGraphSearch pathFinder = model.getPathFinder(pathFinderIndex);
-		for (int n = numSteps; n > 0 && pathFinder.canExplore(); --n) {
-			boolean found = pathFinder.exploreVertex();
-			if (found) {
-				Path path = pathFinder.buildPath(model.getTarget());
-				model.setResult(pathFinder, path, 0);
-				(left ? leftMapView : rightMapView).updateView();
-				return path; // found path
+	private void runSingleFirstStep(int pathFinderIndex) {
+		model.clearResult(pathFinderIndex);
+		model.getPathFinder(pathFinderIndex).start(model.getSource(), model.getTarget());
+	}
+
+	private Path runSingleNumSteps(MapView mapView, ObservableGraphSearch pathFinder, int numSteps) {
+		Path path = pathFinder.buildPath(model.getTarget());
+		for (int n = numSteps; n > 0 && path == Path.NULL && pathFinder.canExplore(); --n) {
+			if (pathFinder.exploreVertex()) {
+				path = pathFinder.buildPath(model.getTarget());
+				break;
 			}
 		}
-		updateViews();
-		return Path.NULL;
-	}
-
-	public Path[] finishPathFinders() {
-		return runPathFinderSteps(Integer.MAX_VALUE);
+		model.setResult(pathFinder, path, 0);
+		mapView.updateView();
+		return path;
 	}
 
 	// other actions

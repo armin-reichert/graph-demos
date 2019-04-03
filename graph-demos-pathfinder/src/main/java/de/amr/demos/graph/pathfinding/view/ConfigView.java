@@ -98,7 +98,7 @@ public class ConfigView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.startPathFinders();
+			controller.runBothFirstStep();
 			updateViewState();
 		}
 	};
@@ -109,7 +109,7 @@ public class ConfigView extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			JComponent source = (JComponent) e.getSource();
 			int numSteps = (Integer) source.getClientProperty("numSteps");
-			controller.runPathFinderSteps(numSteps);
+			controller.runBothNumSteps(numSteps);
 			updateViewState();
 		}
 	};
@@ -118,7 +118,7 @@ public class ConfigView extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			controller.finishPathFinders();
+			controller.runBothRemainingSteps();
 			updateViewState();
 		}
 	};
