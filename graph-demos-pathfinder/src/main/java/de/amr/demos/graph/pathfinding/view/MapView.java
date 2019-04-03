@@ -209,28 +209,6 @@ public class MapView extends JPanel {
 		this.model = model;
 		this.controller = controller;
 		this.fnPathFinderIndex = fnPathFinderIndex;
-		addComponentListener(new ComponentListener() {
-
-			@Override
-			public void componentShown(ComponentEvent e) {
-			}
-
-			@Override
-			public void componentResized(ComponentEvent e) {
-				int size = Math.min(getWidth(), getHeight());
-				setSize(size, size);
-				setPreferredSize(new Dimension(size, size));
-				updateMap();
-			}
-
-			@Override
-			public void componentMoved(ComponentEvent e) {
-			}
-
-			@Override
-			public void componentHidden(ComponentEvent e) {
-			}
-		});
 		mouse = new MouseController();
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
@@ -252,6 +230,9 @@ public class MapView extends JPanel {
 
 	public void updateMap() {
 		int cellSize = getHeight() / model.getMapSize();
+		if (cellSize < 2) {
+			return;
+		}
 		canvas.setCellSize(cellSize, false);
 		canvas.setGrid(model.getMap(), false);
 		updateView();
