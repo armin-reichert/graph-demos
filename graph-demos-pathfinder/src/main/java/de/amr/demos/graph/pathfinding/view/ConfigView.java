@@ -31,6 +31,7 @@ import de.amr.demos.graph.pathfinding.controller.action.RunPathFinderAnimations;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.graph.grid.impl.Top4;
+import de.amr.graph.grid.impl.Top8;
 import net.miginfocom.swing.MigLayout;
 
 /**
@@ -328,6 +329,7 @@ public class ConfigView extends JPanel {
 		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
 		selectComboNoAction(comboAlgorithmLeft, controller.getLeftPathFinderIndex());
 		selectComboNoAction(comboAlgorithmRight, controller.getRightPathFinderIndex());
+		selectComboNoAction(comboTopology, model.getMap().getTopology() == Top4.get() ? 0 : 1);
 		spinnerMapSize.setValue(model.getMapSize());
 		updateViewState();
 	}

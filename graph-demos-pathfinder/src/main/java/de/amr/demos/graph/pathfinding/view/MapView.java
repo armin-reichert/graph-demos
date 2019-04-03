@@ -27,6 +27,8 @@ import de.amr.demos.graph.pathfinding.controller.action.DecreaseMapSize;
 import de.amr.demos.graph.pathfinding.controller.action.IncreaseMapeSize;
 import de.amr.demos.graph.pathfinding.controller.action.ResetScene;
 import de.amr.demos.graph.pathfinding.controller.action.RunPathFinderAnimations;
+import de.amr.demos.graph.pathfinding.controller.action.Set4NeighborTopology;
+import de.amr.demos.graph.pathfinding.controller.action.Set8NeighborTopology;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
@@ -212,10 +214,14 @@ public class MapView extends JPanel {
 		canvas.getActionMap().put("increaseMapSize", new IncreaseMapeSize(controller));
 		canvas.getActionMap().put("decreaseMapSize", new DecreaseMapSize(controller));
 		canvas.getActionMap().put("runPathFinderAnimations", new RunPathFinderAnimations(controller));
+		canvas.getActionMap().put("set4Neighbors", new Set4NeighborTopology(controller));
+		canvas.getActionMap().put("set8Neighbors", new Set8NeighborTopology(controller));
 		
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('+'), "increaseMapSize");
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('-'), "decreaseMapSize");
 		canvas.getInputMap().put(KeyStroke.getKeyStroke(' '), "runPathFinderAnimations");
+		canvas.getInputMap().put(KeyStroke.getKeyStroke('4'), "set4Neighbors");
+		canvas.getInputMap().put(KeyStroke.getKeyStroke('8'), "set8Neighbors");
 		
 		createContextMenu();
 		
