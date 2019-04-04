@@ -4,7 +4,7 @@ This repository contains some graph sample applications:
 
 ### Path Finder Demo Application
 
-In this application you can add/remove walls in a grid and run different path finding algorithms (BFS, Dijkstra, Best-First Search, A*, Bidirectional-{BFS. Dijkstra, A*}):
+In this application you can add/remove walls in a grid and run different path finding algorithms (BFS, Dijkstra, Best-First Search, A*, Bidirectional-BFS, Bidirectional-Dijkstra, Bidirectional-A*).
 
 ![Path finding demo application](https://github.com/armin-reichert/graph-demos/blob/master/graph-demos-pathfinder/doc/settings-window.png)
 
