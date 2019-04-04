@@ -76,7 +76,8 @@ public class MapView extends JPanel {
 		@Override
 		protected Void doInBackground() throws Exception {
 			PathFinderAnimation animation = new PathFinderAnimation();
-			animation.setFnDelay(() -> (int) Math.sqrt(controller.getAnimationDelay()));
+//			animation.setFnDelay(() -> (int) Math.sqrt(controller.getAnimationDelay()));
+			animation.setFnDelay(() -> controller.getAnimationDelay());
 			model.runPathFinder(getPathFinderIndex(), animation);
 			return null;
 		}

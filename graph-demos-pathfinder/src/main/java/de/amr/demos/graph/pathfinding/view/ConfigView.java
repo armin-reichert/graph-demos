@@ -271,10 +271,14 @@ public class ConfigView extends JPanel {
 		btnRun.setText("Run");
 
 		sliderDelay = new JSlider();
-		sliderDelay.setToolTipText("Delay");
+		sliderDelay.setMajorTickSpacing(500);
+		sliderDelay.setMinorTickSpacing(100);
+		sliderDelay.setPaintTicks(true);
+		sliderDelay.setPaintLabels(true);
+		sliderDelay.setToolTipText("Delay [ms]");
 		panel_1.add(sliderDelay, "cell 1 0,growx,aligny center");
 		sliderDelay.setValue(0);
-		sliderDelay.setMaximum(100 * 100);
+		sliderDelay.setMaximum(1000);
 
 		lblTotalCells = new JLabel("(### cells)");
 		panelLayout.add(lblTotalCells, "cell 2 1");
