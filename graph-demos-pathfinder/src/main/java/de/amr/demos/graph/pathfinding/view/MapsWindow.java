@@ -30,10 +30,6 @@ public class MapsWindow extends JFrame {
 
 		@Override
 		public void componentResized(ComponentEvent e) {
-			System.out.println("content pane resized, size " + getContentPane().getSize());
-			System.out.println("Left panel, size:" + panelLeftMap.getSize());
-			System.out.println("Right panel, size:" + panelRightMap.getSize());
-
 			int size = Math.min(panelLeftMap.getWidth(), panelLeftMap.getHeight()) * 98 / 100;
 			Dimension dim = new Dimension(size, size);
 			leftMapView.setSize(dim);

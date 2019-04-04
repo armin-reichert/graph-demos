@@ -4,11 +4,15 @@ import static de.amr.demos.graph.pathfinding.PathFinderDemoApp.MAP_VIEW_SIZE;
 import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
+import java.awt.Point;
+
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.ConfigView;
+import de.amr.demos.graph.pathfinding.view.ConfigWindow;
 import de.amr.demos.graph.pathfinding.view.MapView;
+import de.amr.demos.graph.pathfinding.view.MapsWindow;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.ObservableGraphSearch;
@@ -26,6 +30,9 @@ public class PathFinderController {
 	private int rightPathFinderIndex;
 
 	private final ConfigView configView;
+	private ConfigWindow configWindow;
+
+	private MapsWindow mapsWindow;
 	private final MapView leftMapView;
 	private final MapView rightMapView;
 
@@ -47,9 +54,27 @@ public class PathFinderController {
 		showingParent = false;
 		configView = new ConfigView();
 		leftMapView = new MapView();
-		leftMapView.init(model, this, this::getLeftPathFinderIndex, MAP_VIEW_SIZE);
 		rightMapView = new MapView();
+	}
+
+	public void createAndshowUI() {
+		configView.init(model, this);
+		leftMapView.init(model, this, this::getLeftPathFinderIndex, MAP_VIEW_SIZE);
 		rightMapView.init(model, this, this::getRightPathFinderIndex, MAP_VIEW_SIZE);
+
+		configWindow = new ConfigWindow(configView);
+		configWindow.pack();
+
+		mapsWindow = new MapsWindow(leftMapView, rightMapView);
+		mapsWindow.pack();
+
+		configWindow.setLocation(5, 5);
+		configWindow.setVisible(true);
+
+		Point right = configWindow.getLocation();
+		right.move(configWindow.getWidth(), 5);
+		mapsWindow.setLocation(right);
+		mapsWindow.setVisible(true);
 	}
 
 	public PathFinderModel getModel() {
