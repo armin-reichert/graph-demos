@@ -125,6 +125,7 @@ public class PathFinderController {
 		configView.updateView();
 		leftMapView.updateView();
 		rightMapView.updateView();
+		mapsWindow.updateWindow();
 	}
 
 	private void updateMaps() {

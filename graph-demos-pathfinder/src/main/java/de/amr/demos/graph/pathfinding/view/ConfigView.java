@@ -302,6 +302,8 @@ public class ConfigView extends JPanel {
 		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
 		selectComboNoAction(comboTopology, model.getMap().getTopology() == Top4.get() ? 0 : 1);
 		spinnerMapSize.setValue(model.getMapSize());
+		cbShowCost.setSelected(controller.isShowingCost());
+		cbShowParent.setSelected(controller.isShowingParent());
 		updateViewState();
 	}
 

@@ -13,6 +13,7 @@ import java.awt.event.MouseEvent;
 import java.util.function.IntSupplier;
 
 import javax.swing.Action;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -62,6 +63,8 @@ public class MapView extends JPanel {
 	private PathFinderController controller;
 	private MouseController mouse;
 	private JPopupMenu contextMenu;
+	private JCheckBoxMenuItem cbShowCost;
+	private JCheckBoxMenuItem cbShowParent;
 	private GridCanvas canvas;
 	private IntSupplier fnPathFinderIndex;
 
@@ -265,6 +268,22 @@ public class MapView extends JPanel {
 
 		contextMenu.addSeparator();
 
+		cbShowCost = new JCheckBoxMenuItem("Show Cost");
+		cbShowCost.setSelected(controller.isShowingCost());
+		cbShowCost.setAction(createAction("Show Cost", e -> {
+			getController().showCost(cbShowCost.isSelected());
+		}));
+		contextMenu.add(cbShowCost);
+		
+		cbShowParent = new JCheckBoxMenuItem("Show Parent");
+		cbShowParent.setSelected(controller.isShowingParent());
+		cbShowParent.setAction(createAction("Show Parent", e -> {
+			getController().showParent(cbShowParent.isSelected());
+		}));
+		contextMenu.add(cbShowParent);
+		
+		contextMenu.addSeparator();
+		
 		contextMenu.add(new ResetScene(controller));
 	}
 
@@ -273,6 +292,8 @@ public class MapView extends JPanel {
 	}
 
 	public void updateView() {
+		cbShowCost.setSelected(controller.isShowingCost());
+		cbShowParent.setSelected(controller.isShowingParent());
 		canvas.clear();
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
