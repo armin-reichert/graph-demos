@@ -5,10 +5,11 @@ import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
+import javax.swing.JPanel;
 
+import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import net.miginfocom.swing.MigLayout;
 
 public class MapsWindow extends JFrame {
@@ -16,6 +17,10 @@ public class MapsWindow extends JFrame {
 	private MapView leftMapView;
 	private MapView rightMapView;
 	private ResizeHandler resizeHandler = new ResizeHandler();
+	private JPanel panelLeftMap;
+	private JPanel panelRightMap;
+	private JComboBox<PathFinderAlgorithm> comboLeftPathFinder;
+	private JComboBox<PathFinderAlgorithm> comboRightPathFinder;
 
 	private class ResizeHandler implements ComponentListener {
 
@@ -25,14 +30,20 @@ public class MapsWindow extends JFrame {
 
 		@Override
 		public void componentResized(ComponentEvent e) {
-			int leftMapSize = Math.min(leftMapView.getWidth(), leftMapView.getHeight());
-			int rightMapSize = Math.min(rightMapView.getWidth(), rightMapView.getHeight());
-			int size = Math.min(leftMapSize, rightMapSize);
-			leftMapView.setSize(size, size);
-			leftMapView.setPreferredSize(new Dimension(size, size));
+			System.out.println("content pane resized, size " + getContentPane().getSize());
+			System.out.println("Left panel, size:" + panelLeftMap.getSize());
+			System.out.println("Right panel, size:" + panelRightMap.getSize());
+
+			int size = Math.min(panelLeftMap.getWidth(), panelLeftMap.getHeight()) * 98 / 100;
+			Dimension dim = new Dimension(size, size);
+			leftMapView.setSize(dim);
+			leftMapView.setPreferredSize(dim);
 			leftMapView.updateMap();
-			rightMapView.setSize(size, size);
-			rightMapView.setPreferredSize(new Dimension(size, size));
+
+			size = Math.min(panelRightMap.getWidth(), panelRightMap.getHeight()) * 98 / 100;
+			dim = new Dimension(size, size);
+			rightMapView.setSize(dim);
+			rightMapView.setPreferredSize(dim);
 			rightMapView.updateMap();
 		}
 
@@ -50,26 +61,27 @@ public class MapsWindow extends JFrame {
 		getContentPane().setBackground(Color.WHITE);
 		setTitle("Path Finder Demo Map");
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
-		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[grow]"));
-
-		JLabel lblLeft = new JLabel("LEFT");
-		lblLeft.setHorizontalAlignment(SwingConstants.CENTER);
-		getContentPane().add(lblLeft, "cell 0 0,grow");
-
-		JLabel lblRight = new JLabel("RIGHT");
-		lblRight.setHorizontalAlignment(SwingConstants.CENTER);
-		getContentPane().add(lblRight, "cell 1 0,grow");
+		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[grow][]"));
+		panelLeftMap = new JPanel();
+		panelLeftMap.setOpaque(false);
+		getContentPane().add(panelLeftMap, "cell 0 0,grow");
+		panelLeftMap.setLayout(new MigLayout("", "[]", "[]"));
+		panelRightMap = new JPanel();
+		panelRightMap.setOpaque(false);
+		getContentPane().add(panelRightMap, "cell 1 0,grow");
+		panelRightMap.setLayout(new MigLayout("", "[]", "[]"));
+		comboLeftPathFinder = new JComboBox<>();
+		getContentPane().add(comboLeftPathFinder, "cell 0 1,growx");
+		comboRightPathFinder = new JComboBox<>();
+		getContentPane().add(comboRightPathFinder, "cell 1 1,growx");
 	}
 
 	public MapsWindow(MapView leftMapView, MapView rightMapView) {
 		this();
 		this.leftMapView = leftMapView;
 		this.rightMapView = rightMapView;
-		leftMapView.addComponentListener(resizeHandler);
-		rightMapView.addComponentListener(resizeHandler);
-		getContentPane().removeAll();
-		getContentPane().add(leftMapView, "cell 0 0,grow");
-		getContentPane().add(rightMapView, "cell 1 0,grow");
+		panelLeftMap.add(leftMapView, "cell 0 0,grow");
+		panelRightMap.add(rightMapView, "cell 0 0,grow");
+		getContentPane().addComponentListener(resizeHandler);
 	}
 }
