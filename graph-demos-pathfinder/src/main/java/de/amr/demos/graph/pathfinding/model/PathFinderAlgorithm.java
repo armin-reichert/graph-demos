@@ -14,13 +14,13 @@ import de.amr.graph.pathfinder.impl.DijkstraSearch;
  * @author Armin Reichert
  */
 public enum PathFinderAlgorithm {
-	BFS("BFS", BreadthFirstSearch.class),
-	Dijkstra("Dijkstra", DijkstraSearch.class),
-	GreedyBestFirst("Best-First", BestFirstSearch.class),
+	BFS("Breadth-First Search", BreadthFirstSearch.class),
+	Dijkstra("Dijkstra Search", DijkstraSearch.class),
+	GreedyBestFirst("Best-First Search", BestFirstSearch.class),
 	AStar("A* Search", AStarSearch.class),
-	BidiBFS("Bidi-BFS", BidiBreadthFirstSearch.class),
-	BidiDijkstra("Bidi-Dijkstra", BidiDijkstraSearch.class),
-	BidiAStar("Bidi-A*", BidiAStarSearch.class);
+	BidiBFS("Bidirectional Breadth-First Search", BidiBreadthFirstSearch.class),
+	BidiDijkstra("Bidirectional Dijkstra Search", BidiDijkstraSearch.class),
+	BidiAStar("Bidirectional A* Search", BidiAStarSearch.class);
 
 	private final String displayName;
 	private final Class<?> implementation;

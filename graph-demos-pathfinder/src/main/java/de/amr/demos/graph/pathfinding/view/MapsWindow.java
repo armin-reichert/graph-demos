@@ -1,26 +1,31 @@
 package de.amr.demos.graph.pathfinding.view;
 
+import static de.amr.demos.graph.pathfinding.view.SwingGoodies.selectComboNoAction;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
+import de.amr.demos.graph.pathfinding.controller.PathFinderController;
+import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import net.miginfocom.swing.MigLayout;
 
 public class MapsWindow extends JFrame {
 
+	private PathFinderController controller;
 	private MapView leftMapView;
 	private MapView rightMapView;
 	private ResizeHandler resizeHandler = new ResizeHandler();
 	private JPanel panelLeftMap;
 	private JPanel panelRightMap;
-	private JComboBox<PathFinderAlgorithm> comboLeftPathFinder;
-	private JComboBox<PathFinderAlgorithm> comboRightPathFinder;
+	private JComboBox<String> comboLeftPathFinder;
+	private JComboBox<String> comboRightPathFinder;
 
 	private class ResizeHandler implements ComponentListener {
 
@@ -50,34 +55,54 @@ public class MapsWindow extends JFrame {
 		@Override
 		public void componentHidden(ComponentEvent e) {
 		}
+	}
 
+	public void updateWindow() {
+		selectComboNoAction(comboLeftPathFinder, controller.getLeftPathFinderIndex());
+		selectComboNoAction(comboRightPathFinder, controller.getRightPathFinderIndex());
 	}
 
 	public MapsWindow() {
 		getContentPane().setBackground(Color.WHITE);
 		setTitle("Path Finder Demo Map");
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[grow][]"));
+		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[][grow]"));
 		panelLeftMap = new JPanel();
 		panelLeftMap.setOpaque(false);
-		getContentPane().add(panelLeftMap, "cell 0 0,grow");
+		getContentPane().add(panelLeftMap, "cell 0 1,grow");
 		panelLeftMap.setLayout(new MigLayout("", "[]", "[]"));
 		panelRightMap = new JPanel();
 		panelRightMap.setOpaque(false);
-		getContentPane().add(panelRightMap, "cell 1 0,grow");
+		getContentPane().add(panelRightMap, "cell 1 1,grow");
 		panelRightMap.setLayout(new MigLayout("", "[]", "[]"));
 		comboLeftPathFinder = new JComboBox<>();
-		getContentPane().add(comboLeftPathFinder, "cell 0 1,growx");
+		getContentPane().add(comboLeftPathFinder, "cell 0 0,growx");
 		comboRightPathFinder = new JComboBox<>();
-		getContentPane().add(comboRightPathFinder, "cell 1 1,growx");
+		getContentPane().add(comboRightPathFinder, "cell 1 0,growx");
 	}
 
-	public MapsWindow(MapView leftMapView, MapView rightMapView) {
+	public MapsWindow(PathFinderController controller, MapView leftMapView, MapView rightMapView) {
 		this();
+
+		this.controller = controller;
 		this.leftMapView = leftMapView;
 		this.rightMapView = rightMapView;
+		
 		panelLeftMap.add(leftMapView, "cell 0 0,grow");
 		panelRightMap.add(rightMapView, "cell 0 0,grow");
 		getContentPane().addComponentListener(resizeHandler);
+
+		PathFinderModel model = controller.getModel();
+		comboLeftPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
+		comboLeftPathFinder.setSelectedIndex(model.getPathFinderIndex(controller.getLeftPathFinder()));
+		comboLeftPathFinder.setAction(SwingGoodies.createAction("", e -> {
+			controller.changeLeftPathFinder(comboLeftPathFinder.getSelectedIndex());
+		}));
+
+		comboRightPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
+		comboRightPathFinder.setSelectedIndex(model.getPathFinderIndex(controller.getRightPathFinder()));
+		comboRightPathFinder.setAction(SwingGoodies.createAction("", e -> {
+			controller.changeRightPathFinder(comboRightPathFinder.getSelectedIndex());
+		}));
 	}
 }

@@ -65,7 +65,7 @@ public class PathFinderController {
 		configWindow = new ConfigWindow(configView);
 		configWindow.pack();
 
-		mapsWindow = new MapsWindow(leftMapView, rightMapView);
+		mapsWindow = new MapsWindow(this, leftMapView, rightMapView);
 		mapsWindow.pack();
 
 		configWindow.setLocation(5, 5);
@@ -100,11 +100,13 @@ public class PathFinderController {
 	public void changeLeftPathFinder(int pathFinderIndex) {
 		leftPathFinderIndex = pathFinderIndex;
 		updatePathFinderResults();
+		mapsWindow.updateWindow();
 	}
 
 	public void changeRightPathFinder(int pathFinderIndex) {
 		rightPathFinderIndex = pathFinderIndex;
 		updatePathFinderResults();
+		mapsWindow.updateWindow();
 	}
 
 	public MapView getLeftMapView() {

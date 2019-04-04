@@ -1,5 +1,6 @@
 package de.amr.demos.graph.pathfinding.view;
 
+import static de.amr.demos.graph.pathfinding.view.SwingGoodies.createAction;
 import static de.amr.graph.pathfinder.api.GraphSearch.NO_VERTEX;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -7,13 +8,10 @@ import static java.lang.Math.min;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.function.BiConsumer;
 import java.util.function.IntSupplier;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
@@ -76,7 +74,6 @@ public class MapView extends JPanel {
 		@Override
 		protected Void doInBackground() throws Exception {
 			PathFinderAnimation animation = new PathFinderAnimation();
-//			animation.setFnDelay(() -> (int) Math.sqrt(controller.getAnimationDelay()));
 			animation.setFnDelay(() -> controller.getAnimationDelay());
 			model.runPathFinder(getPathFinderIndex(), animation);
 			return null;
@@ -177,26 +174,16 @@ public class MapView extends JPanel {
 
 	// Actions
 
-	private Action action(String name, BiConsumer<PathFinderController, ActionEvent> handler) {
-		return new AbstractAction(name) {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				handler.accept(controller, e);
-			}
-		};
-	}
-
-	private Action actionSetSource = action("Search From Here", (controller, e) -> {
+	private Action actionSetSource = createAction("Search From Here", e -> {
 		JComponent trigger = (JComponent) e.getSource();
 		GridPosition position = (GridPosition) trigger.getClientProperty("position");
-		controller.setSource(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
+		getController().setSource(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
 	});
 
-	private Action actionSetTarget = action("Search To Here", (controller, e) -> {
+	private Action actionSetTarget = createAction("Search To Here", e -> {
 		JComponent trigger = (JComponent) e.getSource();
 		GridPosition position = (GridPosition) trigger.getClientProperty("position");
-		controller.setTarget(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
+		getController().setTarget(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
 	});
 
 	public MapView() {
@@ -207,7 +194,9 @@ public class MapView extends JPanel {
 		add(canvas);
 	}
 
-	// Context menu
+	public PathFinderController getController() {
+		return controller;
+	}
 
 	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex,
 			int size) {
@@ -232,31 +221,51 @@ public class MapView extends JPanel {
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('8'), "set8Neighbors");
 
 		// context menu
-		contextMenu = new JPopupMenu();
-		contextMenu.add(actionSetSource);
-		JMenu sourceMenu = new JMenu("Search From");
-		for (GridPosition position : GridPosition.values()) {
-			JMenuItem item = sourceMenu.add(actionSetSource);
-			item.setText(position.toString());
-			item.putClientProperty("position", position);
-		}
-		contextMenu.add(sourceMenu);
-		contextMenu.addSeparator();
-		contextMenu.add(actionSetTarget);
-		JMenu targetMenu = new JMenu("Search To");
-		for (GridPosition position : GridPosition.values()) {
-			JMenuItem item = targetMenu.add(actionSetTarget);
-			item.setText(position.toString());
-			item.putClientProperty("position", position);
-		}
-		contextMenu.add(targetMenu);
-		contextMenu.addSeparator();
-		contextMenu.add(new ResetScene(controller));
+		buildContextMenu(controller);
 
 		// initial size
 		setSize(size, size);
 		setPreferredSize(new Dimension(size, size));
 		updateMap();
+	}
+
+	private void buildContextMenu(PathFinderController controller) {
+		JMenuItem item;
+		contextMenu = new JPopupMenu();
+
+		item = contextMenu.add(new RunPathFinderAnimations(controller));
+		item.setText("Run pathfinders");
+
+		contextMenu.addSeparator();
+
+		contextMenu.add(actionSetSource);
+		JMenu sourceMenu = new JMenu("Search From");
+		for (GridPosition position : GridPosition.values()) {
+			item = sourceMenu.add(actionSetSource);
+			item.setText(position.toString());
+			item.putClientProperty("position", position);
+		}
+		contextMenu.add(sourceMenu);
+
+		contextMenu.addSeparator();
+
+		contextMenu.add(actionSetTarget);
+		JMenu targetMenu = new JMenu("Search To");
+		for (GridPosition position : GridPosition.values()) {
+			item = targetMenu.add(actionSetTarget);
+			item.setText(position.toString());
+			item.putClientProperty("position", position);
+		}
+		contextMenu.add(targetMenu);
+
+		contextMenu.addSeparator();
+
+		item = contextMenu.add(new Set4NeighborTopology(controller));
+		contextMenu.add(new Set8NeighborTopology(controller));
+
+		contextMenu.addSeparator();
+
+		contextMenu.add(new ResetScene(controller));
 	}
 
 	public void runPathFinderAnimation() {
@@ -267,6 +276,7 @@ public class MapView extends JPanel {
 		canvas.clear();
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
+		requestFocusInWindow();
 	}
 
 	public void updateMap() {
