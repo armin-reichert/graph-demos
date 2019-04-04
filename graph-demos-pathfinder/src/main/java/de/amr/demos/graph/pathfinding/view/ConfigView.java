@@ -304,6 +304,7 @@ public class ConfigView extends JPanel {
 		spinnerMapSize.setValue(model.getMapSize());
 		cbShowCost.setSelected(controller.isShowingCost());
 		cbShowParent.setSelected(controller.isShowingParent());
+		comboStyle.setSelectedItem(controller.getStyle());
 		updateViewState();
 	}
 
