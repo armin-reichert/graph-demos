@@ -41,8 +41,8 @@ public class PathFinderModel {
 
 	public PathFinderModel(int mapSize, Topology topology) {
 		newMap(mapSize, topology);
-		source = map.cell(mapSize / 4, mapSize / 2);
-		target = map.cell(mapSize * 3 / 4, mapSize / 2);
+		source = map.cell(mapSize / 3, mapSize / 2);
+		target = map.cell(mapSize * 2 / 3, mapSize / 2);
 		results = new ArrayList<>();
 		for (PathFinderAlgorithm algorithm : PathFinderAlgorithm.values()) {
 			results.add(newResult(algorithm));

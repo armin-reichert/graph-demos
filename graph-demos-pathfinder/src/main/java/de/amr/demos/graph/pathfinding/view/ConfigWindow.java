@@ -8,8 +8,9 @@ import javax.swing.JFrame;
 public class ConfigWindow extends JFrame {
 
 	public ConfigWindow() {
+		setResizable(false);
 		getContentPane().setBackground(Color.WHITE);
-		setTitle("Path Finder Demo");
+		setTitle("Path Finder Demo - Settings");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setAlwaysOnTop(true);
 	}

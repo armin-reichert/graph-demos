@@ -29,9 +29,9 @@ public class PathFinderDemoApp {
 	}
 
 	public PathFinderDemoApp() {
-		PathFinderModel model = new PathFinderModel(15, Top8.get());
+		PathFinderModel model = new PathFinderModel(25, Top8.get());
 		PathFinderController controller = new PathFinderController(model, 0, 1);
-		controller.createAndshowUI();
+		controller.createAndShowUI();
 		controller.runBothFirstStep();
 	}
 }

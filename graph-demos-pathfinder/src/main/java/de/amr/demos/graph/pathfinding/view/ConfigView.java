@@ -34,9 +34,10 @@ import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.graph.grid.impl.Top4;
 import net.miginfocom.swing.MigLayout;
+import javax.swing.border.EmptyBorder;
 
 /**
- * View with settings and results for the path finder demo application.
+ * View for editing settings and showing path-finder results.
  * 
  * @author Armin Reichert
  */
@@ -60,8 +61,6 @@ public class ConfigView extends JPanel {
 	private JButton btnRun;
 	private JButton btnFinish;
 	private JLabel lblStepbystep;
-	private JLabel lblAnimation;
-	private JPanel panel_1;
 	private JLabel lblNewLabel;
 	private JLabel lblTotalCells;
 
@@ -112,6 +111,7 @@ public class ConfigView extends JPanel {
 			getController().changeMapSize(newSize);
 		}
 	};
+	private JLabel lblDelay;
 
 	public ConfigView() {
 		setBackground(Color.WHITE);
@@ -121,9 +121,10 @@ public class ConfigView extends JPanel {
 		panelLayout.setOpaque(false);
 		panelLayout.setMinimumSize(new Dimension(550, 10));
 		add(panelLayout);
-		panelLayout.setLayout(new MigLayout("", "[][10:10:10][]", "[][][][][][][][][][][grow,bottom]"));
+		panelLayout.setLayout(new MigLayout("", "[][10][]", "[][][][][][][][][][][][grow,bottom]"));
 
 		JLabel lblMap = new JLabel("Map");
+		lblMap.setBorder(new EmptyBorder(3, 0, 3, 0));
 		panelLayout.add(lblMap, "cell 0 0 3 1,alignx leading");
 		lblMap.setForeground(SystemColor.textHighlight);
 		lblMap.setFont(new Font("Arial Black", Font.PLAIN, 14));
@@ -137,6 +138,7 @@ public class ConfigView extends JPanel {
 		panelLayout.add(cbShowParent, "cell 2 4");
 
 		lblPathFinding = new JLabel("Path Finding");
+		lblPathFinding.setBorder(new EmptyBorder(12, 0, 3, 0));
 		lblPathFinding.setForeground(SystemColor.textHighlight);
 		lblPathFinding.setFont(new Font("Arial Black", Font.PLAIN, 14));
 		panelLayout.add(lblPathFinding, "cell 0 5 3 1,alignx leading");
@@ -156,11 +158,11 @@ public class ConfigView extends JPanel {
 		panelLayout.add(comboExecutionMode, "cell 2 6,growx");
 
 		lblStepbystep = new JLabel("Step-By-Step");
-		panelLayout.add(lblStepbystep, "cell 0 7,alignx trailing");
+		panelLayout.add(lblStepbystep, "cell 0 7,alignx trailing,aligny baseline");
 
 		JPanel panel = new JPanel();
 		panel.setOpaque(false);
-		panelLayout.add(panel, "flowx,cell 2 7,alignx left");
+		panelLayout.add(panel, "flowx,cell 2 7,alignx left,aligny baseline");
 
 		JButton btnStart = new JButton();
 		lblStepbystep.setLabelFor(btnStart);
@@ -195,9 +197,6 @@ public class ConfigView extends JPanel {
 		btnFinish.setAction(actionFinishPathFinders);
 		panel.add(btnFinish);
 
-		lblAnimation = new JLabel("Animation");
-		panelLayout.add(lblAnimation, "cell 0 8,alignx trailing,aligny center");
-
 		JLabel lblTopology = new JLabel("Topology");
 		panelLayout.add(lblTopology, "flowy,cell 0 2,alignx trailing");
 
@@ -213,9 +212,27 @@ public class ConfigView extends JPanel {
 		comboStyle.setAction(actionSelectStyle);
 		comboStyle.setModel(new DefaultComboBoxModel<>(RenderingStyle.values()));
 		panelLayout.add(comboStyle, "cell 2 3,growx");
+				
+						btnRun = new JButton();
+						panelLayout.add(btnRun, "cell 2 8,alignx center");
+						btnRun.setText("Run Path Finder");
+				
+				lblDelay = new JLabel("Delay [ms]");
+				panelLayout.add(lblDelay, "cell 0 9,alignx trailing,aligny center");
+		
+				sliderDelay = new JSlider();
+				lblDelay.setLabelFor(sliderDelay);
+				panelLayout.add(sliderDelay, "cell 2 9,growx");
+				sliderDelay.setMajorTickSpacing(500);
+				sliderDelay.setMinorTickSpacing(100);
+				sliderDelay.setPaintTicks(true);
+				sliderDelay.setPaintLabels(true);
+				sliderDelay.setToolTipText("Delay [ms]");
+				sliderDelay.setValue(0);
+				sliderDelay.setMaximum(1000);
 
 		scrollPaneTableResults = new JScrollPane();
-		panelLayout.add(scrollPaneTableResults, "cell 0 9 3 1,growx");
+		panelLayout.add(scrollPaneTableResults, "cell 0 10 3 1,growx");
 
 		tableResults = new ResultsTable();
 		tableResults.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -227,27 +244,7 @@ public class ConfigView extends JPanel {
 
 		helpPanel = new HelpPanel();
 		helpPanel.setMinimumSize(new Dimension(2, 150));
-		panelLayout.add(helpPanel, "cell 0 10 3 1,growx");
-
-		panel_1 = new JPanel();
-		panel_1.setOpaque(false);
-		panelLayout.add(panel_1, "flowx,cell 2 8,growx,aligny center");
-		panel_1.setLayout(new MigLayout("", "[][grow]", "[]"));
-
-		btnRun = new JButton();
-		lblAnimation.setLabelFor(btnRun);
-		panel_1.add(btnRun, "cell 0 0,aligny center");
-		btnRun.setText("Run");
-
-		sliderDelay = new JSlider();
-		sliderDelay.setMajorTickSpacing(500);
-		sliderDelay.setMinorTickSpacing(100);
-		sliderDelay.setPaintTicks(true);
-		sliderDelay.setPaintLabels(true);
-		sliderDelay.setToolTipText("Delay [ms]");
-		panel_1.add(sliderDelay, "cell 1 0,growx,aligny center");
-		sliderDelay.setValue(0);
-		sliderDelay.setMaximum(1000);
+		panelLayout.add(helpPanel, "cell 0 11 3 1,growx");
 
 		lblTotalCells = new JLabel("(### cells)");
 		panelLayout.add(lblTotalCells, "cell 2 1");
