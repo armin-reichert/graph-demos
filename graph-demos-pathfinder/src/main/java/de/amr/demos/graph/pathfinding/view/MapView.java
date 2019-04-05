@@ -24,6 +24,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 
+import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.action.DecreaseMapSize;
 import de.amr.demos.graph.pathfinding.controller.action.IncreaseMapeSize;
@@ -72,6 +73,8 @@ public class MapView extends JPanel {
 	private JRadioButtonMenuItem rb8Neighbors;
 	private JRadioButtonMenuItem rbShowAsBlocks;
 	private JRadioButtonMenuItem rbShowAsPearls;
+	private JRadioButtonMenuItem rbExecutionManual;
+	private JRadioButtonMenuItem rbExecutionAutomatic;
 	private JCheckBoxMenuItem cbShowCost;
 	private JCheckBoxMenuItem cbShowParent;
 	private GridCanvas canvas;
@@ -246,6 +249,20 @@ public class MapView extends JPanel {
 		item.setText("Run pathfinders");
 
 		contextMenu.addSeparator();
+		
+		rbExecutionManual = new JRadioButtonMenuItem(createAction("Manual execution", e -> {
+			controller.changeExecutionMode(ExecutionMode.MANUAL);
+		}));
+		rbExecutionAutomatic = new JRadioButtonMenuItem(createAction("Automatic execution", e -> {
+			controller.changeExecutionMode(ExecutionMode.VISIBLE);
+		}));
+		ButtonGroup bgExecutionMode = new ButtonGroup();
+		bgExecutionMode.add(rbExecutionAutomatic);
+		bgExecutionMode.add(rbExecutionManual);
+		contextMenu.add(rbExecutionManual);
+		contextMenu.add(rbExecutionAutomatic);
+
+		contextMenu.addSeparator();
 
 		contextMenu.add(actionSetSource);
 		JMenu sourceMenu = new JMenu("Search From");
@@ -333,6 +350,8 @@ public class MapView extends JPanel {
 		cbShowParent.setSelected(controller.isShowingParent());
 		rbShowAsBlocks.setSelected(controller.getStyle() == RenderingStyle.BLOCKS);
 		rbShowAsPearls.setSelected(controller.getStyle() == RenderingStyle.PEARLS);
+		rbExecutionAutomatic.setSelected(controller.getExecutionMode() == ExecutionMode.VISIBLE);
+		rbExecutionManual.setSelected(controller.getExecutionMode() == ExecutionMode.MANUAL);
 		canvas.clear();
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
