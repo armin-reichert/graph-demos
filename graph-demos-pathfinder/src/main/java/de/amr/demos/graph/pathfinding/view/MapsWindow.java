@@ -65,7 +65,7 @@ public class MapsWindow extends JFrame {
 	public MapsWindow() {
 		getContentPane().setBackground(Color.WHITE);
 		setTitle("Path Finder Demo Map");
-		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[][grow]"));
 		panelLeftMap = new JPanel();
 		panelLeftMap.setOpaque(false);
