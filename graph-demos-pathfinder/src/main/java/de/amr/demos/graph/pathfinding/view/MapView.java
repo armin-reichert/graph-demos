@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.OptionalInt;
 import java.util.function.IntSupplier;
 
 import javax.swing.Action;
@@ -436,10 +437,11 @@ public class MapView extends JPanel {
 			}
 		}
 		// TODO this code sometimes causes strange exceptions
-		if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED
-				&& getPathFinder().getNextVertex().isPresent()
-				&& cell == getPathFinder().getNextVertex().getAsInt()) {
-			return NEXT_CELL_BACKGROUND;
+		if (getPathFinder().getState(model.getTarget()) == TraversalState.UNVISITED) {
+			OptionalInt nextVertex = getPathFinder().getNextVertex();
+			if (nextVertex.isPresent() && nextVertex.getAsInt() == cell) {
+				return NEXT_CELL_BACKGROUND;
+			}
 		}
 		if (getPathFinder().getState(cell) == TraversalState.COMPLETED) {
 			return COMPLETED_CELL_BACKGROUND;
