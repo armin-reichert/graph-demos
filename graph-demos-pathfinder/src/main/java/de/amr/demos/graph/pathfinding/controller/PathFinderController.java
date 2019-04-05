@@ -1,10 +1,11 @@
 package de.amr.demos.graph.pathfinding.controller;
 
-import static de.amr.demos.graph.pathfinding.PathFinderDemoApp.MAP_VIEW_SIZE;
 import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
+import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Toolkit;
 
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
@@ -58,22 +59,29 @@ public class PathFinderController {
 	}
 
 	public void createAndShowUI() {
+
 		configView.init(model, this);
-		leftMapView.init(model, this, this::getLeftPathFinderIndex, MAP_VIEW_SIZE);
-		rightMapView.init(model, this, this::getRightPathFinderIndex, MAP_VIEW_SIZE);
+		leftMapView.init(model, this, this::getLeftPathFinderIndex);
+		rightMapView.init(model, this, this::getRightPathFinderIndex);
 
 		configWindow = new ConfigWindow(configView);
 		configWindow.pack();
 
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int width = (screenSize.width - configWindow.getWidth() - 10) / 2;
+		int height = Math.min(width, screenSize.height);
+		leftMapView.setSize(width, height);
+		rightMapView.setSize(width, height);
+
 		mapsWindow = new MapsWindow(this, leftMapView, rightMapView);
 		mapsWindow.pack();
 
-		configWindow.setLocation(5, 5);
-		configWindow.setVisible(true);
+		configWindow.setLocation(0,0);
+		Point mapsWindowLocation = configWindow.getLocation();
+		mapsWindowLocation.move(configWindow.getWidth(), 0);
+		mapsWindow.setLocation(mapsWindowLocation);
 
-		Point right = configWindow.getLocation();
-		right.move(configWindow.getWidth(), 5);
-		mapsWindow.setLocation(right);
+		configWindow.setVisible(true);
 		mapsWindow.setVisible(true);
 	}
 

@@ -67,6 +67,10 @@ public class MapsWindow extends JFrame {
 		setTitle("Path Finder Demo Map");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[][grow]"));
+		comboLeftPathFinder = new JComboBox<>();
+		getContentPane().add(comboLeftPathFinder, "cell 0 0,alignx center");
+		comboRightPathFinder = new JComboBox<>();
+		getContentPane().add(comboRightPathFinder, "cell 1 0,alignx center");
 		panelLeftMap = new JPanel();
 		panelLeftMap.setOpaque(false);
 		getContentPane().add(panelLeftMap, "cell 0 1,grow");
@@ -75,10 +79,6 @@ public class MapsWindow extends JFrame {
 		panelRightMap.setOpaque(false);
 		getContentPane().add(panelRightMap, "cell 1 1,grow");
 		panelRightMap.setLayout(new MigLayout("", "[]", "[]"));
-		comboLeftPathFinder = new JComboBox<>();
-		getContentPane().add(comboLeftPathFinder, "cell 0 0,growx");
-		comboRightPathFinder = new JComboBox<>();
-		getContentPane().add(comboRightPathFinder, "cell 1 0,growx");
 	}
 
 	public MapsWindow(PathFinderController controller, MapView leftMapView, MapView rightMapView) {

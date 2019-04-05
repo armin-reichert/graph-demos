@@ -1,7 +1,6 @@
 package de.amr.demos.graph.pathfinding;
 
 import java.awt.EventQueue;
-import java.awt.Toolkit;
 
 import javax.swing.UIManager;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
@@ -16,8 +15,6 @@ import de.amr.graph.grid.impl.Top8;
  * @author Armin Reichert
  */
 public class PathFinderDemoApp {
-
-	public static final int MAP_VIEW_SIZE = Toolkit.getDefaultToolkit().getScreenSize().width * 30 / 100;
 
 	public static void main(String[] args) {
 		try {

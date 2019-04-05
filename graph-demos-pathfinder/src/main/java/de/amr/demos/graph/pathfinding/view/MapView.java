@@ -7,7 +7,6 @@ import static java.lang.Math.min;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.OptionalInt;
@@ -211,8 +210,7 @@ public class MapView extends JPanel {
 		return controller;
 	}
 
-	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex,
-			int size) {
+	public void init(PathFinderModel model, PathFinderController controller, IntSupplier fnPathFinderIndex) {
 		this.model = model;
 		this.controller = controller;
 		this.fnPathFinderIndex = fnPathFinderIndex;
@@ -235,11 +233,6 @@ public class MapView extends JPanel {
 
 		// context menu
 		buildContextMenu(controller);
-
-		// initial size
-		setSize(size, size);
-		setPreferredSize(new Dimension(size, size));
-		updateMap();
 	}
 
 	private void buildContextMenu(PathFinderController controller) {
@@ -331,6 +324,12 @@ public class MapView extends JPanel {
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
 		requestFocusInWindow();
+	}
+
+	@Override
+	public void setSize(int width, int height) {
+		super.setSize(width, height);
+		updateMap();
 	}
 
 	public void updateMap() {
