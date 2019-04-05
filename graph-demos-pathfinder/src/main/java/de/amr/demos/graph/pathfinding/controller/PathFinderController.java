@@ -14,6 +14,7 @@ import de.amr.demos.graph.pathfinding.view.ConfigView;
 import de.amr.demos.graph.pathfinding.view.ConfigWindow;
 import de.amr.demos.graph.pathfinding.view.MapView;
 import de.amr.demos.graph.pathfinding.view.MapsWindow;
+import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.ObservableGraphSearch;
@@ -76,7 +77,7 @@ public class PathFinderController {
 		mapsWindow = new MapsWindow(this, leftMapView, rightMapView);
 		mapsWindow.pack();
 
-		configWindow.setLocation(0,0);
+		configWindow.setLocation(0, 0);
 		Point mapsWindowLocation = configWindow.getLocation();
 		mapsWindowLocation.move(configWindow.getWidth(), 0);
 		mapsWindow.setLocation(mapsWindowLocation);
@@ -290,7 +291,19 @@ public class PathFinderController {
 	public void setTileAt(int cell, Tile tile) {
 		if (cell != model.getSource() && cell != model.getTarget()) {
 			model.setMapContent(cell, tile);
-			updatePathFinderResults();
+			if (executionMode == ExecutionMode.MANUAL) {
+				// if path finder was already executed, clear it
+				if (getLeftPathFinder().getState(model.getSource()) == TraversalState.COMPLETED) {
+					model.clearResults();
+					getLeftMapView().updateView();
+					getRightMapView().updateView();
+				}
+				getLeftMapView().updateMapCell(cell);
+				getRightMapView().updateMapCell(cell);
+			}
+			else {
+				updatePathFinderResults();
+			}
 		}
 	}
 

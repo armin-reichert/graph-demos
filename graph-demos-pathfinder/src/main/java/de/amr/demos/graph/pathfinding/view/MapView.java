@@ -45,7 +45,7 @@ import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
-import de.amr.graph.grid.ui.animation.AbstractAnimation;
+import de.amr.graph.grid.ui.animation.DelayedRunner;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
 import de.amr.graph.pathfinder.api.GraphSearch;
@@ -86,7 +86,7 @@ public class MapView extends JPanel {
 		@Override
 		protected Void doInBackground() throws Exception {
 			PathFinderAnimation animation = new PathFinderAnimation();
-			animation.setFnDelay(() -> controller.getAnimationDelay());
+			animation.delay.setMillis(() -> controller.getAnimationDelay());
 			model.runPathFinder(getPathFinderIndex(), animation);
 			return null;
 		}
@@ -97,21 +97,23 @@ public class MapView extends JPanel {
 		}
 	}
 
-	public class PathFinderAnimation extends AbstractAnimation implements GraphSearchObserver {
+	public class PathFinderAnimation implements GraphSearchObserver {
+
+		private DelayedRunner delay = new DelayedRunner();
 
 		@Override
 		public void vertexStateChanged(int v, TraversalState oldState, TraversalState newState) {
-			delayed(() -> canvas.drawGridCell(v));
+			delay.run(() -> canvas.drawGridCell(v));
 		}
 
 		@Override
 		public void edgeTraversed(int either, int other) {
-			delayed(() -> canvas.drawGridPassage(either, other, true));
+			delay.run(() -> canvas.drawGridPassage(either, other, true));
 		}
 
 		@Override
 		public void vertexRemovedFromFrontier(int v) {
-			delayed(() -> canvas.drawGridCell(v));
+			delay.run(() -> canvas.drawGridCell(v));
 		}
 	}
 
@@ -179,7 +181,8 @@ public class MapView extends JPanel {
 			if (cell != draggedCell) {
 				// dragged mouse into new cell
 				draggedCell = cell;
-				controller.setTileAt(cell, e.isShiftDown() ? Tile.BLANK : Tile.WALL);
+				Tile tile = e.isShiftDown() ? Tile.BLANK : Tile.WALL;
+				controller.setTileAt(cell, tile);
 			}
 		}
 	}
@@ -309,8 +312,18 @@ public class MapView extends JPanel {
 		contextMenu.add(new ResetScene(controller));
 	}
 
+	@Override
+	public void setSize(int width, int height) {
+		super.setSize(width, height);
+		updateMap();
+	}
+
 	public void runPathFinderAnimation() {
 		new PathFinderAnimationTask().execute();
+	}
+
+	public void updateMapCell(int cell) {
+		canvas.drawGridCell(cell);
 	}
 
 	public void updateView() {
@@ -324,12 +337,6 @@ public class MapView extends JPanel {
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
 		requestFocusInWindow();
-	}
-
-	@Override
-	public void setSize(int width, int height) {
-		super.setSize(width, height);
-		updateMap();
 	}
 
 	public void updateMap() {
