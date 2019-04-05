@@ -87,7 +87,7 @@ public class MapsWindow extends JFrame {
 		this.controller = controller;
 		this.leftMapView = leftMapView;
 		this.rightMapView = rightMapView;
-		
+
 		panelLeftMap.add(leftMapView, "cell 0 0,grow");
 		panelRightMap.add(rightMapView, "cell 0 0,grow");
 		getContentPane().addComponentListener(resizeHandler);
@@ -96,13 +96,25 @@ public class MapsWindow extends JFrame {
 		comboLeftPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
 		comboLeftPathFinder.setSelectedIndex(model.getPathFinderIndex(controller.getLeftPathFinder()));
 		comboLeftPathFinder.setAction(SwingGoodies.createAction("", e -> {
-			controller.changeLeftPathFinder(comboLeftPathFinder.getSelectedIndex());
+			int newSelection = comboLeftPathFinder.getSelectedIndex();
+			if (newSelection != comboRightPathFinder.getSelectedIndex()) {
+				controller.changeLeftPathFinder(newSelection);
+			}
+			else {
+				updateWindow();
+			}
 		}));
 
 		comboRightPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
 		comboRightPathFinder.setSelectedIndex(model.getPathFinderIndex(controller.getRightPathFinder()));
 		comboRightPathFinder.setAction(SwingGoodies.createAction("", e -> {
-			controller.changeRightPathFinder(comboRightPathFinder.getSelectedIndex());
+			int newSelection = comboRightPathFinder.getSelectedIndex();
+			if (newSelection != comboLeftPathFinder.getSelectedIndex()) {
+				controller.changeRightPathFinder(newSelection);
+			}
+			else {
+				updateWindow();
+			}
 		}));
 	}
 }

@@ -98,15 +98,17 @@ public class PathFinderController {
 	}
 
 	public void changeLeftPathFinder(int pathFinderIndex) {
-		leftPathFinderIndex = pathFinderIndex;
-		updatePathFinderResults();
-		mapsWindow.updateWindow();
+		if (pathFinderIndex != rightPathFinderIndex) {
+			leftPathFinderIndex = pathFinderIndex;
+			updatePathFinderResults();
+		}
 	}
 
 	public void changeRightPathFinder(int pathFinderIndex) {
-		rightPathFinderIndex = pathFinderIndex;
-		updatePathFinderResults();
-		mapsWindow.updateWindow();
+		if (pathFinderIndex != leftPathFinderIndex) {
+			rightPathFinderIndex = pathFinderIndex;
+			updatePathFinderResults();
+		}
 	}
 
 	public MapView getLeftMapView() {
