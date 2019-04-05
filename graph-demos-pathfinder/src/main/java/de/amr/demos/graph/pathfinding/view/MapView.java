@@ -43,6 +43,8 @@ import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsMapRenderer;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
+import de.amr.graph.grid.impl.Top4;
+import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.grid.ui.animation.AbstractAnimation;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
@@ -66,6 +68,8 @@ public class MapView extends JPanel {
 	private MouseController mouse;
 	private JPopupMenu contextMenu;
 
+	private JRadioButtonMenuItem rb4Neighbors;
+	private JRadioButtonMenuItem rb8Neighbors;
 	private JRadioButtonMenuItem rbShowAsBlocks;
 	private JRadioButtonMenuItem rbShowAsPearls;
 	private JCheckBoxMenuItem cbShowCost;
@@ -268,22 +272,27 @@ public class MapView extends JPanel {
 
 		contextMenu.addSeparator();
 
-		item = contextMenu.add(new Set4NeighborTopology(controller));
-		contextMenu.add(new Set8NeighborTopology(controller));
+		rb4Neighbors = new JRadioButtonMenuItem(new Set4NeighborTopology(controller));
+		rb8Neighbors = new JRadioButtonMenuItem(new Set8NeighborTopology(controller));
+		ButtonGroup bgNeighbors = new ButtonGroup();
+		bgNeighbors.add(rb4Neighbors);
+		bgNeighbors.add(rb8Neighbors);
+		contextMenu.add(rb4Neighbors);
+		contextMenu.add(rb8Neighbors);
 
 		contextMenu.addSeparator();
 
 		rbShowAsBlocks = new JRadioButtonMenuItem(createAction("Blocks", e -> {
 			controller.changeStyle(RenderingStyle.BLOCKS);
 		}));
-		contextMenu.add(rbShowAsBlocks);
 		rbShowAsPearls = new JRadioButtonMenuItem(createAction("Pearls", e -> {
 			controller.changeStyle(RenderingStyle.PEARLS);
 		}));
+		ButtonGroup bgStyke = new ButtonGroup();
+		bgStyke.add(rbShowAsBlocks);
+		bgStyke.add(rbShowAsPearls);
+		contextMenu.add(rbShowAsBlocks);
 		contextMenu.add(rbShowAsPearls);
-		ButtonGroup bg = new ButtonGroup();
-		bg.add(rbShowAsBlocks);
-		bg.add(rbShowAsPearls);
 
 		contextMenu.addSeparator();
 
@@ -311,6 +320,8 @@ public class MapView extends JPanel {
 	}
 
 	public void updateView() {
+		rb4Neighbors.setSelected(model.getMap().getTopology() == Top4.get());
+		rb8Neighbors.setSelected(model.getMap().getTopology() == Top8.get());
 		cbShowCost.setSelected(controller.isShowingCost());
 		cbShowParent.setSelected(controller.isShowingParent());
 		rbShowAsBlocks.setSelected(controller.getStyle() == RenderingStyle.BLOCKS);
