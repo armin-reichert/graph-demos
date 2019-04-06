@@ -25,6 +25,7 @@ import javax.swing.KeyStroke;
 
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
+import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
 import de.amr.demos.graph.pathfinding.controller.action.DecreaseMapSize;
 import de.amr.demos.graph.pathfinding.controller.action.IncreaseMapeSize;
 import de.amr.demos.graph.pathfinding.controller.action.ResetScene;
@@ -32,7 +33,6 @@ import de.amr.demos.graph.pathfinding.controller.action.RunPathFinderAnimations;
 import de.amr.demos.graph.pathfinding.controller.action.Set4NeighborTopology;
 import de.amr.demos.graph.pathfinding.controller.action.Set8NeighborTopology;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
-import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.blocks.BlocksMap;
 import de.amr.demos.graph.pathfinding.view.renderer.blocks.FGH_Cell;
