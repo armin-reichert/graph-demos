@@ -23,6 +23,7 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -34,7 +35,6 @@ import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.graph.grid.impl.Top4;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.border.EmptyBorder;
 
 /**
  * View for editing settings and showing path-finder results.

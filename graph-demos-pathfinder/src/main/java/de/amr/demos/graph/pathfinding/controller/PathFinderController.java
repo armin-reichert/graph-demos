@@ -7,18 +7,22 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
 
+import javax.swing.SwingWorker;
+
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.ConfigView;
 import de.amr.demos.graph.pathfinding.view.ConfigWindow;
 import de.amr.demos.graph.pathfinding.view.MapView;
+import de.amr.demos.graph.pathfinding.view.MapView.PathFinderAnimation;
 import de.amr.demos.graph.pathfinding.view.MapsWindow;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
+import de.amr.util.StopWatch;
 
 /**
  * Demo application controller.
@@ -44,6 +48,36 @@ public class PathFinderController {
 	private int animationDelay;
 	private boolean showingCost;
 	private boolean showingParent;
+
+	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
+
+		private final StopWatch watch = new StopWatch();
+		private final int pathFinderIndex;
+		private final MapView mapView;
+
+		public PathFinderAnimationTask(int pathFinderIndex, MapView mapView) {
+			this.pathFinderIndex = pathFinderIndex;
+			this.mapView = mapView;
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			PathFinderAnimation animation = mapView.new PathFinderAnimation();
+			animation.getDelay().setMillis(PathFinderController.this::getAnimationDelay);
+			watch.start();
+			model.runPathFinder(pathFinderIndex, animation);
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			watch.stop();
+			ObservableGraphSearch pathFinder = model.getPathFinder(pathFinderIndex);
+			model.setResult(pathFinder, pathFinder.buildPath(pathFinder.getTarget()), watch.getMillis());
+			mapView.updateView();
+			mapsWindow.updateWindow();
+		}
+	}
 
 	public PathFinderController(PathFinderModel model, int leftPathFinderIndex, int rightPathFinderIndex) {
 		this.model = model;
@@ -163,8 +197,8 @@ public class PathFinderController {
 		case VISIBLE:
 			model.clearResult(leftPathFinderIndex);
 			model.clearResult(rightPathFinderIndex);
-			leftMapView.runPathFinderAnimation();
-			rightMapView.runPathFinderAnimation();
+			runPathFinderAnimation(leftPathFinderIndex, leftMapView);
+			runPathFinderAnimation(rightPathFinderIndex, rightMapView);
 			break;
 		case ALL:
 			model.runAllPathFinders();
@@ -174,6 +208,10 @@ public class PathFinderController {
 	}
 
 	// animated execution
+
+	private void runPathFinderAnimation(int pathFinderIndex, MapView mapView) {
+		new PathFinderAnimationTask(pathFinderIndex, mapView).execute();
+	}
 
 	public int getAnimationDelay() {
 		return animationDelay;
@@ -188,8 +226,8 @@ public class PathFinderController {
 		model.clearResult(rightPathFinderIndex);
 		leftMapView.updateView();
 		rightMapView.updateView();
-		leftMapView.runPathFinderAnimation();
-		rightMapView.runPathFinderAnimation();
+		runPathFinderAnimation(leftPathFinderIndex, leftMapView);
+		runPathFinderAnimation(rightPathFinderIndex, rightMapView);
 	}
 
 	// step-wise execution

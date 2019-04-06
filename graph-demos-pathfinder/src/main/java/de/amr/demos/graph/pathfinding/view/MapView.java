@@ -22,7 +22,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
-import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
@@ -84,25 +83,13 @@ public class MapView extends JPanel {
 		return fnPathFinderIndex.getAsInt();
 	}
 
-	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
-
-		@Override
-		protected Void doInBackground() throws Exception {
-			PathFinderAnimation animation = new PathFinderAnimation();
-			animation.delay.setMillis(() -> controller.getAnimationDelay());
-			model.runPathFinder(getPathFinderIndex(), animation);
-			return null;
-		}
-
-		@Override
-		protected void done() {
-			updateView();
-		}
-	}
-
 	public class PathFinderAnimation implements GraphSearchObserver {
 
-		private DelayedRunner delay = new DelayedRunner();
+		private final DelayedRunner delay = new DelayedRunner();
+		
+		public DelayedRunner getDelay() {
+			return delay;
+		}
 
 		@Override
 		public void vertexStateChanged(int v, TraversalState oldState, TraversalState newState) {
@@ -333,10 +320,6 @@ public class MapView extends JPanel {
 	public void setSize(int width, int height) {
 		super.setSize(width, height);
 		updateMap();
-	}
-
-	public void runPathFinderAnimation() {
-		new PathFinderAnimationTask().execute();
 	}
 
 	public void updateMapCell(int cell) {

@@ -10,14 +10,17 @@ import java.awt.event.ComponentListener;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
+import de.amr.demos.graph.pathfinding.model.PathFinderResult;
 import net.miginfocom.swing.MigLayout;
 
 public class MapsWindow extends JFrame {
 
+	private PathFinderModel model;
 	private PathFinderController controller;
 	private MapView leftMapView;
 	private MapView rightMapView;
@@ -26,6 +29,8 @@ public class MapsWindow extends JFrame {
 	private JPanel panelRightMap;
 	private JComboBox<String> comboLeftPathFinder;
 	private JComboBox<String> comboRightPathFinder;
+	private JLabel lblResultsRight;
+	private JLabel lblResultsLeft;
 
 	private class ResizeHandler implements ComponentListener {
 
@@ -60,13 +65,22 @@ public class MapsWindow extends JFrame {
 	public void updateWindow() {
 		selectComboNoAction(comboLeftPathFinder, controller.getLeftPathFinderIndex());
 		selectComboNoAction(comboRightPathFinder, controller.getRightPathFinderIndex());
+		lblResultsLeft.setText(formatResult(controller.getLeftPathFinderIndex()));
+		lblResultsRight.setText(formatResult(controller.getRightPathFinderIndex()));
+	}
+
+	private String formatResult(int pathFinderIndex) {
+		PathFinderResult result = model.getResult(pathFinderIndex);
+		return String.format("Time: %.0f ms, Path length: %d, Cost: %.0f, Touched cells %d",
+				result.getRunningTimeMillis(), result.getPathLength(), result.getCost(),
+				result.getNumTouchedVertices());
 	}
 
 	public MapsWindow() {
 		getContentPane().setBackground(Color.WHITE);
 		setTitle("Path Finder Demo Map");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[][grow]"));
+		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[][grow][]"));
 		comboLeftPathFinder = new JComboBox<>();
 		getContentPane().add(comboLeftPathFinder, "cell 0 0,alignx center");
 		comboRightPathFinder = new JComboBox<>();
@@ -79,12 +93,17 @@ public class MapsWindow extends JFrame {
 		panelRightMap.setOpaque(false);
 		getContentPane().add(panelRightMap, "cell 1 1,grow");
 		panelRightMap.setLayout(new MigLayout("", "[]", "[]"));
+		lblResultsLeft = new JLabel("");
+		getContentPane().add(lblResultsLeft, "cell 0 2,alignx center,aligny top");
+		lblResultsRight = new JLabel("");
+		getContentPane().add(lblResultsRight, "cell 1 2,alignx center,aligny top");
 	}
 
 	public MapsWindow(PathFinderController controller, MapView leftMapView, MapView rightMapView) {
 		this();
 
 		this.controller = controller;
+		this.model = controller.getModel();
 		this.leftMapView = leftMapView;
 		this.rightMapView = rightMapView;
 
@@ -92,9 +111,8 @@ public class MapsWindow extends JFrame {
 		panelRightMap.add(rightMapView, "cell 0 0,grow");
 		getContentPane().addComponentListener(resizeHandler);
 
-		PathFinderModel model = controller.getModel();
 		comboLeftPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
-		comboLeftPathFinder.setSelectedIndex(model.getPathFinderIndex(controller.getLeftPathFinder()));
+		comboLeftPathFinder.setSelectedIndex(controller.getLeftPathFinderIndex());
 		comboLeftPathFinder.setAction(SwingGoodies.createAction("", e -> {
 			int newSelection = comboLeftPathFinder.getSelectedIndex();
 			if (newSelection != comboRightPathFinder.getSelectedIndex()) {
@@ -106,7 +124,7 @@ public class MapsWindow extends JFrame {
 		}));
 
 		comboRightPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
-		comboRightPathFinder.setSelectedIndex(model.getPathFinderIndex(controller.getRightPathFinder()));
+		comboRightPathFinder.setSelectedIndex(controller.getRightPathFinderIndex());
 		comboRightPathFinder.setAction(SwingGoodies.createAction("", e -> {
 			int newSelection = comboRightPathFinder.getSelectedIndex();
 			if (newSelection != comboLeftPathFinder.getSelectedIndex()) {

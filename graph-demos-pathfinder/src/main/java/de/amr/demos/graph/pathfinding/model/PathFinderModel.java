@@ -204,8 +204,8 @@ public class PathFinderModel {
 		return results.size();
 	}
 
-	public PathFinderResult getResult(int i) {
-		return results.get(i);
+	public PathFinderResult getResult(int pathFinderIndex) {
+		return results.get(pathFinderIndex);
 	}
 
 	public void setResult(ObservableGraphSearch pathFinder, Path path, float timeMillis) {
@@ -226,12 +226,12 @@ public class PathFinderModel {
 		}
 	}
 
-	public void clearResult(int i) {
-		results.set(i, newResult(getAlgorithm(i)));
+	public void clearResult(int pathFinderIndex) {
+		results.set(pathFinderIndex, newResult(getAlgorithm(pathFinderIndex)));
 	}
 
-	private PathFinderAlgorithm getAlgorithm(int i) {
-		return PathFinderAlgorithm.values()[i];
+	private PathFinderAlgorithm getAlgorithm(int pathFinderIndex) {
+		return PathFinderAlgorithm.values()[pathFinderIndex];
 	}
 
 	public int getSource() {
@@ -255,17 +255,8 @@ public class PathFinderModel {
 				.map(PathFinderResult::getPathFinder).findFirst();
 	}
 
-	public ObservableGraphSearch getPathFinder(int i) {
-		return results.get(i).getPathFinder();
-	}
-
-	public int getPathFinderIndex(ObservableGraphSearch pathFinder) {
-		for (int i = 0; i < results.size(); i++) {
-			if (results.get(i).getPathFinder() == pathFinder) {
-				return i;
-			}
-		}
-		return -1;
+	public ObservableGraphSearch getPathFinder(int pathFinderIndex) {
+		return results.get(pathFinderIndex).getPathFinder();
 	}
 
 	public String[] getPathFinderNames() {
@@ -278,9 +269,13 @@ public class PathFinderModel {
 		}
 	}
 
-	public void runPathFinder(int i, GraphSearchObserver observer) {
-		clearResult(i);
-		ObservableGraphSearch pathFinder = getPathFinder(i);
+	public void runPathFinder(int pathFinderIndex) {
+		runPathFinder(pathFinderIndex, null);
+	}
+
+	public void runPathFinder(int pathFinderIndex, GraphSearchObserver observer) {
+		clearResult(pathFinderIndex);
+		ObservableGraphSearch pathFinder = getPathFinder(pathFinderIndex);
 		if (observer != null) {
 			pathFinder.addObserver(observer);
 		}
@@ -291,10 +286,6 @@ public class PathFinderModel {
 		if (observer != null) {
 			pathFinder.removeObserver(observer);
 		}
-		setResult(pathFinder, path, watch.getNanos() / 1_000_000f);
-	}
-
-	public void runPathFinder(int i) {
-		runPathFinder(i, null);
+		setResult(pathFinder, path, watch.getMillis());
 	}
 }
