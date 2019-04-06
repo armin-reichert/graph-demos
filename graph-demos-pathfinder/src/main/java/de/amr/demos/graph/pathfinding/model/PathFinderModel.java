@@ -32,7 +32,7 @@ import de.amr.util.StopWatch;
 public class PathFinderModel {
 
 	public static final int MIN_MAP_SIZE = 2;
-	public static final int MAX_MAP_SIZE = 316;
+	public static final int MAX_MAP_SIZE = (int) Math.sqrt(100000);
 
 	private GridGraph<Tile, Double> map;
 	private int source;

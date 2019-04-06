@@ -212,24 +212,24 @@ public class ConfigView extends JPanel {
 		comboStyle.setAction(actionSelectStyle);
 		comboStyle.setModel(new DefaultComboBoxModel<>(RenderingStyle.values()));
 		panelLayout.add(comboStyle, "cell 2 3,growx");
-				
-						btnRun = new JButton();
-						panelLayout.add(btnRun, "cell 2 8,alignx center");
-						btnRun.setText("Run Path Finder");
-				
-				lblDelay = new JLabel("Delay [ms]");
-				panelLayout.add(lblDelay, "cell 0 9,alignx trailing,aligny center");
-		
-				sliderDelay = new JSlider();
-				lblDelay.setLabelFor(sliderDelay);
-				panelLayout.add(sliderDelay, "cell 2 9,growx");
-				sliderDelay.setMajorTickSpacing(500);
-				sliderDelay.setMinorTickSpacing(100);
-				sliderDelay.setPaintTicks(true);
-				sliderDelay.setPaintLabels(true);
-				sliderDelay.setToolTipText("Delay [ms]");
-				sliderDelay.setValue(0);
-				sliderDelay.setMaximum(1000);
+
+		btnRun = new JButton();
+		panelLayout.add(btnRun, "cell 2 8,alignx center");
+		btnRun.setText("Run Path Finder");
+
+		lblDelay = new JLabel("Delay [ms]");
+		panelLayout.add(lblDelay, "cell 0 9,alignx trailing,aligny center");
+
+		sliderDelay = new JSlider();
+		lblDelay.setLabelFor(sliderDelay);
+		panelLayout.add(sliderDelay, "cell 2 9,growx");
+		sliderDelay.setMajorTickSpacing(500);
+		sliderDelay.setMinorTickSpacing(100);
+		sliderDelay.setPaintTicks(true);
+		sliderDelay.setPaintLabels(true);
+		sliderDelay.setToolTipText("Delay [ms]");
+		sliderDelay.setValue(0);
+		sliderDelay.setMaximum(1000);
 
 		scrollPaneTableResults = new JScrollPane();
 		panelLayout.add(scrollPaneTableResults, "cell 0 10 3 1,growx");
@@ -296,7 +296,8 @@ public class ConfigView extends JPanel {
 
 	public void updateView() {
 		tableResults.dataChanged();
-		lblTotalCells.setText(String.format("(%d cells)", model.getMapSize() * model.getMapSize()));
+		lblTotalCells.setText(String.format("(%d cells, min: %d, max: %d)",
+				model.getMapSize() * model.getMapSize(), PathFinderModel.MIN_MAP_SIZE, PathFinderModel.MAX_MAP_SIZE));
 		selectComboNoAction(comboTopology, model.getMap().getTopology() == Top4.get() ? 0 : 1);
 		spinnerMapSize.setValue(model.getMapSize());
 		cbShowCost.setSelected(controller.isShowingCost());
