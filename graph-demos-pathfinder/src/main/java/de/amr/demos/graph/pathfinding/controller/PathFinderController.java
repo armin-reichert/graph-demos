@@ -4,11 +4,11 @@ import static de.amr.demos.graph.pathfinding.model.Tile.BLANK;
 import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.Toolkit;
 
 import javax.swing.SwingWorker;
 
+import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.Tile;
@@ -32,17 +32,17 @@ import de.amr.util.StopWatch;
 public class PathFinderController {
 
 	private final PathFinderModel model;
-	private int leftPathFinderIndex;
-	private int rightPathFinderIndex;
 
-	private final ConfigView configView;
 	private ConfigWindow configWindow;
+	private ConfigView configView;
 
 	private MapsWindow mapsWindow;
-	private final MapView leftMapView;
-	private final MapView rightMapView;
+	private MapView leftMapView;
+	private MapView rightMapView;
 
 	// controller state
+	private int leftPathFinderIndex;
+	private int rightPathFinderIndex;
 	private RenderingStyle style;
 	private ExecutionMode executionMode;
 	private int animationDelay;
@@ -79,42 +79,40 @@ public class PathFinderController {
 		}
 	}
 
-	public PathFinderController(PathFinderModel model, int leftPathFinderIndex, int rightPathFinderIndex) {
+	public PathFinderController(PathFinderModel model, PathFinderAlgorithm leftAlgorithm,
+			PathFinderAlgorithm rightAlgorithm) {
 		this.model = model;
-		this.leftPathFinderIndex = leftPathFinderIndex;
-		this.rightPathFinderIndex = rightPathFinderIndex;
+		leftPathFinderIndex = leftAlgorithm.ordinal();
+		rightPathFinderIndex = rightAlgorithm.ordinal();
 		style = RenderingStyle.BLOCKS;
 		executionMode = ExecutionMode.MANUAL;
 		animationDelay = 0;
 		showingCost = true;
 		showingParent = false;
-		configView = new ConfigView();
-		leftMapView = new MapView();
-		rightMapView = new MapView();
 	}
 
 	public void createAndShowUI() {
+		configView = new ConfigView();
+		leftMapView = new MapView();
+		rightMapView = new MapView();
 
 		configView.init(model, this);
 		leftMapView.init(model, this, this::getLeftPathFinderIndex);
 		rightMapView.init(model, this, this::getRightPathFinderIndex);
 
 		configWindow = new ConfigWindow(configView);
+		configWindow.setLocation(0, 0);
 		configWindow.pack();
 
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		int width = (screenSize.width - configWindow.getWidth() - 10) / 2;
+		int width = (screenSize.width - configWindow.getWidth()) / 2 * 95 / 100;
 		int height = Math.min(width, screenSize.height);
 		leftMapView.setSize(width, height);
 		rightMapView.setSize(width, height);
 
 		mapsWindow = new MapsWindow(this, leftMapView, rightMapView);
+		mapsWindow.setLocation(configWindow.getWidth(), 0);
 		mapsWindow.pack();
-
-		configWindow.setLocation(0, 0);
-		Point mapsWindowLocation = configWindow.getLocation();
-		mapsWindowLocation.move(configWindow.getWidth(), 0);
-		mapsWindow.setLocation(mapsWindowLocation);
 
 		configWindow.setVisible(true);
 		mapsWindow.setVisible(true);

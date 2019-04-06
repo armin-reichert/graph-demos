@@ -6,6 +6,7 @@ import javax.swing.UIManager;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
+import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Top8;
 
@@ -27,7 +28,8 @@ public class PathFinderDemoApp {
 
 	public PathFinderDemoApp() {
 		PathFinderModel model = new PathFinderModel(25, Top8.get());
-		PathFinderController controller = new PathFinderController(model, 0, 1);
+		PathFinderController controller = new PathFinderController(model, PathFinderAlgorithm.BFS,
+				PathFinderAlgorithm.AStar);
 		controller.createAndShowUI();
 		controller.runBothFirstStep();
 	}
