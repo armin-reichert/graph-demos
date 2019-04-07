@@ -340,6 +340,8 @@ public class MapView extends JPanel {
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
 		requestFocusInWindow();
+		
+		System.out.println("MapView updated: " + this);
 	}
 
 	public void updateMap(boolean updateView) {

@@ -302,6 +302,8 @@ public class ConfigView extends JPanel {
 		cbShowParent.setSelected(controller.isShowingParent());
 		selectComboNoAction(comboStyle, controller.getStyle());
 		updateViewState();
+		
+		System.out.println("ConfigView updated: " + this);
 	}
 
 	private void updateViewState() {

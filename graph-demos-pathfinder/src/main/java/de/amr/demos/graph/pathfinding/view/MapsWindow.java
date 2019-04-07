@@ -113,11 +113,12 @@ public class MapsWindow extends JFrame {
 		this.leftMapView = leftMapView;
 		this.rightMapView = rightMapView;
 
+		getContentPane().addComponentListener(resizeHandler);
+		
 		updateTitle();
 
 		panelLeftMap.add(leftMapView, "cell 0 0,grow");
 		panelRightMap.add(rightMapView, "cell 0 0,grow");
-		getContentPane().addComponentListener(resizeHandler);
 
 		comboLeftPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
 		comboLeftPathFinder.setSelectedIndex(controller.getLeftPathFinderIndex());
