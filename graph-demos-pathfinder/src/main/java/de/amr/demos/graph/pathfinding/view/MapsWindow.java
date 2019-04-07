@@ -44,13 +44,13 @@ public class MapsWindow extends JFrame {
 			Dimension dim = new Dimension(size, size);
 			leftMapView.setSize(dim);
 			leftMapView.setPreferredSize(dim);
-			leftMapView.updateMap();
+			leftMapView.updateMap(true);
 
 			size = Math.min(panelRightMap.getWidth(), panelRightMap.getHeight()) * 98 / 100;
 			dim = new Dimension(size, size);
 			rightMapView.setSize(dim);
 			rightMapView.setPreferredSize(dim);
-			rightMapView.updateMap();
+			rightMapView.updateMap(true);
 		}
 
 		@Override

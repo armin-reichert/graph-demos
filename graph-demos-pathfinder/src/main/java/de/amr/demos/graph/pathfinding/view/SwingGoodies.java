@@ -31,9 +31,14 @@ public class SwingGoodies {
 	}
 
 	public static void selectComboNoAction(JComboBox<?> combo, int index) {
+		selectComboNoAction(combo, combo.getModel().getElementAt(index));
+	}
+
+	public static void selectComboNoAction(JComboBox<?> combo, Object selection) {
 		Action action = combo.getAction();
 		combo.setAction(NULL_ACTION);
-		combo.setSelectedIndex(index);
+		combo.setSelectedItem(selection);
 		combo.setAction(action);
 	}
+
 }

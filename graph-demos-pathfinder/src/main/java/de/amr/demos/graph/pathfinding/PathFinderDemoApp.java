@@ -31,6 +31,5 @@ public class PathFinderDemoApp {
 		PathFinderController controller = new PathFinderController(model, PathFinderAlgorithm.BFS,
 				PathFinderAlgorithm.AStar);
 		controller.createAndShowUI();
-		controller.runBothFirstStep();
 	}
 }

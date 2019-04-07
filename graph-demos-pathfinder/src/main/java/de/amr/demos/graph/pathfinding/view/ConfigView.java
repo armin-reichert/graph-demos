@@ -79,7 +79,7 @@ public class ConfigView extends JPanel {
 	});
 
 	private Action actionStartSelectedPathFinder = createAction("Start", e -> {
-		getController().runBothFirstStep();
+		getController().runBothFirstStep(true);
 		updateViewState();
 	});
 
@@ -296,17 +296,17 @@ public class ConfigView extends JPanel {
 
 	public void updateView() {
 		tableResults.dataChanged();
-		lblTotalCells.setText(String.format("(%d cells, min: %d, max: %d)",
-				model.getMapSize() * model.getMapSize(), PathFinderModel.MIN_MAP_SIZE, PathFinderModel.MAX_MAP_SIZE));
 		selectComboNoAction(comboTopology, model.getMap().getTopology() == Top4.get() ? 0 : 1);
 		spinnerMapSize.setValue(model.getMapSize());
 		cbShowCost.setSelected(controller.isShowingCost());
 		cbShowParent.setSelected(controller.isShowingParent());
-		comboStyle.setSelectedItem(controller.getStyle());
+		selectComboNoAction(comboStyle, controller.getStyle());
 		updateViewState();
 	}
 
 	private void updateViewState() {
+		lblTotalCells.setText(String.format("(%d cells, min: %d, max: %d)",
+				model.getMapSize() * model.getMapSize(), PathFinderModel.MIN_MAP_SIZE, PathFinderModel.MAX_MAP_SIZE));
 		boolean manual = controller.getExecutionMode() == ExecutionMode.MANUAL;
 		actionStartSelectedPathFinder.setEnabled(manual);
 		actionStepPathFinders.setEnabled(manual);

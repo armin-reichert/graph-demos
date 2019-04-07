@@ -170,9 +170,9 @@ public class PathFinderController {
 		mapsWindow.updateWindow();
 	}
 
-	private void updateMaps() {
-		leftMapView.updateMap();
-		rightMapView.updateMap();
+	private void updateMaps(boolean updateViews) {
+		leftMapView.updateMap(updateViews);
+		rightMapView.updateMap(updateViews);
 	}
 
 	public ExecutionMode getExecutionMode() {
@@ -229,10 +229,12 @@ public class PathFinderController {
 
 	// step-wise execution
 
-	public void runBothFirstStep() {
+	public void runBothFirstStep(boolean updateViews) {
 		runSingleFirstStep(leftPathFinderIndex);
 		runSingleFirstStep(rightPathFinderIndex);
-		updateViews();
+		if (updateViews) {
+			updateViews();
+		}
 	}
 
 	public void runBothNumSteps(int numSteps) {
@@ -244,7 +246,7 @@ public class PathFinderController {
 		runBothNumSteps(Integer.MAX_VALUE);
 	}
 
-	private void runSingleFirstStep(int pathFinderIndex) {
+	public void runSingleFirstStep(int pathFinderIndex) {
 		model.clearResult(pathFinderIndex);
 		model.getPathFinder(pathFinderIndex).start(model.getSource(), model.getTarget());
 	}
@@ -267,7 +269,7 @@ public class PathFinderController {
 	public void resetScene() {
 		model.clearMap();
 		model.clearResults();
-		updateMaps();
+		updateMaps(false);
 		updatePathFinderResults();
 	}
 
@@ -279,14 +281,14 @@ public class PathFinderController {
 	public void changeMapSize(int size) {
 		model.setMapSize(size);
 		model.clearResults();
-		updateMaps();
+		updateMaps(false);
 		updatePathFinderResults();
 	}
 
 	public void changeTopology(TopologySelection topology) {
 		model.setMapTopology(topology == TopologySelection._4_NEIGHBORS ? Top4.get() : Top8.get());
 		model.clearResults();
-		updateMaps();
+		updateMaps(false);
 		updatePathFinderResults();
 	}
 

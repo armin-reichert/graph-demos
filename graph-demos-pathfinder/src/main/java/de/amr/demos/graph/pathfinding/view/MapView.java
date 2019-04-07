@@ -86,7 +86,7 @@ public class MapView extends JPanel {
 	public class PathFinderAnimation implements GraphSearchObserver {
 
 		private final DelayedRunner delay = new DelayedRunner();
-		
+
 		public DelayedRunner getDelay() {
 			return delay;
 		}
@@ -224,8 +224,9 @@ public class MapView extends JPanel {
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('4'), "set4Neighbors");
 		canvas.getInputMap().put(KeyStroke.getKeyStroke('8'), "set8Neighbors");
 
-		// context menu
 		buildContextMenu(controller);
+
+		controller.runSingleFirstStep(getPathFinderIndex());
 	}
 
 	private void buildContextMenu(PathFinderController controller) {
@@ -236,7 +237,7 @@ public class MapView extends JPanel {
 		item.setText("Run pathfinders");
 
 		contextMenu.addSeparator();
-		
+
 		rbExecutionManual = new JRadioButtonMenuItem(createAction("Manual execution", e -> {
 			controller.changeExecutionMode(ExecutionMode.MANUAL);
 		}));
@@ -319,7 +320,7 @@ public class MapView extends JPanel {
 	@Override
 	public void setSize(int width, int height) {
 		super.setSize(width, height);
-		updateMap();
+		updateMap(true);
 	}
 
 	public void updateMapCell(int cell) {
@@ -341,14 +342,16 @@ public class MapView extends JPanel {
 		requestFocusInWindow();
 	}
 
-	public void updateMap() {
+	public void updateMap(boolean updateView) {
 		int cellSize = getHeight() / model.getMapSize();
 		if (cellSize < 2) {
 			return;
 		}
 		canvas.setCellSize(cellSize, false);
 		canvas.setGrid(model.getMap(), false);
-		updateView();
+		if (updateView) {
+			updateView();
+		}
 	}
 
 	public ObservableGraphSearch getPathFinder() {
