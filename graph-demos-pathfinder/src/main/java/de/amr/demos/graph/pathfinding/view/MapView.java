@@ -3,6 +3,7 @@ package de.amr.demos.graph.pathfinding.view;
 import static de.amr.demos.graph.pathfinding.view.SwingGoodies.createAction;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static javax.swing.KeyStroke.getKeyStroke;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,6 +14,7 @@ import java.util.function.IntSupplier;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
+import javax.swing.InputMap;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
@@ -20,17 +22,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.KeyStroke;
 
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
-import de.amr.demos.graph.pathfinding.controller.action.DecreaseMapSize;
-import de.amr.demos.graph.pathfinding.controller.action.IncreaseMapeSize;
-import de.amr.demos.graph.pathfinding.controller.action.ResetScene;
-import de.amr.demos.graph.pathfinding.controller.action.RunPathFinderAnimations;
-import de.amr.demos.graph.pathfinding.controller.action.Set4NeighborTopology;
-import de.amr.demos.graph.pathfinding.controller.action.Set8NeighborTopology;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.blocks.BlocksMap;
@@ -212,17 +207,13 @@ public class MapView extends JPanel {
 		canvas.addMouseListener(mouse);
 		canvas.addMouseMotionListener(mouse);
 
-		canvas.getActionMap().put("increaseMapSize", new IncreaseMapeSize(controller));
-		canvas.getActionMap().put("decreaseMapSize", new DecreaseMapSize(controller));
-		canvas.getActionMap().put("runPathFinderAnimations", new RunPathFinderAnimations(controller));
-		canvas.getActionMap().put("set4Neighbors", new Set4NeighborTopology(controller));
-		canvas.getActionMap().put("set8Neighbors", new Set8NeighborTopology(controller));
-
-		canvas.getInputMap().put(KeyStroke.getKeyStroke('+'), "increaseMapSize");
-		canvas.getInputMap().put(KeyStroke.getKeyStroke('-'), "decreaseMapSize");
-		canvas.getInputMap().put(KeyStroke.getKeyStroke(' '), "runPathFinderAnimations");
-		canvas.getInputMap().put(KeyStroke.getKeyStroke('4'), "set4Neighbors");
-		canvas.getInputMap().put(KeyStroke.getKeyStroke('8'), "set8Neighbors");
+		canvas.getActionMap().setParent(controller.getActions());
+		InputMap inputMap = canvas.getInputMap();
+		inputMap.put(getKeyStroke('+'), controller.actionIncreaseMapSize().getValue(Action.NAME));
+		inputMap.put(getKeyStroke('-'), controller.actionDecreaseMapSize().getValue(Action.NAME));
+		inputMap.put(getKeyStroke(' '), controller.actionRunPathFinderAnimations().getValue(Action.NAME));
+		inputMap.put(getKeyStroke('4'), controller.actionSet4Neighbors().getValue(Action.NAME));
+		inputMap.put(getKeyStroke('8'), controller.actionSet8Neighbors().getValue(Action.NAME));
 
 		buildContextMenu(controller);
 
@@ -233,7 +224,7 @@ public class MapView extends JPanel {
 		JMenuItem item;
 		contextMenu = new JPopupMenu();
 
-		item = contextMenu.add(new RunPathFinderAnimations(controller));
+		item = contextMenu.add(controller.actionRunPathFinderAnimations());
 		item.setText("Run pathfinders");
 
 		contextMenu.addSeparator();
@@ -274,8 +265,8 @@ public class MapView extends JPanel {
 
 		contextMenu.addSeparator();
 
-		rb4Neighbors = new JRadioButtonMenuItem(new Set4NeighborTopology(controller));
-		rb8Neighbors = new JRadioButtonMenuItem(new Set8NeighborTopology(controller));
+		rb4Neighbors = new JRadioButtonMenuItem(controller.actionSet4Neighbors());
+		rb8Neighbors = new JRadioButtonMenuItem(controller.actionSet8Neighbors());
 		ButtonGroup bgNeighbors = new ButtonGroup();
 		bgNeighbors.add(rb4Neighbors);
 		bgNeighbors.add(rb8Neighbors);
@@ -313,8 +304,7 @@ public class MapView extends JPanel {
 		contextMenu.add(cbShowParent);
 
 		contextMenu.addSeparator();
-
-		contextMenu.add(new ResetScene(controller));
+		contextMenu.add(controller.actionResetScene());
 	}
 
 	@Override
@@ -340,7 +330,7 @@ public class MapView extends JPanel {
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
 		requestFocusInWindow();
-		
+
 		System.out.println("MapView updated: " + this);
 	}
 

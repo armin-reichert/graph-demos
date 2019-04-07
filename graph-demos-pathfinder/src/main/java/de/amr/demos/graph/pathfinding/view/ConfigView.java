@@ -31,7 +31,6 @@ import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
-import de.amr.demos.graph.pathfinding.controller.action.RunPathFinderAnimations;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Top4;
 import net.miginfocom.swing.MigLayout;
@@ -58,59 +57,11 @@ public class ConfigView extends JPanel {
 	private JSlider sliderDelay;
 	private JScrollPane scrollPaneTableResults;
 	private HelpPanel helpPanel;
-	private JButton btnRun;
-	private JButton btnFinish;
+	private JButton btnRunAnimation;
+	private JButton btnFinishAnimation;
 	private JLabel lblStepbystep;
 	private JLabel lblNewLabel;
 	private JLabel lblTotalCells;
-
-	// Actions
-
-	private Action actionSelectTopology = createAction("Select Topology", e -> {
-		getController().changeTopology(selection(comboTopology));
-	});
-
-	private Action actionSelectExecutionMode = createAction("Select Execution Mode", e -> {
-		getController().changeExecutionMode(selection(comboExecutionMode));
-	});
-
-	private Action actionSelectStyle = createAction("Select Map Style", e -> {
-		getController().changeStyle(selection(comboStyle));
-	});
-
-	private Action actionStartSelectedPathFinder = createAction("Start", e -> {
-		getController().runBothFirstStep(true);
-		updateViewState();
-	});
-
-	private Action actionStepPathFinders = createAction("Steps", e -> {
-		JComponent source = (JComponent) e.getSource();
-		int numSteps = (Integer) source.getClientProperty("numSteps");
-		getController().runBothNumSteps(numSteps);
-		updateViewState();
-	});
-
-	private Action actionFinishPathFinders = createAction("Finish", e -> {
-		getController().runBothRemainingSteps();
-		updateViewState();
-	});
-
-	private Action actionShowCost = createAction("Show Cost", e -> {
-		getController().showCost(cbShowCost.isSelected());
-	});
-
-	private Action actionShowParent = createAction("Show Parent", e -> {
-		getController().showParent(cbShowParent.isSelected());
-	});
-
-	private ChangeListener onMapSizeChange = new ChangeListener() {
-
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			int newSize = (int) spinnerMapSize.getValue();
-			getController().changeMapSize(newSize);
-		}
-	};
 	private JLabel lblDelay;
 
 	public ConfigView() {
@@ -193,9 +144,9 @@ public class ConfigView extends JPanel {
 		btnSteps50.setText("+50");
 		panel.add(btnSteps50);
 
-		btnFinish = new JButton();
-		btnFinish.setAction(actionFinishPathFinders);
-		panel.add(btnFinish);
+		btnFinishAnimation = new JButton();
+		btnFinishAnimation.setAction(actionFinishPathFinders);
+		panel.add(btnFinishAnimation);
 
 		JLabel lblTopology = new JLabel("Topology");
 		panelLayout.add(lblTopology, "flowy,cell 0 2,alignx trailing");
@@ -213,9 +164,9 @@ public class ConfigView extends JPanel {
 		comboStyle.setModel(new DefaultComboBoxModel<>(RenderingStyle.values()));
 		panelLayout.add(comboStyle, "cell 2 3,growx");
 
-		btnRun = new JButton();
-		panelLayout.add(btnRun, "cell 2 8,alignx center");
-		btnRun.setText("Run Path Finder");
+		btnRunAnimation = new JButton();
+		panelLayout.add(btnRunAnimation, "cell 2 8,alignx center");
+		btnRunAnimation.setText("Run Path Finder");
 
 		lblDelay = new JLabel("Delay [ms]");
 		panelLayout.add(lblDelay, "cell 0 9,alignx trailing,aligny center");
@@ -250,9 +201,14 @@ public class ConfigView extends JPanel {
 		panelLayout.add(lblTotalCells, "cell 2 1");
 	}
 
+	/*
+	 * Initialization using model and controller.
+	 */
 	public void init(PathFinderModel model, PathFinderController controller) {
 		this.model = model;
 		this.controller = controller;
+
+		btnRunAnimation.setAction(controller.actionRunPathFinderAnimations());
 
 		// path finder results table
 		tableResults.init(model);
@@ -265,13 +221,7 @@ public class ConfigView extends JPanel {
 		spinnerMapSize.addChangeListener(onMapSizeChange);
 
 		sliderDelay.setValue(controller.getAnimationDelay());
-		sliderDelay.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				controller.setAnimationDelay(sliderDelay.getValue());
-			}
-		});
+		sliderDelay.addChangeListener(onDelayChange);
 
 		comboTopology.setModel(new DefaultComboBoxModel<>(TopologySelection.values()));
 		comboTopology.setSelectedItem(model.getMap().getTopology() == Top4.get() ? TopologySelection._4_NEIGHBORS
@@ -285,14 +235,10 @@ public class ConfigView extends JPanel {
 		cbShowCost.setSelected(controller.isShowingCost());
 		cbShowParent.setSelected(controller.isShowingParent());
 
-		btnRun.setAction(new RunPathFinderAnimations(controller));
-
 		updateViewState();
 	}
 
-	public PathFinderController getController() {
-		return controller;
-	}
+	// Actions and change listeners
 
 	public void updateView() {
 		tableResults.dataChanged();
@@ -302,7 +248,7 @@ public class ConfigView extends JPanel {
 		cbShowParent.setSelected(controller.isShowingParent());
 		selectComboNoAction(comboStyle, controller.getStyle());
 		updateViewState();
-		
+
 		System.out.println("ConfigView updated: " + this);
 	}
 
@@ -313,9 +259,66 @@ public class ConfigView extends JPanel {
 		actionStartSelectedPathFinder.setEnabled(manual);
 		actionStepPathFinders.setEnabled(manual);
 		actionFinishPathFinders.setEnabled(manual);
-		btnRun.setEnabled(manual);
+		btnRunAnimation.setEnabled(manual);
 		scrollPaneTableResults.setVisible(controller.getExecutionMode() == ExecutionMode.ALL);
 		cbShowCost.setVisible(comboStyle.getSelectedItem() == RenderingStyle.BLOCKS);
 	}
 
+	public PathFinderController getController() {
+		return controller;
+	}
+
+	private Action actionSelectTopology = createAction("Select Topology", e -> {
+		getController().changeTopology(selection(comboTopology));
+	});
+
+	private Action actionSelectExecutionMode = createAction("Select Execution Mode", e -> {
+		getController().changeExecutionMode(selection(comboExecutionMode));
+	});
+
+	private Action actionSelectStyle = createAction("Select Map Style", e -> {
+		getController().changeStyle(selection(comboStyle));
+	});
+
+	private Action actionStartSelectedPathFinder = createAction("Start", e -> {
+		getController().runBothFirstStep(true);
+		updateViewState();
+	});
+
+	private Action actionStepPathFinders = createAction("Steps", e -> {
+		JComponent source = (JComponent) e.getSource();
+		int numSteps = (Integer) source.getClientProperty("numSteps");
+		getController().runBothNumSteps(numSteps);
+		updateViewState();
+	});
+
+	private Action actionFinishPathFinders = createAction("Finish", e -> {
+		getController().runBothRemainingSteps();
+		updateViewState();
+	});
+
+	private Action actionShowCost = createAction("Show Cost", e -> {
+		getController().showCost(cbShowCost.isSelected());
+	});
+
+	private Action actionShowParent = createAction("Show Parent", e -> {
+		getController().showParent(cbShowParent.isSelected());
+	});
+
+	private ChangeListener onMapSizeChange = new ChangeListener() {
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			int newSize = (int) spinnerMapSize.getValue();
+			getController().changeMapSize(newSize);
+		}
+	};
+
+	private ChangeListener onDelayChange = new ChangeListener() {
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			controller.setAnimationDelay(sliderDelay.getValue());
+		}
+	};
 }

@@ -5,7 +5,12 @@ import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
@@ -47,6 +52,63 @@ public class PathFinderController {
 	private int animationDelay;
 	private boolean showingCost;
 	private boolean showingParent;
+
+	// actions
+
+	private ActionMap actions = new ActionMap();
+
+	public ActionMap getActions() {
+		return actions;
+	}
+
+	private Action getAction(String name, ActionListener handler) {
+		Action action = actions.get(name);
+		if (action == null) {
+			action = new AbstractAction(name) {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					handler.actionPerformed(e);
+				}
+			};
+			actions.put(name, action);
+		}
+		return action;
+	}
+
+	public Action actionDecreaseMapSize() {
+		return getAction("-", e -> {
+			int mapSize = getModel().getMapSize() - 1;
+			if (mapSize >= PathFinderModel.MIN_MAP_SIZE) {
+				changeMapSize(mapSize);
+			}
+		});
+	}
+
+	public Action actionIncreaseMapSize() {
+		return getAction("+", e -> {
+			int mapSize = getModel().getMapSize() + 1;
+			if (mapSize <= PathFinderModel.MAX_MAP_SIZE) {
+				changeMapSize(mapSize);
+			}
+		});
+	}
+
+	public Action actionRunPathFinderAnimations() {
+		return getAction("Run Path Finder Animations", e -> runPathFinderAnimations());
+	}
+
+	public Action actionSet4Neighbors() {
+		return getAction("4 Neighbors", e -> changeTopology(TopologySelection._4_NEIGHBORS));
+	}
+
+	public Action actionSet8Neighbors() {
+		return getAction("8 Neighbors", e -> changeTopology(TopologySelection._8_NEIGHBORS));
+	}
+
+	public Action actionResetScene() {
+		return getAction("Reset Scene", e -> resetScene());
+	}
 
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
 

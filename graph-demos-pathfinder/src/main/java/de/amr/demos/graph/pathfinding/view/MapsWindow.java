@@ -114,7 +114,7 @@ public class MapsWindow extends JFrame {
 		this.rightMapView = rightMapView;
 
 		getContentPane().addComponentListener(resizeHandler);
-		
+
 		updateTitle();
 
 		panelLeftMap.add(leftMapView, "cell 0 0,grow");
