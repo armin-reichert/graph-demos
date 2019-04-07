@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.JComponent;
 import javax.swing.SwingWorker;
 
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
@@ -22,6 +23,7 @@ import de.amr.demos.graph.pathfinding.view.MapView;
 import de.amr.demos.graph.pathfinding.view.MapView.PathFinderAnimation;
 import de.amr.demos.graph.pathfinding.view.MapsWindow;
 import de.amr.graph.core.api.TraversalState;
+import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.impl.Top8;
 import de.amr.graph.pathfinder.api.ObservableGraphSearch;
@@ -110,6 +112,34 @@ public class PathFinderController {
 		return getAction("Reset Scene", e -> resetScene());
 	}
 
+	public Action actionSetSource() {
+		return getAction("Set Source", e -> {
+			JComponent trigger = (JComponent) e.getSource();
+			GridPosition position = (GridPosition) trigger.getClientProperty("position");
+			setSource(model.getMap().cell(position));
+		});
+	}
+
+	public Action actionSetTarget() {
+		return getAction("Set Target", e -> {
+			JComponent trigger = (JComponent) e.getSource();
+			GridPosition position = (GridPosition) trigger.getClientProperty("position");
+			setTarget(model.getMap().cell(position));
+		});
+	}
+
+	public Action actionToggleShowCost() {
+		return getAction("Show Cost", e -> {
+			showCost(!showingCost);
+		});
+	}
+
+	public Action actionToggleShowParent() {
+		return getAction("Show Parent", e -> {
+			showParent(!showingParent);
+		});
+	}
+	
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
 
 		private final StopWatch watch = new StopWatch();
@@ -211,18 +241,6 @@ public class PathFinderController {
 			rightPathFinderIndex = pathFinderIndex;
 			updatePathFinderResults();
 		}
-	}
-
-	public MapView getLeftMapView() {
-		return leftMapView;
-	}
-
-	public MapView getRightMapView() {
-		return rightMapView;
-	}
-
-	public ConfigView getConfigView() {
-		return configView;
 	}
 
 	private void updateViews() {
@@ -378,13 +396,17 @@ public class PathFinderController {
 	}
 
 	public void setSource(int source) {
-		model.setSource(source);
-		updatePathFinderResults();
+		if (model.getMap().get(source) != WALL) {
+			model.setSource(source);
+			updatePathFinderResults();
+		}
 	}
 
 	public void setTarget(int target) {
-		model.setTarget(target);
-		updatePathFinderResults();
+		if (model.getMap().get(target) != WALL) {
+			model.setTarget(target);
+			updatePathFinderResults();
+		}
 	}
 
 	public void setTileAt(int cell, Tile tile) {
@@ -394,11 +416,11 @@ public class PathFinderController {
 				// if path finder was already executed, clear it
 				if (getLeftPathFinder().getState(model.getSource()) == TraversalState.COMPLETED) {
 					model.clearResults();
-					getLeftMapView().updateView();
-					getRightMapView().updateView();
+					leftMapView.updateView();
+					rightMapView.updateView();
 				}
-				getLeftMapView().updateMapCell(cell);
-				getRightMapView().updateMapCell(cell);
+				leftMapView.updateMapCell(cell);
+				rightMapView.updateMapCell(cell);
 			}
 			else {
 				updatePathFinderResults();
