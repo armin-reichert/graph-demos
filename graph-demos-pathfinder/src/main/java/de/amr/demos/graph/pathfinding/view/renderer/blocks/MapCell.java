@@ -1,6 +1,5 @@
 package de.amr.demos.graph.pathfinding.view.renderer.blocks;
 
-import static de.amr.graph.pathfinder.api.GraphSearch.NO_VERTEX;
 import static de.amr.graph.pathfinder.api.Path.INFINITE_COST;
 
 import java.awt.BasicStroke;
@@ -18,6 +17,7 @@ import java.util.function.Function;
 import java.util.function.IntSupplier;
 
 import de.amr.demos.graph.pathfinding.model.Tile;
+import de.amr.graph.core.api.Graph;
 import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.impl.Top4;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
@@ -99,7 +99,7 @@ public abstract class MapCell implements GridCellRenderer {
 	}
 
 	protected void drawNeedle(Graphics2D g, GridGraph2D<?, ?> grid, int cell, int parent, Area needle) {
-		if (parent == NO_VERTEX) {
+		if (parent == Graph.NO_VERTEX) {
 			return;
 		}
 		grid.direction(cell, parent).ifPresent(dir -> {

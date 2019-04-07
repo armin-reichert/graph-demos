@@ -1,7 +1,6 @@
 package de.amr.demos.graph.pathfinding.view;
 
 import static de.amr.demos.graph.pathfinding.view.SwingGoodies.createAction;
-import static de.amr.graph.pathfinder.api.GraphSearch.NO_VERTEX;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -41,6 +40,7 @@ import de.amr.demos.graph.pathfinding.view.renderer.blocks.G_Cell;
 import de.amr.demos.graph.pathfinding.view.renderer.blocks.MapCell;
 import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsMapRenderer;
+import de.amr.graph.core.api.Graph;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.impl.Top4;
@@ -113,8 +113,8 @@ public class MapView extends JPanel {
 		private int draggedCell;
 
 		public MouseController() {
-			draggedCell = NO_VERTEX;
-			cellUnderMouse = NO_VERTEX;
+			draggedCell = Graph.NO_VERTEX;
+			cellUnderMouse = Graph.NO_VERTEX;
 		}
 
 		public int getCellUnderMouse() {
@@ -152,9 +152,9 @@ public class MapView extends JPanel {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			cellUnderMouse = computeCellUnderMouse(e);
-			if (draggedCell != NO_VERTEX) {
+			if (draggedCell != Graph.NO_VERTEX) {
 				// end of dragging
-				draggedCell = NO_VERTEX;
+				draggedCell = Graph.NO_VERTEX;
 				controller.updatePathFinderResults();
 			}
 			else if (e.isPopupTrigger()) {
