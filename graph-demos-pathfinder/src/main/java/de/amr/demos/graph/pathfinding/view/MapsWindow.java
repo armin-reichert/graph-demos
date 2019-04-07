@@ -63,18 +63,23 @@ public class MapsWindow extends JFrame {
 	}
 
 	public void updateWindow() {
+		updateTitle();
 		selectComboNoAction(comboLeftPathFinder, controller.getLeftPathFinderIndex());
 		selectComboNoAction(comboRightPathFinder, controller.getRightPathFinderIndex());
 		lblResultsLeft.setText(formatResult(controller.getLeftPathFinderIndex()));
 		lblResultsRight.setText(formatResult(controller.getRightPathFinderIndex()));
 	}
 
+	private void updateTitle() {
+		setTitle(String.format("Path Finder Demo Map (%d x %d = %d cells)", model.getMap().numCols(),
+				model.getMap().numRows(), model.getMap().numVertices()));
+	}
+
 	private String formatResult(int pathFinderIndex) {
 		PathFinderResult result = model.getResult(pathFinderIndex);
-		return String.format("%d Cells, Time: %.0f ms, Path length: %d, Cost: %.0f, Touched cells %d",
-				model.getMap().numVertices(),
-				result.getRunningTimeMillis(), result.getPathLength(), result.getCost(),
-				result.getNumTouchedVertices());
+		return String.format("Path length: %d, Cost: %.0f, Touched cells %d, Time: %.0f ms",
+				result.getPathLength(), result.getCost(), result.getNumTouchedVertices(),
+				result.getRunningTimeMillis());
 	}
 
 	public MapsWindow() {
@@ -107,6 +112,8 @@ public class MapsWindow extends JFrame {
 		this.model = controller.getModel();
 		this.leftMapView = leftMapView;
 		this.rightMapView = rightMapView;
+
+		updateTitle();
 
 		panelLeftMap.add(leftMapView, "cell 0 0,grow");
 		panelRightMap.add(rightMapView, "cell 0 0,grow");
