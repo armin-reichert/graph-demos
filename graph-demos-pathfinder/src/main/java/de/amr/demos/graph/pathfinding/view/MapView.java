@@ -16,7 +16,6 @@ import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.InputMap;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -154,8 +153,8 @@ public class MapView extends JPanel {
 			}
 			else if (e.isPopupTrigger()) {
 				boolean noWall = model.getMap().get(cellUnderMouse) != Tile.WALL;
-				actionSetSource.setEnabled(noWall);
-				actionSetTarget.setEnabled(noWall);
+				actionSetSourceHere.setEnabled(noWall);
+				actionSetTargetHere.setEnabled(noWall);
 				contextMenu.show(canvas, e.getX(), e.getY());
 			}
 		}
@@ -174,16 +173,12 @@ public class MapView extends JPanel {
 
 	// Actions
 
-	private Action actionSetSource = createAction("Search From Here", e -> {
-		JComponent trigger = (JComponent) e.getSource();
-		GridPosition position = (GridPosition) trigger.getClientProperty("position");
-		getController().setSource(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
+	private Action actionSetSourceHere = createAction("Search From Here", e -> {
+		getController().setSource(mouse.getCellUnderMouse());
 	});
 
-	private Action actionSetTarget = createAction("Search To Here", e -> {
-		JComponent trigger = (JComponent) e.getSource();
-		GridPosition position = (GridPosition) trigger.getClientProperty("position");
-		getController().setTarget(position != null ? model.getMap().cell(position) : mouse.getCellUnderMouse());
+	private Action actionSetTargetHere = createAction("Search To Here", e -> {
+		getController().setTarget(mouse.getCellUnderMouse());
 	});
 
 	public MapView() {
@@ -221,14 +216,10 @@ public class MapView extends JPanel {
 	}
 
 	private void buildContextMenu(PathFinderController controller) {
-		JMenuItem item;
 		contextMenu = new JPopupMenu();
-
-		item = contextMenu.add(controller.actionRunPathFinderAnimations());
-		item.setText("Run pathfinders");
+		contextMenu.add(controller.actionRunPathFinderAnimations());
 
 		contextMenu.addSeparator();
-
 		rbExecutionManual = new JRadioButtonMenuItem(createAction("Manual execution", e -> {
 			controller.changeExecutionMode(ExecutionMode.MANUAL);
 		}));
@@ -242,29 +233,26 @@ public class MapView extends JPanel {
 		contextMenu.add(rbExecutionAutomatic);
 
 		contextMenu.addSeparator();
-
-		contextMenu.add(actionSetSource);
+		contextMenu.add(actionSetSourceHere);
 		JMenu sourceMenu = new JMenu("Search From");
 		for (GridPosition position : GridPosition.values()) {
-			item = sourceMenu.add(actionSetSource);
+			JMenuItem item = sourceMenu.add(controller.actionSetSource());
 			item.setText(position.toString());
 			item.putClientProperty("position", position);
 		}
 		contextMenu.add(sourceMenu);
 
 		contextMenu.addSeparator();
-
-		contextMenu.add(actionSetTarget);
+		contextMenu.add(actionSetTargetHere);
 		JMenu targetMenu = new JMenu("Search To");
 		for (GridPosition position : GridPosition.values()) {
-			item = targetMenu.add(actionSetTarget);
+			JMenuItem item = targetMenu.add(controller.actionSetTarget());
 			item.setText(position.toString());
 			item.putClientProperty("position", position);
 		}
 		contextMenu.add(targetMenu);
 
 		contextMenu.addSeparator();
-
 		rb4Neighbors = new JRadioButtonMenuItem(controller.actionSet4Neighbors());
 		rb8Neighbors = new JRadioButtonMenuItem(controller.actionSet8Neighbors());
 		ButtonGroup bgNeighbors = new ButtonGroup();
@@ -274,7 +262,6 @@ public class MapView extends JPanel {
 		contextMenu.add(rb8Neighbors);
 
 		contextMenu.addSeparator();
-
 		rbShowAsBlocks = new JRadioButtonMenuItem(createAction("Blocks", e -> {
 			controller.changeStyle(RenderingStyle.BLOCKS);
 		}));
@@ -288,19 +275,15 @@ public class MapView extends JPanel {
 		contextMenu.add(rbShowAsPearls);
 
 		contextMenu.addSeparator();
-
+		
 		cbShowCost = new JCheckBoxMenuItem("Show Cost");
 		cbShowCost.setSelected(controller.isShowingCost());
-		cbShowCost.setAction(createAction("Show Cost", e -> {
-			getController().showCost(cbShowCost.isSelected());
-		}));
+		cbShowCost.setAction(controller.actionToggleShowCost());
 		contextMenu.add(cbShowCost);
-
+		
 		cbShowParent = new JCheckBoxMenuItem("Show Parent");
 		cbShowParent.setSelected(controller.isShowingParent());
-		cbShowParent.setAction(createAction("Show Parent", e -> {
-			getController().showParent(cbShowParent.isSelected());
-		}));
+		cbShowParent.setAction(controller.actionToggleShowParent());
 		contextMenu.add(cbShowParent);
 
 		contextMenu.addSeparator();
