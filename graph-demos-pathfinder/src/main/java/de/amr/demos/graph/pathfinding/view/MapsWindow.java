@@ -40,17 +40,7 @@ public class MapsWindow extends JFrame {
 
 		@Override
 		public void componentResized(ComponentEvent e) {
-			int size = Math.min(panelLeftMap.getWidth(), panelLeftMap.getHeight()) * 98 / 100;
-			Dimension dim = new Dimension(size, size);
-			leftMapView.setSize(dim);
-			leftMapView.setPreferredSize(dim);
-			leftMapView.updateMap(true);
-
-			size = Math.min(panelRightMap.getWidth(), panelRightMap.getHeight()) * 98 / 100;
-			dim = new Dimension(size, size);
-			rightMapView.setSize(dim);
-			rightMapView.setPreferredSize(dim);
-			rightMapView.updateMap(true);
+			resizeMapViews();
 		}
 
 		@Override
@@ -68,6 +58,29 @@ public class MapsWindow extends JFrame {
 		selectComboNoAction(comboRightPathFinder, controller.getRightPathFinderIndex());
 		lblResultsLeft.setText(formatResult(controller.getLeftPathFinderIndex()));
 		lblResultsRight.setText(formatResult(controller.getRightPathFinderIndex()));
+	}
+
+	public void resizeMapViews() {
+		int size;
+		Dimension dim;
+
+		size = Math.min(panelLeftMap.getWidth(), panelLeftMap.getHeight()) * 98 / 100;
+		dim = new Dimension(size, size);
+		if (!dim.equals(leftMapView.getSize())) {
+			System.out.println("resize left view to " + dim);
+			leftMapView.setSize(dim);
+			leftMapView.setPreferredSize(dim);
+			leftMapView.updateMap(true);
+		}
+
+		size = Math.min(panelRightMap.getWidth(), panelRightMap.getHeight()) * 98 / 100;
+		dim = new Dimension(size, size);
+		if (!dim.equals(rightMapView.getSize())) {
+			System.out.println("resize right view to " + dim);
+			rightMapView.setSize(dim);
+			rightMapView.setPreferredSize(dim);
+			rightMapView.updateMap(true);
+		}
 	}
 
 	private void updateTitle() {

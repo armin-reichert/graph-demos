@@ -139,7 +139,7 @@ public class PathFinderController {
 			showParent(!showingParent);
 		});
 	}
-	
+
 	private class PathFinderAnimationTask extends SwingWorker<Void, Void> {
 
 		private final StopWatch watch = new StopWatch();
@@ -199,11 +199,14 @@ public class PathFinderController {
 		int width = (screenSize.width - configWindow.getWidth()) / 2 * 95 / 100;
 		int height = Math.min(width, screenSize.height);
 		leftMapView.setSize(width, height);
+		leftMapView.updateView();
 		rightMapView.setSize(width, height);
+		rightMapView.updateView();
 
 		mapsWindow = new MapsWindow(this, leftMapView, rightMapView);
 		mapsWindow.setLocation(configWindow.getWidth(), 0);
 		mapsWindow.pack();
+		mapsWindow.resizeMapViews();
 
 		configWindow.setVisible(true);
 		mapsWindow.setVisible(true);
@@ -287,6 +290,8 @@ public class PathFinderController {
 	// animated execution
 
 	private void runPathFinderAnimation(int pathFinderIndex, MapView mapView) {
+		mapView.getCanvas().clear();
+		mapView.getCanvas().drawGrid();
 		new PathFinderAnimationTask(pathFinderIndex, mapView).execute();
 	}
 
@@ -301,8 +306,6 @@ public class PathFinderController {
 	public void runPathFinderAnimations() {
 		model.clearResult(leftPathFinderIndex);
 		model.clearResult(rightPathFinderIndex);
-		leftMapView.updateView();
-		rightMapView.updateView();
 		runPathFinderAnimation(leftPathFinderIndex, leftMapView);
 		runPathFinderAnimation(rightPathFinderIndex, rightMapView);
 	}

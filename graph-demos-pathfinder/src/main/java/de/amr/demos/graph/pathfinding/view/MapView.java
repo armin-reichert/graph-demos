@@ -289,11 +289,15 @@ public class MapView extends JPanel {
 		contextMenu.addSeparator();
 		contextMenu.add(controller.actionResetScene());
 	}
+	
+	public GridCanvas getCanvas() {
+		return canvas;
+	}
 
 	@Override
 	public void setSize(int width, int height) {
 		super.setSize(width, height);
-		updateMap(true);
+		updateMap(false);
 	}
 
 	public void updateMapCell(int cell) {
@@ -314,8 +318,10 @@ public class MapView extends JPanel {
 		canvas.drawGrid();
 		requestFocusInWindow();
 
-		System.out.println("MapView updated: " + this);
+		System.out.println("(" + updateCnt++ + ") MapView updated: " + this);
 	}
+	
+	static int updateCnt;
 
 	public void updateMap(boolean updateView) {
 		int cellSize = getHeight() / model.getMapSize();
