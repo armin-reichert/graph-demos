@@ -1,8 +1,8 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.demos.graph.pathfinding.view.SwingGoodies.createAction;
-import static de.amr.demos.graph.pathfinding.view.SwingGoodies.selectComboNoAction;
-import static de.amr.demos.graph.pathfinding.view.SwingGoodies.selection;
+import static de.amr.swing.SwingGoodies.createAction;
+import static de.amr.swing.SwingGoodies.selectComboNoAction;
+import static de.amr.swing.SwingGoodies.selection;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

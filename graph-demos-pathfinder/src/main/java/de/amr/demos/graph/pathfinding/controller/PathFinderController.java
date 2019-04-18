@@ -283,6 +283,8 @@ public class PathFinderController {
 		case ALL:
 			model.runAllPathFinders();
 			break;
+		default:
+			break;
 		}
 		updateViews();
 	}

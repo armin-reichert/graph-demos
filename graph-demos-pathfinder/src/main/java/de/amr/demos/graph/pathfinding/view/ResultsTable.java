@@ -122,8 +122,9 @@ public class ResultsTable extends JTable {
 				return result.getNumTouchedVertices();
 			case 6:
 				return result.getNumClosedVertices();
+			default:
+				throw new IllegalArgumentException();
 			}
-			throw new IllegalArgumentException();
 		}
 	}
 

@@ -1,6 +1,6 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.demos.graph.pathfinding.view.SwingGoodies.createAction;
+import static de.amr.swing.SwingGoodies.createAction;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static javax.swing.KeyStroke.getKeyStroke;

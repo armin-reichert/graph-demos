@@ -1,6 +1,6 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.demos.graph.pathfinding.view.SwingGoodies.selectComboNoAction;
+import static de.amr.swing.SwingGoodies.selectComboNoAction;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
+import de.amr.swing.SwingGoodies;
 import net.miginfocom.swing.MigLayout;
 
 public class MapsWindow extends JFrame {
