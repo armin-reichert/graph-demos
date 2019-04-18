@@ -1,8 +1,6 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.swing.SwingGoodies.createAction;
-import static de.amr.swing.SwingGoodies.selectComboNoAction;
-import static de.amr.swing.SwingGoodies.selection;
+import static de.amr.swing.Swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,6 +31,7 @@ import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Top4;
+import de.amr.swing.Swing;
 import net.miginfocom.swing.MigLayout;
 
 /**
@@ -268,40 +267,40 @@ public class ConfigView extends JPanel {
 		return controller;
 	}
 
-	private Action actionSelectTopology = createAction("Select Topology", e -> {
-		getController().changeTopology(selection(comboTopology));
+	private Action actionSelectTopology = Swing.action("Select Topology", e -> {
+		getController().changeTopology(comboSelection(comboTopology));
 	});
 
-	private Action actionSelectExecutionMode = createAction("Select Execution Mode", e -> {
-		getController().changeExecutionMode(selection(comboExecutionMode));
+	private Action actionSelectExecutionMode = Swing.action("Select Execution Mode", e -> {
+		getController().changeExecutionMode(comboSelection(comboExecutionMode));
 	});
 
-	private Action actionSelectStyle = createAction("Select Map Style", e -> {
-		getController().changeStyle(selection(comboStyle));
+	private Action actionSelectStyle = Swing.action("Select Map Style", e -> {
+		getController().changeStyle(comboSelection(comboStyle));
 	});
 
-	private Action actionStartSelectedPathFinder = createAction("Start", e -> {
+	private Action actionStartSelectedPathFinder = Swing.action("Start", e -> {
 		getController().runBothFirstStep(true);
 		updateViewState();
 	});
 
-	private Action actionStepPathFinders = createAction("Steps", e -> {
+	private Action actionStepPathFinders = Swing.action("Steps", e -> {
 		JComponent source = (JComponent) e.getSource();
 		int numSteps = (Integer) source.getClientProperty("numSteps");
 		getController().runBothNumSteps(numSteps);
 		updateViewState();
 	});
 
-	private Action actionFinishPathFinders = createAction("Finish", e -> {
+	private Action actionFinishPathFinders = Swing.action("Finish", e -> {
 		getController().runBothRemainingSteps();
 		updateViewState();
 	});
 
-	private Action actionShowCost = createAction("Show Cost", e -> {
+	private Action actionShowCost = Swing.action("Show Cost", e -> {
 		getController().showCost(cbShowCost.isSelected());
 	});
 
-	private Action actionShowParent = createAction("Show Parent", e -> {
+	private Action actionShowParent = Swing.action("Show Parent", e -> {
 		getController().showParent(cbShowParent.isSelected());
 	});
 

@@ -1,6 +1,5 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.swing.SwingGoodies.createAction;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static javax.swing.KeyStroke.getKeyStroke;
@@ -49,6 +48,7 @@ import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.BidiAStarSearch;
 import de.amr.graph.pathfinder.impl.BidiGraphSearch;
+import de.amr.swing.Swing;
 
 /**
  * Displays the map together with the information computed during the path finder execution.
@@ -173,11 +173,11 @@ public class MapView extends JPanel {
 
 	// Actions
 
-	private Action actionSetSourceHere = createAction("Search From Here", e -> {
+	private Action actionSetSourceHere = Swing.action("Search From Here", e -> {
 		getController().setSource(mouse.getCellUnderMouse());
 	});
 
-	private Action actionSetTargetHere = createAction("Search To Here", e -> {
+	private Action actionSetTargetHere = Swing.action("Search To Here", e -> {
 		getController().setTarget(mouse.getCellUnderMouse());
 	});
 
@@ -220,10 +220,10 @@ public class MapView extends JPanel {
 		contextMenu.add(controller.actionRunPathFinderAnimations());
 
 		contextMenu.addSeparator();
-		rbExecutionManual = new JRadioButtonMenuItem(createAction("Manual execution", e -> {
+		rbExecutionManual = new JRadioButtonMenuItem(Swing.action("Manual execution", e -> {
 			controller.changeExecutionMode(ExecutionMode.MANUAL);
 		}));
-		rbExecutionAutomatic = new JRadioButtonMenuItem(createAction("Automatic execution", e -> {
+		rbExecutionAutomatic = new JRadioButtonMenuItem(Swing.action("Automatic execution", e -> {
 			controller.changeExecutionMode(ExecutionMode.VISIBLE);
 		}));
 		ButtonGroup bgExecutionMode = new ButtonGroup();
@@ -262,10 +262,10 @@ public class MapView extends JPanel {
 		contextMenu.add(rb8Neighbors);
 
 		contextMenu.addSeparator();
-		rbShowAsBlocks = new JRadioButtonMenuItem(createAction("Blocks", e -> {
+		rbShowAsBlocks = new JRadioButtonMenuItem(Swing.action("Blocks", e -> {
 			controller.changeStyle(RenderingStyle.BLOCKS);
 		}));
-		rbShowAsPearls = new JRadioButtonMenuItem(createAction("Pearls", e -> {
+		rbShowAsPearls = new JRadioButtonMenuItem(Swing.action("Pearls", e -> {
 			controller.changeStyle(RenderingStyle.PEARLS);
 		}));
 		ButtonGroup bgStyke = new ButtonGroup();
@@ -275,12 +275,12 @@ public class MapView extends JPanel {
 		contextMenu.add(rbShowAsPearls);
 
 		contextMenu.addSeparator();
-		
+
 		cbShowCost = new JCheckBoxMenuItem("Show Cost");
 		cbShowCost.setSelected(controller.isShowingCost());
 		cbShowCost.setAction(controller.actionToggleShowCost());
 		contextMenu.add(cbShowCost);
-		
+
 		cbShowParent = new JCheckBoxMenuItem("Show Parent");
 		cbShowParent.setSelected(controller.isShowingParent());
 		cbShowParent.setAction(controller.actionToggleShowParent());
@@ -289,7 +289,7 @@ public class MapView extends JPanel {
 		contextMenu.addSeparator();
 		contextMenu.add(controller.actionResetScene());
 	}
-	
+
 	public GridCanvas getCanvas() {
 		return canvas;
 	}
@@ -320,7 +320,7 @@ public class MapView extends JPanel {
 
 		System.out.println("(" + updateCnt++ + ") MapView updated: " + this);
 	}
-	
+
 	static int updateCnt;
 
 	public void updateMap(boolean updateView) {
