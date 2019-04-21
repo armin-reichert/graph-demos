@@ -10,10 +10,7 @@ import static de.amr.graph.grid.impl.Top4.N;
 import static de.amr.graph.grid.impl.Top4.S;
 import static de.amr.graph.grid.impl.Top4.W;
 import static de.amr.graph.util.GraphUtils.log;
-import static java.util.Arrays.asList;
 
-import java.util.EnumMap;
-import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -29,15 +26,6 @@ import de.amr.graph.grid.ui.SwingGridSampleApp;
  */
 public class HilbertCurveApp extends SwingGridSampleApp {
 
-	private static final EnumMap<GridPosition, List<Integer>> ORIENTATION = new EnumMap<>(GridPosition.class);
-
-	static {
-		ORIENTATION.put(TOP_RIGHT, asList(N, E, S, W));
-		ORIENTATION.put(TOP_LEFT, asList(N, W, S, E));
-		ORIENTATION.put(BOTTOM_RIGHT, asList(E, S, W, N));
-		ORIENTATION.put(BOTTOM_LEFT, asList(W, S, E, N));
-	}
-
 	public static void main(String[] args) {
 		launch(new HilbertCurveApp());
 	}
@@ -46,16 +34,29 @@ public class HilbertCurveApp extends SwingGridSampleApp {
 		super(512, 512, 256);
 		setAppName("Hilbert Curve");
 	}
+	
+	private int[] getOrientation(GridPosition startPosition) {
+		switch (startPosition) {
+		case TOP_RIGHT:
+			return new int[] { N, E, S, W };
+		case TOP_LEFT:
+			return new int[] { N, W, S, E };
+		case BOTTOM_RIGHT:
+			return new int[] { E, S, W, N };
+		case BOTTOM_LEFT:
+			return new int[] { W, S, E, N };
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
 
 	@Override
 	public void run() {
 		Stream.of(TOP_RIGHT, TOP_LEFT, BOTTOM_RIGHT, BOTTOM_LEFT).forEach(start -> {
 			IntStream.of(256, 128, 64, 32, 16, 8, 4, 2).forEach(cellSize -> {
 				setCellSize(cellSize);
-				getCanvas().clear();
-				List<Integer> dir = ORIENTATION.get(start);
-				HilbertCurve hilbert = new HilbertCurve(log(2, getGrid().numCols()), dir.get(0), dir.get(1),
-						dir.get(2), dir.get(3));
+				int[] dir = getOrientation(start);
+				HilbertCurve hilbert = new HilbertCurve(log(2, getGrid().numCols()), dir[0], dir[1], dir[2], dir[3]);
 				traverse(hilbert, getGrid(), getGrid().cell(start), this::addEdge);
 				floodFill(start);
 				sleep(1000);
