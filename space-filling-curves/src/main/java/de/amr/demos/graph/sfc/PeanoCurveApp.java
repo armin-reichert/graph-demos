@@ -2,7 +2,6 @@ package de.amr.demos.graph.sfc;
 
 import static de.amr.graph.grid.api.GridPosition.BOTTOM_LEFT;
 import static de.amr.graph.grid.curves.CurveUtils.traverse;
-import static de.amr.graph.util.GraphUtils.log;
 
 import java.util.stream.IntStream;
 
@@ -22,10 +21,10 @@ public class PeanoCurveApp extends SwingGridSampleApp {
 
 	@Override
 	public void run() {
-		IntStream.of(3, 9, 81, 243).forEach(n -> {
-			setCellSize(getCanvas().getWidth() / n);
+		IntStream.rangeClosed(1, 5).forEach(n -> {
 			getCanvas().clear();
-			traverse(new PeanoCurve(log(3, n)), getGrid(), getGrid().cell(BOTTOM_LEFT), this::addEdge);
+			setCellSize(4 * (int) Math.pow(3, 5 - n));
+			traverse(new PeanoCurve(n), getGrid(), getGrid().cell(BOTTOM_LEFT), this::addEdge);
 			floodFill(BOTTOM_LEFT);
 			sleep(1000);
 		});
