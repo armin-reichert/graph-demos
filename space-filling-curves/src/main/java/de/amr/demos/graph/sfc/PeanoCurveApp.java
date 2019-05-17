@@ -15,14 +15,13 @@ public class PeanoCurveApp extends SwingGridSampleApp {
 	}
 
 	public PeanoCurveApp() {
-		super(243 * 4, 243 * 4, 4);
+		super(4 * 243, 4 * 243, 4);
 		setAppName("Peano Curve");
 	}
 
 	@Override
 	public void run() {
 		IntStream.rangeClosed(1, 5).forEach(n -> {
-			getCanvas().clear();
 			setCellSize(4 * (int) Math.pow(3, 5 - n));
 			traverse(new PeanoCurve(n), getGrid(), getGrid().cell(BOTTOM_LEFT), this::addEdge);
 			floodFill(BOTTOM_LEFT);
