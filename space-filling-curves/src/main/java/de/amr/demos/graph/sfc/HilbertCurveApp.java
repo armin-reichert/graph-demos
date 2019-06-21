@@ -4,7 +4,6 @@ import static de.amr.graph.grid.api.GridPosition.BOTTOM_LEFT;
 import static de.amr.graph.grid.api.GridPosition.BOTTOM_RIGHT;
 import static de.amr.graph.grid.api.GridPosition.TOP_LEFT;
 import static de.amr.graph.grid.api.GridPosition.TOP_RIGHT;
-import static de.amr.graph.grid.curves.CurveUtils.traverse;
 import static de.amr.graph.grid.impl.Top4.E;
 import static de.amr.graph.grid.impl.Top4.N;
 import static de.amr.graph.grid.impl.Top4.S;
@@ -34,7 +33,7 @@ public class HilbertCurveApp extends SwingGridSampleApp {
 		super(512, 512, 256);
 		setAppName("Hilbert Curve");
 	}
-	
+
 	private int[] getOrientation(GridPosition startPosition) {
 		switch (startPosition) {
 		case TOP_RIGHT:
@@ -57,7 +56,7 @@ public class HilbertCurveApp extends SwingGridSampleApp {
 				setCellSize(cellSize);
 				int[] dir = getOrientation(start);
 				HilbertCurve hilbert = new HilbertCurve(log(2, getGrid().numCols()), dir[0], dir[1], dir[2], dir[3]);
-				traverse(hilbert, getGrid(), getGrid().cell(start), this::addEdge);
+				hilbert.traverse(getGrid(), getGrid().cell(start), this::addEdge);
 				floodFill(start);
 				sleep(1000);
 			});

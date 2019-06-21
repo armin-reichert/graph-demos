@@ -1,7 +1,6 @@
 package de.amr.demos.graph.sfc;
 
 import static de.amr.graph.grid.api.GridPosition.TOP_RIGHT;
-import static de.amr.graph.grid.curves.CurveUtils.traverse;
 import static de.amr.graph.util.GraphUtils.log;
 
 import java.util.stream.IntStream;
@@ -26,7 +25,7 @@ public class HilbertLCurveWirthApp extends SwingGridSampleApp {
 			setCellSize(cellSize);
 			getCanvas().clear();
 			HilbertLCurveWirth curve = new HilbertLCurveWirth(log(2, getGrid().numCols()));
-			traverse(curve, getGrid(), getGrid().cell(TOP_RIGHT), this::addEdge);
+			curve.traverse(getGrid(), getGrid().cell(TOP_RIGHT), this::addEdge);
 			floodFill(TOP_RIGHT);
 			sleep(1000);
 		});

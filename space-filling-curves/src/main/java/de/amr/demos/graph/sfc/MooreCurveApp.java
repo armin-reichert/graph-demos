@@ -1,6 +1,5 @@
 package de.amr.demos.graph.sfc;
 
-import static de.amr.graph.grid.curves.CurveUtils.traverse;
 import static de.amr.graph.util.GraphUtils.log;
 
 import java.util.stream.IntStream;
@@ -32,7 +31,7 @@ public class MooreCurveApp extends SwingGridSampleApp {
 			getCanvas().clear();
 			int startCol = n / 2, startRow = n - 1;
 			int startCell = getGrid().cell(startCol, startRow);
-			traverse(new MooreLCurve(log(2, n)), getGrid(), startCell, this::addEdge);
+			new MooreLCurve(log(2, n)).traverse(getGrid(), startCell, this::addEdge);
 			floodFill(startCell);
 			sleep(1000);
 		});
