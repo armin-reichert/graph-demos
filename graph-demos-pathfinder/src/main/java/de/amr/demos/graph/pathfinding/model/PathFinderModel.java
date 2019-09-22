@@ -66,16 +66,19 @@ public class PathFinderModel {
 		case BidiBFS:
 			return new BidiBreadthFirstSearch(map, map::euclidean);
 		case BidiAStar:
-			return new BidiAStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), map::euclidean, map::euclidean);
+			return new BidiAStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), map::euclidean,
+					map::euclidean);
 		case BidiDijkstra:
 			return new BidiDijkstraSearch(map, map::euclidean);
+		default:
+			throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
 		}
-		throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
 	}
 
 	private void newMap(int mapSize, Topology topology) {
 		GridGraph<Tile, Double> oldMap = map;
-		map = new GridGraph<>(mapSize, mapSize, topology, v -> null, (u, v) -> 0.0, UndirectedEdge::new);
+		map = new GridGraph<>(mapSize, mapSize, topology, v -> null, (u, v) -> 0.0,
+				UndirectedEdge::new);
 		map.setDefaultVertexLabel(cell -> Tile.BLANK);
 		map.setDefaultEdgeLabel(map::euclidean);
 		map.fill();
@@ -184,7 +187,8 @@ public class PathFinderModel {
 		switch (tile) {
 		case BLANK:
 			map.neighbors(cell).filter(neighbor -> map.get(neighbor) != WALL)
-					.filter(neighbor -> !map.adjacent(cell, neighbor)).forEach(neighbor -> map.addEdge(cell, neighbor));
+					.filter(neighbor -> !map.adjacent(cell, neighbor))
+					.forEach(neighbor -> map.addEdge(cell, neighbor));
 			break;
 		case WALL:
 			map.neighbors(cell).filter(neighbor -> map.get(neighbor) != WALL)
@@ -209,8 +213,10 @@ public class PathFinderModel {
 	}
 
 	public void setResult(ObservableGraphSearch pathFinder, Path path, float timeMillis) {
-		long touched = map.vertices().filter(v -> pathFinder.getState(v) != TraversalState.UNVISITED).count();
-		long closed = map.vertices().filter(v -> pathFinder.getState(v) == TraversalState.COMPLETED).count();
+		long touched = map.vertices().filter(v -> pathFinder.getState(v) != TraversalState.UNVISITED)
+				.count();
+		long closed = map.vertices().filter(v -> pathFinder.getState(v) == TraversalState.COMPLETED)
+				.count();
 		getResult(pathFinder).ifPresent(result -> {
 			result.setPath(path);
 			result.setRunningTimeMillis(timeMillis);
@@ -250,7 +256,8 @@ public class PathFinderModel {
 		this.target = target;
 	}
 
-	public Optional<ObservableGraphSearch> getPathFinderByClass(Class<? extends ObservableGraphSearch> clazz) {
+	public Optional<ObservableGraphSearch> getPathFinderByClass(
+			Class<? extends ObservableGraphSearch> clazz) {
 		return results.stream().filter(result -> result.getPathFinder().getClass() == clazz)
 				.map(PathFinderResult::getPathFinder).findFirst();
 	}
