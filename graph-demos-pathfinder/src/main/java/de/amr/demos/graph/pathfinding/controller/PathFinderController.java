@@ -24,8 +24,8 @@ import de.amr.demos.graph.pathfinding.view.MapView.PathFinderAnimation;
 import de.amr.demos.graph.pathfinding.view.MapsWindow;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
-import de.amr.graph.grid.impl.Top4;
-import de.amr.graph.grid.impl.Top8;
+import de.amr.graph.grid.impl.Grid4Topology;
+import de.amr.graph.grid.impl.Grid8Topology;
 import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
 import de.amr.util.StopWatch;
@@ -371,7 +371,7 @@ public class PathFinderController {
 	}
 
 	public void changeTopology(TopologySelection topology) {
-		model.setMapTopology(topology == TopologySelection._4_NEIGHBORS ? Top4.get() : Top8.get());
+		model.setMapTopology(topology == TopologySelection._4_NEIGHBORS ? Grid4Topology.get() : Grid8Topology.get());
 		model.clearResults();
 		updateMaps(false);
 		updatePathFinderResults();

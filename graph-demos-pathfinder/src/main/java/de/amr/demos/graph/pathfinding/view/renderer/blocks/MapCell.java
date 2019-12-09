@@ -19,7 +19,7 @@ import java.util.function.IntSupplier;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.graph.core.api.Graph;
 import de.amr.graph.grid.api.GridGraph2D;
-import de.amr.graph.grid.impl.Top4;
+import de.amr.graph.grid.impl.Grid4Topology;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 
 public abstract class MapCell implements GridCellRenderer {
@@ -110,7 +110,7 @@ public abstract class MapCell implements GridCellRenderer {
 			g2.setStroke(stroke);
 			g2.translate(cs / 2, cs / 2);
 			// direction constants start at North and then go clock-wise
-			g2.rotate(Math.toRadians((grid.getTopology() == Top4.get() ? 90 : 45) * dir));
+			g2.rotate(Math.toRadians((grid.getTopology() == Grid4Topology.get() ? 90 : 45) * dir));
 			g2.fill(needle);
 			g2.dispose();
 		});

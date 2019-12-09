@@ -10,7 +10,7 @@ import java.util.Optional;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.core.api.UndirectedEdge;
 import de.amr.graph.grid.api.GridPosition;
-import de.amr.graph.grid.api.Topology;
+import de.amr.graph.grid.api.GridTopology;
 import de.amr.graph.grid.impl.GridGraph;
 import de.amr.graph.pathfinder.api.GraphSearchObserver;
 import de.amr.graph.pathfinder.api.ObservableGraphSearch;
@@ -39,7 +39,7 @@ public class PathFinderModel {
 	private int target;
 	private List<PathFinderResult> results;
 
-	public PathFinderModel(int mapSize, Topology topology) {
+	public PathFinderModel(int mapSize, GridTopology topology) {
 		newMap(mapSize, topology);
 		source = map.cell(mapSize / 3, mapSize / 2);
 		target = map.cell(mapSize * 2 / 3, mapSize / 2);
@@ -75,7 +75,7 @@ public class PathFinderModel {
 		}
 	}
 
-	private void newMap(int mapSize, Topology topology) {
+	private void newMap(int mapSize, GridTopology topology) {
 		GridGraph<Tile, Double> oldMap = map;
 		map = new GridGraph<>(mapSize, mapSize, topology, v -> null, (u, v) -> 0.0,
 				UndirectedEdge::new);
@@ -156,11 +156,11 @@ public class PathFinderModel {
 		return map;
 	}
 
-	public Topology getMapTopology() {
+	public GridTopology getMapTopology() {
 		return map.getTopology();
 	}
 
-	public void setMapTopology(Topology topology) {
+	public void setMapTopology(GridTopology topology) {
 		if (topology != map.getTopology()) {
 			newMap(map.numRows(), topology);
 		}

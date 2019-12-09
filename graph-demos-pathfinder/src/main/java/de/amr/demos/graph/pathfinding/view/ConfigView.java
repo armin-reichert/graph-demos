@@ -30,7 +30,7 @@ import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
-import de.amr.graph.grid.impl.Top4;
+import de.amr.graph.grid.impl.Grid4Topology;
 import de.amr.swing.Swing;
 import net.miginfocom.swing.MigLayout;
 
@@ -223,7 +223,7 @@ public class ConfigView extends JPanel {
 		sliderDelay.addChangeListener(onDelayChange);
 
 		comboTopology.setModel(new DefaultComboBoxModel<>(TopologySelection.values()));
-		comboTopology.setSelectedItem(model.getMap().getTopology() == Top4.get() ? TopologySelection._4_NEIGHBORS
+		comboTopology.setSelectedItem(model.getMap().getTopology() == Grid4Topology.get() ? TopologySelection._4_NEIGHBORS
 				: TopologySelection._8_NEIGHBORS);
 		comboTopology.setAction(actionSelectTopology);
 
@@ -241,7 +241,7 @@ public class ConfigView extends JPanel {
 
 	public void updateView() {
 		tableResults.dataChanged();
-		selectComboNoAction(comboTopology, model.getMap().getTopology() == Top4.get() ? 0 : 1);
+		selectComboNoAction(comboTopology, model.getMap().getTopology() == Grid4Topology.get() ? 0 : 1);
 		spinnerMapSize.setValue(model.getMapSize());
 		cbShowCost.setSelected(controller.isShowingCost());
 		cbShowParent.setSelected(controller.isShowingParent());

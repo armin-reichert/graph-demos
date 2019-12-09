@@ -8,7 +8,7 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
-import de.amr.graph.grid.impl.Top8;
+import de.amr.graph.grid.impl.Grid8Topology;
 
 /**
  * Demo application for path finder algorithms.
@@ -27,7 +27,7 @@ public class PathFinderDemoApp {
 	}
 
 	public PathFinderDemoApp() {
-		PathFinderModel model = new PathFinderModel(25, Top8.get());
+		PathFinderModel model = new PathFinderModel(25, Grid8Topology.get());
 		PathFinderController controller = new PathFinderController(model, PathFinderAlgorithm.BFS,
 				PathFinderAlgorithm.AStar);
 		controller.createAndShowUI();

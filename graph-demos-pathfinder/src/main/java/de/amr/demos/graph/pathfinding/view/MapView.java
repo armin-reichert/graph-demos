@@ -36,8 +36,8 @@ import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsMapRenderer;
 import de.amr.graph.core.api.Graph;
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.grid.api.GridPosition;
-import de.amr.graph.grid.impl.Top4;
-import de.amr.graph.grid.impl.Top8;
+import de.amr.graph.grid.impl.Grid4Topology;
+import de.amr.graph.grid.impl.Grid8Topology;
 import de.amr.graph.grid.ui.animation.DelayedRunner;
 import de.amr.graph.grid.ui.rendering.GridCanvas;
 import de.amr.graph.grid.ui.rendering.GridRenderer;
@@ -305,8 +305,8 @@ public class MapView extends JPanel {
 	}
 
 	public void updateView() {
-		rb4Neighbors.setSelected(model.getMap().getTopology() == Top4.get());
-		rb8Neighbors.setSelected(model.getMap().getTopology() == Top8.get());
+		rb4Neighbors.setSelected(model.getMap().getTopology() == Grid4Topology.get());
+		rb8Neighbors.setSelected(model.getMap().getTopology() == Grid8Topology.get());
 		cbShowCost.setSelected(controller.isShowingCost());
 		cbShowParent.setSelected(controller.isShowingParent());
 		rbShowAsBlocks.setSelected(controller.getStyle() == RenderingStyle.BLOCKS);

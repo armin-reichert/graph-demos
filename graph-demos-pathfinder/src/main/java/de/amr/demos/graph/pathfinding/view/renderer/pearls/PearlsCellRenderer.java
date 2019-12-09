@@ -11,7 +11,7 @@ import java.awt.geom.Ellipse2D;
 
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.graph.grid.api.GridGraph2D;
-import de.amr.graph.grid.impl.Top4;
+import de.amr.graph.grid.impl.Grid4Topology;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 import de.amr.graph.pathfinder.api.GraphSearch;
 
@@ -97,7 +97,7 @@ public abstract class PearlsCellRenderer implements GridCellRenderer {
 			g2.setStroke(stroke);
 			g2.translate(getCellSize() / 2, getCellSize() / 2);
 			// direction constants start at North and then go clock-wise
-			g2.rotate(Math.toRadians((grid.getTopology() == Top4.get() ? 90 : 45) * dir));
+			g2.rotate(Math.toRadians((grid.getTopology() == Grid4Topology.get() ? 90 : 45) * dir));
 			g2.fill(needle);
 			g2.dispose();
 		});

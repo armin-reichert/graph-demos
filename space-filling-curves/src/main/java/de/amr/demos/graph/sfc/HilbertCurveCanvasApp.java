@@ -13,7 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import de.amr.graph.grid.curves.HilbertCurve;
-import de.amr.graph.grid.impl.Top4;
+import de.amr.graph.grid.impl.Grid4Topology;
 
 /**
  * Paints a series of Hilbert curves to a canvas.
@@ -92,8 +92,8 @@ public class HilbertCurveCanvasApp extends Canvas {
 		x1 = getWidth() - 1;
 		y1 = 0;
 		for (int dir : curve) {
-			int x2 = x1 + 2 * Top4.get().dx(dir) * cellSize;
-			int y2 = y1 + 2 * Top4.get().dy(dir) * cellSize;
+			int x2 = x1 + 2 * Grid4Topology.get().dx(dir) * cellSize;
+			int y2 = y1 + 2 * Grid4Topology.get().dy(dir) * cellSize;
 			g.setColor(Color.YELLOW);
 			g.setStroke(new BasicStroke(Math.max(1, cellSize / 2)));
 			g.drawLine(x1, y1, x2, y2);

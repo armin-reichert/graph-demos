@@ -4,10 +4,10 @@ import static de.amr.graph.grid.api.GridPosition.BOTTOM_LEFT;
 import static de.amr.graph.grid.api.GridPosition.BOTTOM_RIGHT;
 import static de.amr.graph.grid.api.GridPosition.TOP_LEFT;
 import static de.amr.graph.grid.api.GridPosition.TOP_RIGHT;
-import static de.amr.graph.grid.impl.Top4.E;
-import static de.amr.graph.grid.impl.Top4.N;
-import static de.amr.graph.grid.impl.Top4.S;
-import static de.amr.graph.grid.impl.Top4.W;
+import static de.amr.graph.grid.impl.Grid4Topology.E;
+import static de.amr.graph.grid.impl.Grid4Topology.N;
+import static de.amr.graph.grid.impl.Grid4Topology.S;
+import static de.amr.graph.grid.impl.Grid4Topology.W;
 import static de.amr.graph.util.GraphUtils.log;
 
 import java.util.stream.IntStream;
