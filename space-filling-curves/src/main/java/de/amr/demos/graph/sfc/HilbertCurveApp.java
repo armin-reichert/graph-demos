@@ -34,16 +34,16 @@ public class HilbertCurveApp extends SwingGridSampleApp {
 		setAppName("Hilbert Curve");
 	}
 
-	private int[] getOrientation(GridPosition startPosition) {
+	private byte[] getOrientation(GridPosition startPosition) {
 		switch (startPosition) {
 		case TOP_RIGHT:
-			return new int[] { N, E, S, W };
+			return new byte[] { N, E, S, W };
 		case TOP_LEFT:
-			return new int[] { N, W, S, E };
+			return new byte[] { N, W, S, E };
 		case BOTTOM_RIGHT:
-			return new int[] { E, S, W, N };
+			return new byte[] { E, S, W, N };
 		case BOTTOM_LEFT:
-			return new int[] { W, S, E, N };
+			return new byte[] { W, S, E, N };
 		default:
 			throw new IllegalArgumentException();
 		}
@@ -54,7 +54,7 @@ public class HilbertCurveApp extends SwingGridSampleApp {
 		Stream.of(TOP_RIGHT, TOP_LEFT, BOTTOM_RIGHT, BOTTOM_LEFT).forEach(start -> {
 			IntStream.of(256, 128, 64, 32, 16, 8, 4, 2).forEach(cellSize -> {
 				setCellSize(cellSize);
-				int[] dir = getOrientation(start);
+				byte[] dir = getOrientation(start);
 				HilbertCurve hilbert = new HilbertCurve(log(2, getGrid().numCols()), dir[0], dir[1], dir[2], dir[3]);
 				hilbert.traverse(getGrid(), getGrid().cell(start), this::addEdge);
 				floodFill(start);

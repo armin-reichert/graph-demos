@@ -374,16 +374,16 @@ public class MapView extends JPanel {
 			return blocksMap;
 		}
 		else if (style == RenderingStyle.PEARLS) {
-			PearlsMapRenderer pearlsMap = new PearlsMapRenderer(new PearlsCellRendererAdapter());
-			pearlsMap.fnCellSize = canvas::getCellSize;
-			pearlsMap.fnGridBgColor = () -> MAP_BACKGROUND;
-			pearlsMap.fnCellBgColor = this::computeCellBackground;
-			pearlsMap.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
-			pearlsMap.fnPassageColor = (cell,
-					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).getAsInt())
+			PearlsMapRenderer pmr = new PearlsMapRenderer(new PearlsCellRendererAdapter());
+			pmr.fnCellSize = canvas::getCellSize;
+			pmr.fnGridBgColor = () -> MAP_BACKGROUND;
+			pmr.fnCellBgColor = this::computeCellBackground;
+			pmr.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
+			pmr.fnPassageColor = (cell,
+					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).get())
 							? SOLUTION_BACKGROUND
 							: UNVISITED_CELL_BACKGROUND;
-			return pearlsMap;
+			return pmr;
 		}
 		throw new IllegalArgumentException("Unknown style: " + style);
 	}
