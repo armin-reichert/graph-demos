@@ -20,7 +20,8 @@ public class HelpPanel extends JTextPane {
 			addHyperlinkListener(e -> {
 				if (e.getEventType() == EventType.ACTIVATED) {
 					try {
-						Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + e.getURL());
+						Runtime.getRuntime()
+								.exec(new String[] { "rundll32", "url.dll,FileProtocolHandler", e.getURL().toString() });
 					} catch (IOException x) {
 						x.printStackTrace();
 					}
