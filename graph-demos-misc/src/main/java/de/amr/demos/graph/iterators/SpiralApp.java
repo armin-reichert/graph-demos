@@ -3,7 +3,6 @@ package de.amr.demos.graph.iterators;
 import static de.amr.graph.core.api.TraversalState.COMPLETED;
 import static de.amr.graph.core.api.TraversalState.UNVISITED;
 import static de.amr.graph.core.api.TraversalState.VISITED;
-import static de.amr.graph.grid.api.GridPosition.CENTER;
 
 import de.amr.graph.grid.traversals.Spiral;
 import de.amr.graph.grid.ui.SwingGridSampleApp;
@@ -24,7 +23,7 @@ public class SpiralApp extends SwingGridSampleApp {
 		getGrid().vertices().forEach(cell -> {
 			getGrid().set(cell, COMPLETED);
 		});
-		Spiral spiral = new Spiral(getGrid(), getGrid().cell(CENTER));
+		Spiral spiral = new Spiral(getGrid());
 		Integer prevCell = null;
 		for (Integer cell : spiral) {
 			getGrid().set(cell, VISITED);
