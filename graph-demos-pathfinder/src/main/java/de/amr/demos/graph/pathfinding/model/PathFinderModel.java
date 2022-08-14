@@ -1,14 +1,15 @@
 package de.amr.demos.graph.pathfinding.model;
 
-import static de.amr.demos.graph.pathfinding.model.Tile.WALL;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.ToDoubleBiFunction;
 
 import de.amr.graph.core.api.TraversalState;
 import de.amr.graph.core.api.UndirectedEdge;
+import de.amr.graph.grid.api.GridMetrics;
 import de.amr.graph.grid.api.GridPosition;
 import de.amr.graph.grid.api.GridTopology;
 import de.amr.graph.grid.impl.GridGraph;
@@ -54,33 +55,34 @@ public class PathFinderModel {
 	}
 
 	private ObservableGraphSearch newPathFinder(PathFinderAlgorithm algorithm) {
+		ToDoubleBiFunction<Integer, Integer> edgeLabel = (u, v) -> map.getEdgeLabel(u, v);
+		ToDoubleBiFunction<Integer, Integer> euclidean = (u, v) -> GridMetrics.euclidean(map, u, v);
 		switch (algorithm) {
 		case AStar:
-			return new AStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), map::euclidean);
+			return new AStarSearch(map, edgeLabel, euclidean);
 		case BFS:
-			return new BreadthFirstSearch(map, map::euclidean);
+			return new BreadthFirstSearch(map, euclidean);
 		case Dijkstra:
-			return new DijkstraSearch(map, (u, v) -> map.getEdgeLabel(u, v));
+			return new DijkstraSearch(map, edgeLabel);
 		case GreedyBestFirst:
-			return new BestFirstSearch(map, v -> map.euclidean(v, getTarget()), map::euclidean);
+			return new BestFirstSearch(map, v -> euclidean.applyAsDouble(v, getTarget()), euclidean);
 		case BidiBFS:
-			return new BidiBreadthFirstSearch(map, map::euclidean);
+			return new BidiBreadthFirstSearch(map, euclidean);
 		case BidiAStar:
-			return new BidiAStarSearch(map, (u, v) -> map.getEdgeLabel(u, v), map::euclidean,
-					map::euclidean);
+			return new BidiAStarSearch(map, edgeLabel, euclidean, euclidean);
 		case BidiDijkstra:
-			return new BidiDijkstraSearch(map, map::euclidean);
+			return new BidiDijkstraSearch(map, euclidean);
 		default:
 			throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
 		}
 	}
 
 	private void newMap(int mapSize, GridTopology topology) {
+		BiFunction<Integer, Integer, Double> euclidean = (u, v) -> GridMetrics.euclidean(map, u, v);
 		GridGraph<Tile, Double> oldMap = map;
-		map = new GridGraph<>(mapSize, mapSize, topology, v -> null, (u, v) -> 0.0,
-				UndirectedEdge::new);
+		map = new GridGraph<>(mapSize, mapSize, topology, v -> null, (u, v) -> 0.0, UndirectedEdge::new);
 		map.setDefaultVertexLabel(cell -> Tile.BLANK);
-		map.setDefaultEdgeLabel(map::euclidean);
+		map.setDefaultEdgeLabel(euclidean);
 		map.fill();
 		if (oldMap == null) {
 			return;
@@ -112,8 +114,7 @@ public class PathFinderModel {
 					sourceRow = scaledCoord(oldMap.row(source), scalingFactor);
 			if (map.isValidCol(sourceCol) && map.isValidRow(sourceRow)) {
 				source = map.cell(sourceCol, sourceRow);
-			}
-			else {
+			} else {
 				source = 0;
 			}
 		}
@@ -134,8 +135,7 @@ public class PathFinderModel {
 					targetRow = scaledCoord(oldMap.row(target), scalingFactor);
 			if (map.isValidCol(targetCol) && map.isValidRow(targetRow)) {
 				target = map.cell(targetCol, targetRow);
-			}
-			else {
+			} else {
 				target = map.numVertices() - 1;
 			}
 		}
@@ -186,14 +186,12 @@ public class PathFinderModel {
 		map.set(cell, tile);
 		switch (tile) {
 		case BLANK:
-			map.neighbors(cell).filter(neighbor -> map.get(neighbor) != WALL)
-					.filter(neighbor -> !map.adjacent(cell, neighbor))
-					.forEach(neighbor -> map.addEdge(cell, neighbor));
+			map.neighbors(cell).filter(neighbor -> map.get(neighbor) != Tile.WALL)
+					.filter(neighbor -> !map.adjacent(cell, neighbor)).forEach(neighbor -> map.addEdge(cell, neighbor));
 			break;
 		case WALL:
-			map.neighbors(cell).filter(neighbor -> map.get(neighbor) != WALL)
-					.filter(neighbor -> map.adjacent(cell, neighbor))
-					.forEach(neighbor -> map.removeEdge(cell, neighbor));
+			map.neighbors(cell).filter(neighbor -> map.get(neighbor) != Tile.WALL)
+					.filter(neighbor -> map.adjacent(cell, neighbor)).forEach(neighbor -> map.removeEdge(cell, neighbor));
 			break;
 		default:
 			throw new IllegalArgumentException("Unknown tile " + tile);
@@ -213,10 +211,8 @@ public class PathFinderModel {
 	}
 
 	public void setResult(ObservableGraphSearch pathFinder, Path path, float timeMillis) {
-		long touched = map.vertices().filter(v -> pathFinder.getState(v) != TraversalState.UNVISITED)
-				.count();
-		long closed = map.vertices().filter(v -> pathFinder.getState(v) == TraversalState.COMPLETED)
-				.count();
+		long touched = map.vertices().filter(v -> pathFinder.getState(v) != TraversalState.UNVISITED).count();
+		long closed = map.vertices().filter(v -> pathFinder.getState(v) == TraversalState.COMPLETED).count();
 		getResult(pathFinder).ifPresent(result -> {
 			result.setPath(path);
 			result.setRunningTimeMillis(timeMillis);
@@ -256,8 +252,7 @@ public class PathFinderModel {
 		this.target = target;
 	}
 
-	public Optional<ObservableGraphSearch> getPathFinderByClass(
-			Class<? extends ObservableGraphSearch> clazz) {
+	public Optional<ObservableGraphSearch> getPathFinderByClass(Class<? extends ObservableGraphSearch> clazz) {
 		return results.stream().filter(result -> result.getPathFinder().getClass() == clazz)
 				.map(PathFinderResult::getPathFinder).findFirst();
 	}
