@@ -48,7 +48,7 @@ import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.BidiAStarSearch;
 import de.amr.graph.pathfinder.impl.BidiGraphSearch;
-import de.amr.swing.Swing;
+import de.amr.swing.MySwingUtils;
 
 /**
  * Displays the map together with the information computed during the path finder execution.
@@ -173,11 +173,11 @@ public class MapView extends JPanel {
 
 	// Actions
 
-	private Action actionSetSourceHere = Swing.action("Search From Here", e -> {
+	private Action actionSetSourceHere = MySwingUtils.action("Search From Here", e -> {
 		getController().setSource(mouse.getCellUnderMouse());
 	});
 
-	private Action actionSetTargetHere = Swing.action("Search To Here", e -> {
+	private Action actionSetTargetHere = MySwingUtils.action("Search To Here", e -> {
 		getController().setTarget(mouse.getCellUnderMouse());
 	});
 
@@ -220,10 +220,10 @@ public class MapView extends JPanel {
 		contextMenu.add(controller.actionRunPathFinderAnimations());
 
 		contextMenu.addSeparator();
-		rbExecutionManual = new JRadioButtonMenuItem(Swing.action("Manual execution", e -> {
+		rbExecutionManual = new JRadioButtonMenuItem(MySwingUtils.action("Manual execution", e -> {
 			controller.changeExecutionMode(ExecutionMode.MANUAL);
 		}));
-		rbExecutionAutomatic = new JRadioButtonMenuItem(Swing.action("Automatic execution", e -> {
+		rbExecutionAutomatic = new JRadioButtonMenuItem(MySwingUtils.action("Automatic execution", e -> {
 			controller.changeExecutionMode(ExecutionMode.VISIBLE);
 		}));
 		ButtonGroup bgExecutionMode = new ButtonGroup();
@@ -262,10 +262,10 @@ public class MapView extends JPanel {
 		contextMenu.add(rb8Neighbors);
 
 		contextMenu.addSeparator();
-		rbShowAsBlocks = new JRadioButtonMenuItem(Swing.action("Blocks", e -> {
+		rbShowAsBlocks = new JRadioButtonMenuItem(MySwingUtils.action("Blocks", e -> {
 			controller.changeStyle(RenderingStyle.BLOCKS);
 		}));
-		rbShowAsPearls = new JRadioButtonMenuItem(Swing.action("Pearls", e -> {
+		rbShowAsPearls = new JRadioButtonMenuItem(MySwingUtils.action("Pearls", e -> {
 			controller.changeStyle(RenderingStyle.PEARLS);
 		}));
 		ButtonGroup bgStyke = new ButtonGroup();

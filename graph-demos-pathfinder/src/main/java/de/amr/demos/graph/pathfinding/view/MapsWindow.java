@@ -1,6 +1,6 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.swing.Swing.selectComboNoAction;
+import static de.amr.swing.MySwingUtils.selectComboNoAction;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
-import de.amr.swing.Swing;
+import de.amr.swing.MySwingUtils;
 import net.miginfocom.swing.MigLayout;
 
 public class MapsWindow extends JFrame {
@@ -136,7 +136,7 @@ public class MapsWindow extends JFrame {
 
 		comboLeftPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
 		comboLeftPathFinder.setSelectedIndex(controller.getLeftPathFinderIndex());
-		comboLeftPathFinder.setAction(Swing.action("", e -> {
+		comboLeftPathFinder.setAction(MySwingUtils.action("", e -> {
 			int newSelection = comboLeftPathFinder.getSelectedIndex();
 			if (newSelection != comboRightPathFinder.getSelectedIndex()) {
 				controller.changeLeftPathFinder(newSelection);
@@ -148,7 +148,7 @@ public class MapsWindow extends JFrame {
 
 		comboRightPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
 		comboRightPathFinder.setSelectedIndex(controller.getRightPathFinderIndex());
-		comboRightPathFinder.setAction(Swing.action("", e -> {
+		comboRightPathFinder.setAction(MySwingUtils.action("", e -> {
 			int newSelection = comboRightPathFinder.getSelectedIndex();
 			if (newSelection != comboLeftPathFinder.getSelectedIndex()) {
 				controller.changeRightPathFinder(newSelection);
