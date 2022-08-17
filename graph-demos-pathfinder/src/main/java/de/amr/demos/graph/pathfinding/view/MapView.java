@@ -137,8 +137,7 @@ public class MapView extends JPanel {
 			}
 			if (e.isShiftDown() && e.isAltDown() && cellUnderMouse != model.getSource()) {
 				controller.setSource(cellUnderMouse);
-			}
-			else if (!e.isShiftDown() && e.isAltDown() && cellUnderMouse != model.getTarget()) {
+			} else if (!e.isShiftDown() && e.isAltDown() && cellUnderMouse != model.getTarget()) {
 				controller.setTarget(cellUnderMouse);
 			}
 		}
@@ -150,8 +149,7 @@ public class MapView extends JPanel {
 				// end of dragging
 				draggedCell = Graph.NO_VERTEX;
 				controller.updatePathFinderResults();
-			}
-			else if (e.isPopupTrigger()) {
+			} else if (e.isPopupTrigger()) {
 				boolean noWall = model.getMap().get(cellUnderMouse) != Tile.WALL;
 				actionSetSourceHere.setEnabled(noWall);
 				actionSetTargetHere.setEnabled(noWall);
@@ -173,13 +171,11 @@ public class MapView extends JPanel {
 
 	// Actions
 
-	private Action actionSetSourceHere = MySwingUtils.action("Search From Here", e -> {
-		getController().setSource(mouse.getCellUnderMouse());
-	});
+	private Action actionSetSourceHere = MySwingUtils.action("Search From Here",
+			e -> getController().setSource(mouse.getCellUnderMouse()));
 
-	private Action actionSetTargetHere = MySwingUtils.action("Search To Here", e -> {
-		getController().setTarget(mouse.getCellUnderMouse());
-	});
+	private Action actionSetTargetHere = MySwingUtils.action("Search To Here",
+			e -> getController().setTarget(mouse.getCellUnderMouse()));
 
 	public MapView() {
 		setBackground(Color.WHITE);
@@ -220,12 +216,10 @@ public class MapView extends JPanel {
 		contextMenu.add(controller.actionRunPathFinderAnimations());
 
 		contextMenu.addSeparator();
-		rbExecutionManual = new JRadioButtonMenuItem(MySwingUtils.action("Manual execution", e -> {
-			controller.changeExecutionMode(ExecutionMode.MANUAL);
-		}));
-		rbExecutionAutomatic = new JRadioButtonMenuItem(MySwingUtils.action("Automatic execution", e -> {
-			controller.changeExecutionMode(ExecutionMode.VISIBLE);
-		}));
+		rbExecutionManual = new JRadioButtonMenuItem(
+				MySwingUtils.action("Manual execution", e -> controller.changeExecutionMode(ExecutionMode.MANUAL)));
+		rbExecutionAutomatic = new JRadioButtonMenuItem(
+				MySwingUtils.action("Automatic execution", e -> controller.changeExecutionMode(ExecutionMode.VISIBLE)));
 		ButtonGroup bgExecutionMode = new ButtonGroup();
 		bgExecutionMode.add(rbExecutionAutomatic);
 		bgExecutionMode.add(rbExecutionManual);
@@ -262,12 +256,10 @@ public class MapView extends JPanel {
 		contextMenu.add(rb8Neighbors);
 
 		contextMenu.addSeparator();
-		rbShowAsBlocks = new JRadioButtonMenuItem(MySwingUtils.action("Blocks", e -> {
-			controller.changeStyle(RenderingStyle.BLOCKS);
-		}));
-		rbShowAsPearls = new JRadioButtonMenuItem(MySwingUtils.action("Pearls", e -> {
-			controller.changeStyle(RenderingStyle.PEARLS);
-		}));
+		rbShowAsBlocks = new JRadioButtonMenuItem(
+				MySwingUtils.action("Blocks", e -> controller.changeStyle(RenderingStyle.BLOCKS)));
+		rbShowAsPearls = new JRadioButtonMenuItem(
+				MySwingUtils.action("Pearls", e -> controller.changeStyle(RenderingStyle.PEARLS)));
 		ButtonGroup bgStyke = new ButtonGroup();
 		bgStyke.add(rbShowAsBlocks);
 		bgStyke.add(rbShowAsPearls);
@@ -372,16 +364,14 @@ public class MapView extends JPanel {
 			blocksMap.fnCellSize = canvas::getCellSize;
 			blocksMap.fnGridBgColor = () -> MAP_BACKGROUND;
 			return blocksMap;
-		}
-		else if (style == RenderingStyle.PEARLS) {
+		} else if (style == RenderingStyle.PEARLS) {
 			PearlsMapRenderer pmr = new PearlsMapRenderer(new PearlsCellRendererAdapter());
 			pmr.fnCellSize = canvas::getCellSize;
 			pmr.fnGridBgColor = () -> MAP_BACKGROUND;
 			pmr.fnCellBgColor = this::computeCellBackground;
 			pmr.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
 			pmr.fnPassageColor = (cell,
-					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).get())
-							? SOLUTION_BACKGROUND
+					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).get()) ? SOLUTION_BACKGROUND
 							: UNVISITED_CELL_BACKGROUND;
 			return pmr;
 		}
@@ -389,19 +379,18 @@ public class MapView extends JPanel {
 	}
 
 	private MapCell createMapCell() {
-		if (getPathFinder().getClass() == AStarSearch.class) {
-			AStarSearch pathFinder = (AStarSearch) getPathFinder();
-			return new FGH_Cell(cell -> pathFinder.getScore(cell), cell -> pathFinder.getCost(cell),
-					cell -> pathFinder.getEstimatedCost(cell));
+		var impl = getPathFinder().getClass();
+		if (impl == AStarSearch.class) {
+			var astar = (AStarSearch) getPathFinder();
+			return new FGH_Cell(astar::getScore, astar::getCost, astar::getEstimatedCost);
 		}
-		if (getPathFinder().getClass() == BidiAStarSearch.class) {
-			BidiAStarSearch pathFinder = (BidiAStarSearch) getPathFinder();
-			return new FGH_Cell(cell -> pathFinder.getScore(cell), cell -> pathFinder.getCost(cell),
-					cell -> pathFinder.getEstimatedCost(cell));
+		if (impl == BidiAStarSearch.class) {
+			var bidiAstar = (BidiAStarSearch) getPathFinder();
+			return new FGH_Cell(bidiAstar::getScore, bidiAstar::getCost, bidiAstar::getEstimatedCost);
 		}
-		if (getPathFinder().getClass() == BestFirstSearch.class) {
-			BestFirstSearch pathFinder = (BestFirstSearch) getPathFinder();
-			return new GH_Cell(cell -> pathFinder.getCost(cell), cell -> pathFinder.getEstimatedCost(cell));
+		if (impl == BestFirstSearch.class) {
+			var bfs = (BestFirstSearch) getPathFinder();
+			return new GH_Cell(bfs::getCost, bfs::getEstimatedCost);
 		}
 		return new G_Cell(cell -> getPathFinder().getCost(cell));
 	}
