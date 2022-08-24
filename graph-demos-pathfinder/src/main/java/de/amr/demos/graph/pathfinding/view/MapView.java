@@ -382,7 +382,7 @@ public class MapView extends JPanel {
 		var impl = getPathFinder().getClass();
 		if (impl == AStarSearch.class) {
 			var astar = (AStarSearch) getPathFinder();
-			return new FGH_Cell(astar::getScore, astar::getCost, astar::getEstimatedCost);
+			return new FGH_Cell(astar::getScore, astar::getCost, astar::getEstimatedCostToTarget);
 		}
 		if (impl == BidiAStarSearch.class) {
 			var bidiAstar = (BidiAStarSearch) getPathFinder();
