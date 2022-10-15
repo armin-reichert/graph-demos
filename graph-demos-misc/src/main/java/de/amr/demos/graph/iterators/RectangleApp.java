@@ -13,7 +13,7 @@ public class RectangleApp extends SwingGridSampleApp {
 	}
 
 	public RectangleApp() {
-		super(800, 800, 2);
+		super(2);
 		setAppName("Rectangles");
 	}
 
@@ -28,5 +28,7 @@ public class RectangleApp extends SwingGridSampleApp {
 		for (Integer cell : expRect) {
 			getGrid().set(cell, COMPLETED);
 		}
+		sleep(2000);
+		System.exit(0);
 	}
 }

@@ -32,5 +32,7 @@ public class SpiralApp extends SwingGridSampleApp {
 			}
 			prevCell = cell;
 		}
+		sleep(2000);
+		System.exit(0);
 	}
 }

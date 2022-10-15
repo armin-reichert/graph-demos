@@ -4,9 +4,14 @@ import static de.amr.graph.core.api.TraversalState.COMPLETED;
 
 import java.util.stream.IntStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.amr.graph.grid.ui.SwingGridSampleApp;
 
 public class FullGridApp extends SwingGridSampleApp {
+
+	private static final Logger LOGGER = LogManager.getFormatterLogger();
 
 	public static void main(String[] args) {
 		launch(new FullGridApp());
@@ -26,8 +31,8 @@ public class FullGridApp extends SwingGridSampleApp {
 			getGrid().fill();
 			getCanvas().clear();
 			watch.measure(getCanvas()::drawGrid);
-			System.out.println(String.format("Grid (%d cells @%d) rendered in %.2f seconds",
-					getGrid().numVertices(), cellSize, watch.getSeconds()));
+			LOGGER.info(String.format("Grid (%d cells @%d) rendered in %.2f seconds", getGrid().numVertices(), cellSize,
+					watch.getSeconds()));
 			sleep(1000);
 		});
 		System.exit(0);
