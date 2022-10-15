@@ -1,11 +1,11 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.swing.MySwingUtils.selectComboNoAction;
+import static de.amr.swing.MySwing.selectComboNoAction;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -13,13 +13,18 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
-import de.amr.swing.MySwingUtils;
+import de.amr.swing.MySwing;
 import net.miginfocom.swing.MigLayout;
 
 public class MapsWindow extends JFrame {
+
+	private static final Logger LOGGER = LogManager.getFormatterLogger();
 
 	private PathFinderModel model;
 	private PathFinderController controller;
@@ -33,23 +38,15 @@ public class MapsWindow extends JFrame {
 	private JLabel lblResultsRight;
 	private JLabel lblResultsLeft;
 
-	private class ResizeHandler implements ComponentListener {
-
-		@Override
-		public void componentShown(ComponentEvent e) {
-		}
-
+	private class ResizeHandler extends ComponentAdapter {
 		@Override
 		public void componentResized(ComponentEvent e) {
-			resizeMapViews();
-		}
-
-		@Override
-		public void componentMoved(ComponentEvent e) {
-		}
-
-		@Override
-		public void componentHidden(ComponentEvent e) {
+			var containerSize = e.getComponent().getSize();
+			int containerWidth = containerSize.width;
+			int containerHeight = containerSize.height;
+			LOGGER.info("Container resized to %s", containerSize);
+			var newSize = Math.min(0.45 * containerWidth, 0.85 * containerHeight);
+			resizeMapViews((int) newSize);
 		}
 	}
 
@@ -61,27 +58,24 @@ public class MapsWindow extends JFrame {
 		lblResultsRight.setText(formatResult(controller.getRightPathFinderIndex()));
 	}
 
-	public void resizeMapViews() {
-		int size;
-		Dimension dim;
-
-		size = Math.min(panelLeftMap.getWidth(), panelLeftMap.getHeight()) * 98 / 100;
-		dim = new Dimension(size, size);
-		if (!dim.equals(leftMapView.getSize())) {
-			System.out.println("resize left view to " + dim);
-			leftMapView.setSize(dim);
-			leftMapView.setPreferredSize(dim);
-			leftMapView.updateMap(true);
+	public void resizeMapViews(int newSize) {
+		if (resizeMapView(leftMapView, newSize)) {
+			LOGGER.info("Resized left view to %s", leftMapView.getSize());
 		}
-
-		size = Math.min(panelRightMap.getWidth(), panelRightMap.getHeight()) * 98 / 100;
-		dim = new Dimension(size, size);
-		if (!dim.equals(rightMapView.getSize())) {
-			System.out.println("resize right view to " + dim);
-			rightMapView.setSize(dim);
-			rightMapView.setPreferredSize(dim);
-			rightMapView.updateMap(true);
+		if (resizeMapView(rightMapView, newSize)) {
+			LOGGER.info("Resized right view to %s", rightMapView.getSize());
 		}
+	}
+
+	private boolean resizeMapView(MapView mapView, int size) {
+		var dim = new Dimension(size, size);
+		if (!dim.equals(mapView.getSize())) {
+			mapView.setSize(dim);
+			mapView.setPreferredSize(dim);
+			mapView.updateMap(true);
+			return true;
+		}
+		return false;
 	}
 
 	private void updateTitle() {
@@ -90,10 +84,9 @@ public class MapsWindow extends JFrame {
 	}
 
 	private String formatResult(int pathFinderIndex) {
-		PathFinderResult result = model.getResult(pathFinderIndex);
-		return String.format("Path length: %d, Cost: %.0f, Touched cells %d, Time: %.0f ms",
-				result.getPathLength(), result.getCost(), result.getNumTouchedVertices(),
-				result.getRunningTimeMillis());
+		PathFinderResult result = model.getResultAtIndex(pathFinderIndex);
+		return String.format("Path length: %d, Cost: %.0f, Touched cells %d, Time: %.0f ms", result.getPathLength(),
+				result.getCost(), result.getNumTouchedVertices(), result.getRunningTimeMillis());
 	}
 
 	public MapsWindow() {
@@ -136,24 +129,22 @@ public class MapsWindow extends JFrame {
 
 		comboLeftPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
 		comboLeftPathFinder.setSelectedIndex(controller.getLeftPathFinderIndex());
-		comboLeftPathFinder.setAction(MySwingUtils.action("", e -> {
+		comboLeftPathFinder.setAction(MySwing.action("", e -> {
 			int newSelection = comboLeftPathFinder.getSelectedIndex();
 			if (newSelection != comboRightPathFinder.getSelectedIndex()) {
 				controller.changeLeftPathFinder(newSelection);
-			}
-			else {
+			} else {
 				updateWindow();
 			}
 		}));
 
 		comboRightPathFinder.setModel(new DefaultComboBoxModel<>(model.getPathFinderNames()));
 		comboRightPathFinder.setSelectedIndex(controller.getRightPathFinderIndex());
-		comboRightPathFinder.setAction(MySwingUtils.action("", e -> {
+		comboRightPathFinder.setAction(MySwing.action("", e -> {
 			int newSelection = comboRightPathFinder.getSelectedIndex();
 			if (newSelection != comboLeftPathFinder.getSelectedIndex()) {
 				controller.changeRightPathFinder(newSelection);
-			}
-			else {
+			} else {
 				updateWindow();
 			}
 		}));

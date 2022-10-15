@@ -206,7 +206,6 @@ public class PathFinderController {
 		mapsWindow = new MapsWindow(this, leftMapView, rightMapView);
 		mapsWindow.setLocation(configWindow.getWidth(), 0);
 		mapsWindow.pack();
-		mapsWindow.resizeMapViews();
 
 		configWindow.setVisible(true);
 		mapsWindow.setVisible(true);
@@ -297,7 +296,7 @@ public class PathFinderController {
 		new PathFinderAnimationTask(pathFinderIndex, mapView).execute();
 	}
 
-	public int getAnimationDelay() {
+	public synchronized int getAnimationDelay() {
 		return animationDelay;
 	}
 
@@ -426,8 +425,7 @@ public class PathFinderController {
 				}
 				leftMapView.updateMapCell(cell);
 				rightMapView.updateMapCell(cell);
-			}
-			else {
+			} else {
 				updatePathFinderResults();
 			}
 		}

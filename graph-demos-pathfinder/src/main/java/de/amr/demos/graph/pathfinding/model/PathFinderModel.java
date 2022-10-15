@@ -206,7 +206,7 @@ public class PathFinderModel {
 		return results.size();
 	}
 
-	public PathFinderResult getResult(int pathFinderIndex) {
+	public PathFinderResult getResultAtIndex(int pathFinderIndex) {
 		return results.get(pathFinderIndex);
 	}
 

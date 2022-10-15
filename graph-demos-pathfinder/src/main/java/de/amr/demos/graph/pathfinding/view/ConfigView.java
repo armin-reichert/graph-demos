@@ -1,7 +1,7 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.swing.MySwingUtils.comboSelection;
-import static de.amr.swing.MySwingUtils.selectComboNoAction;
+import static de.amr.swing.MySwing.comboSelection;
+import static de.amr.swing.MySwing.selectComboNoAction;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -20,8 +20,10 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
@@ -29,7 +31,7 @@ import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
 import de.amr.demos.graph.pathfinding.controller.TopologySelection;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.graph.grid.impl.Grid4Topology;
-import de.amr.swing.MySwingUtils;
+import de.amr.swing.MySwing;
 import net.miginfocom.swing.MigLayout;
 
 /**
@@ -39,9 +41,14 @@ import net.miginfocom.swing.MigLayout;
  */
 public class ConfigView extends JPanel {
 
+	private static final Logger LOGGER = LogManager.getFormatterLogger();
+
 	private PathFinderModel model;
 	private PathFinderController controller;
 
+	private JTabbedPane tabbedPane;
+	private JPanel tabMap;
+	private JPanel tabPathFinding;
 	private JPanel bottomPane;
 	private JSpinner spinnerMapSize;
 	private JComboBox<TopologySelection> comboTopology;
@@ -59,6 +66,43 @@ public class ConfigView extends JPanel {
 	private JLabel lblNewLabel;
 	private JLabel lblTotalCells;
 	private JLabel lblDelay;
+
+	private Action actionSelectTopology = MySwing.action("Select Topology", e -> {
+		controller.changeTopology(comboSelection(comboTopology));
+	});
+
+	private Action actionSelectExecutionMode = MySwing.action("Select Execution Mode", e -> {
+		controller.changeExecutionMode(comboSelection(comboExecutionMode));
+	});
+
+	private Action actionSelectStyle = MySwing.action("Select Map Style", e -> {
+		controller.changeStyle(comboSelection(comboStyle));
+	});
+
+	private Action actionStartSelectedPathFinder = MySwing.action("Start", e -> {
+		controller.runBothFirstStep(true);
+		updateViewState();
+	});
+
+	private Action actionStepPathFinders = MySwing.action("Steps", e -> {
+		JComponent source = (JComponent) e.getSource();
+		int numSteps = (Integer) source.getClientProperty("numSteps");
+		controller.runBothNumSteps(numSteps);
+		updateViewState();
+	});
+
+	private Action actionFinishPathFinders = MySwing.action("Finish", e -> {
+		controller.runBothRemainingSteps();
+		updateViewState();
+	});
+
+	private Action actionShowCost = MySwing.action("Show Cost", e -> controller.showCost(cbShowCost.isSelected()));
+
+	private Action actionShowParent = MySwing.action("Show Parent",
+			e -> controller.showParent(cbShowParent.isSelected()));
+
+	private ChangeListener onMapSizeChange = e -> controller.changeMapSize((int) spinnerMapSize.getValue());
+	private ChangeListener onDelayChange = e -> controller.setAnimationDelay(sliderDelay.getValue());
 
 	public ConfigView() {
 		setPreferredSize(new Dimension(450, 600));
@@ -206,7 +250,8 @@ public class ConfigView extends JPanel {
 
 		// path finder results table
 		tableResults.init(model);
-		int minTableWidth = 400, minTableHeight = model.numResults() * 20; // TODO
+		int minTableWidth = 400;
+		int minTableHeight = model.numResults() * 20;
 		scrollPaneTableResults.setPreferredSize(new Dimension(minTableWidth, minTableHeight));
 
 		// others controls
@@ -232,8 +277,6 @@ public class ConfigView extends JPanel {
 		updateViewState();
 	}
 
-	// Actions and change listeners
-
 	public void updateView() {
 		tableResults.dataChanged();
 		selectComboNoAction(comboTopology, model.getMap().getTopology() == Grid4Topology.get() ? 0 : 1);
@@ -242,8 +285,7 @@ public class ConfigView extends JPanel {
 		cbShowParent.setSelected(controller.isShowingParent());
 		selectComboNoAction(comboStyle, controller.getStyle());
 		updateViewState();
-
-		System.out.println("ConfigView updated: " + this);
+		LOGGER.trace("ConfigView updated: %s", this);
 	}
 
 	private void updateViewState() {
@@ -261,61 +303,4 @@ public class ConfigView extends JPanel {
 	public PathFinderController getController() {
 		return controller;
 	}
-
-	private Action actionSelectTopology = MySwingUtils.action("Select Topology", e -> {
-		getController().changeTopology(comboSelection(comboTopology));
-	});
-
-	private Action actionSelectExecutionMode = MySwingUtils.action("Select Execution Mode", e -> {
-		getController().changeExecutionMode(comboSelection(comboExecutionMode));
-	});
-
-	private Action actionSelectStyle = MySwingUtils.action("Select Map Style", e -> {
-		getController().changeStyle(comboSelection(comboStyle));
-	});
-
-	private Action actionStartSelectedPathFinder = MySwingUtils.action("Start", e -> {
-		getController().runBothFirstStep(true);
-		updateViewState();
-	});
-
-	private Action actionStepPathFinders = MySwingUtils.action("Steps", e -> {
-		JComponent source = (JComponent) e.getSource();
-		int numSteps = (Integer) source.getClientProperty("numSteps");
-		getController().runBothNumSteps(numSteps);
-		updateViewState();
-	});
-
-	private Action actionFinishPathFinders = MySwingUtils.action("Finish", e -> {
-		getController().runBothRemainingSteps();
-		updateViewState();
-	});
-
-	private Action actionShowCost = MySwingUtils.action("Show Cost", e -> {
-		getController().showCost(cbShowCost.isSelected());
-	});
-
-	private Action actionShowParent = MySwingUtils.action("Show Parent", e -> {
-		getController().showParent(cbShowParent.isSelected());
-	});
-
-	private ChangeListener onMapSizeChange = new ChangeListener() {
-
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			int newSize = (int) spinnerMapSize.getValue();
-			getController().changeMapSize(newSize);
-		}
-	};
-
-	private ChangeListener onDelayChange = new ChangeListener() {
-
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			controller.setAnimationDelay(sliderDelay.getValue());
-		}
-	};
-	private JTabbedPane tabbedPane;
-	private JPanel tabMap;
-	private JPanel tabPathFinding;
 }

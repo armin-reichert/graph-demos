@@ -1,7 +1,6 @@
 package de.amr.demos.graph.pathfinding.view;
 
 import java.awt.Component;
-import java.util.Optional;
 import java.util.function.Function;
 
 import javax.swing.JTable;
@@ -11,7 +10,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import de.amr.demos.graph.pathfinding.model.PathFinderAlgorithm;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
-import de.amr.graph.pathfinder.api.ObservableGraphSearch;
 import de.amr.graph.pathfinder.api.Path;
 import de.amr.graph.pathfinder.impl.AStarSearch;
 
@@ -51,7 +49,7 @@ public class ResultsTable extends JTable {
 		new ColumnSpec(
 				"Path length", 
 				Integer.class, 
-				len -> (int) len == -1 ? "\u221e" : String.format("%d", len)), 
+				len -> (int) len == -1 ? "\u221e" : String.format("%d", (int)len)), 
 		new ColumnSpec(
 				"Path cost", 
 				Double.class,
@@ -98,7 +96,7 @@ public class ResultsTable extends JTable {
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
-			PathFinderResult result = model.getResult(rowIndex);
+			PathFinderResult result = model.getResultAtIndex(rowIndex);
 			switch (columnIndex) {
 			case 0:
 				return result.getPathFinderName();
@@ -109,10 +107,11 @@ public class ResultsTable extends JTable {
 			case 3:
 				return result.getCost();
 			case 4:
-				Optional<ObservableGraphSearch> astar = model.getPathFinderByClass(AStarSearch.class);
+				var astar = model.getPathFinderByClass(AStarSearch.class);
 				if (astar.isPresent()) {
 					double cost = result.getCost();
-					double optimum = model.getResult(astar.get()).get().getCost();
+					var astarResult = model.getResult(astar.get());
+					double optimum = astarResult.get().getCost();
 					if (cost != 0 && optimum != 0) {
 						return 100 * (result.getCost() - optimum) / optimum;
 					}
@@ -134,8 +133,8 @@ public class ResultsTable extends JTable {
 			getColumnModel().getColumn(i).setCellRenderer(new DefaultTableCellRenderer() {
 
 				@Override
-				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-						boolean hasFocus, int rowIndex, int columnIndex) {
+				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+						int rowIndex, int columnIndex) {
 					super.getTableCellRendererComponent(table, value, isSelected, hasFocus, rowIndex, columnIndex);
 					if (value == null) {
 						return this;

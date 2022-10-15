@@ -27,9 +27,8 @@ public class PathFinderDemoApp {
 	}
 
 	public PathFinderDemoApp() {
-		PathFinderModel model = new PathFinderModel(25, Grid8Topology.get());
-		PathFinderController controller = new PathFinderController(model, PathFinderAlgorithm.BFS,
-				PathFinderAlgorithm.AStar);
+		var model = new PathFinderModel(25, Grid8Topology.get());
+		var controller = new PathFinderController(model, PathFinderAlgorithm.BFS, PathFinderAlgorithm.AStar);
 		controller.createAndShowUI();
 	}
 }

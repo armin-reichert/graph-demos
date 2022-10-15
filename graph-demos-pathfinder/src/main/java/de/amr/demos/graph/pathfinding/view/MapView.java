@@ -21,6 +21,9 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
@@ -48,7 +51,7 @@ import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.BidiAStarSearch;
 import de.amr.graph.pathfinder.impl.BidiGraphSearch;
-import de.amr.swing.MySwingUtils;
+import de.amr.swing.MySwing;
 
 /**
  * Displays the map together with the information computed during the path finder execution.
@@ -56,6 +59,8 @@ import de.amr.swing.MySwingUtils;
  * @author Armin Reichert
  */
 public class MapView extends JPanel {
+
+	private static final Logger LOGGER = LogManager.getFormatterLogger();
 
 	private PathFinderModel model;
 	private PathFinderController controller;
@@ -171,10 +176,10 @@ public class MapView extends JPanel {
 
 	// Actions
 
-	private Action actionSetSourceHere = MySwingUtils.action("Search From Here",
+	private Action actionSetSourceHere = MySwing.action("Search From Here",
 			e -> getController().setSource(mouse.getCellUnderMouse()));
 
-	private Action actionSetTargetHere = MySwingUtils.action("Search To Here",
+	private Action actionSetTargetHere = MySwing.action("Search To Here",
 			e -> getController().setTarget(mouse.getCellUnderMouse()));
 
 	public MapView() {
@@ -217,9 +222,9 @@ public class MapView extends JPanel {
 
 		contextMenu.addSeparator();
 		rbExecutionManual = new JRadioButtonMenuItem(
-				MySwingUtils.action("Manual execution", e -> controller.changeExecutionMode(ExecutionMode.MANUAL)));
+				MySwing.action("Manual execution", e -> controller.changeExecutionMode(ExecutionMode.MANUAL)));
 		rbExecutionAutomatic = new JRadioButtonMenuItem(
-				MySwingUtils.action("Automatic execution", e -> controller.changeExecutionMode(ExecutionMode.VISIBLE)));
+				MySwing.action("Automatic execution", e -> controller.changeExecutionMode(ExecutionMode.VISIBLE)));
 		ButtonGroup bgExecutionMode = new ButtonGroup();
 		bgExecutionMode.add(rbExecutionAutomatic);
 		bgExecutionMode.add(rbExecutionManual);
@@ -257,9 +262,9 @@ public class MapView extends JPanel {
 
 		contextMenu.addSeparator();
 		rbShowAsBlocks = new JRadioButtonMenuItem(
-				MySwingUtils.action("Blocks", e -> controller.changeStyle(RenderingStyle.BLOCKS)));
+				MySwing.action("Blocks", e -> controller.changeStyle(RenderingStyle.BLOCKS)));
 		rbShowAsPearls = new JRadioButtonMenuItem(
-				MySwingUtils.action("Pearls", e -> controller.changeStyle(RenderingStyle.PEARLS)));
+				MySwing.action("Pearls", e -> controller.changeStyle(RenderingStyle.PEARLS)));
 		ButtonGroup bgStyke = new ButtonGroup();
 		bgStyke.add(rbShowAsBlocks);
 		bgStyke.add(rbShowAsPearls);
@@ -309,8 +314,7 @@ public class MapView extends JPanel {
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
 		requestFocusInWindow();
-
-		System.out.println("(" + updateCnt++ + ") MapView updated: " + this);
+		LOGGER.trace(() -> "(%d) MapView updated: %s".formatted(updateCnt, this));
 	}
 
 	static int updateCnt;
@@ -453,7 +457,7 @@ public class MapView extends JPanel {
 	}
 
 	private boolean partOfSolution(int cell) {
-		return model.getResult(getPathFinderIndex()).pathContains(cell);
+		return model.getResultAtIndex(getPathFinderIndex()).pathContains(cell);
 	}
 
 	private class PearlsCellRendererAdapter extends PearlsCellRenderer {
