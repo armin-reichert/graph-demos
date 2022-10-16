@@ -22,8 +22,9 @@ public class CellG extends Cell {
 
 	@Override
 	protected void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
+		int cs = cellSize.getAsInt();
 		String gCostText = formatScaledValue(gValue.apply(cell), 10);
-		int fontSize = availableFontSize(g, 0.5f);
+		int fontSize = (int) (0.5f * cs);
 		if (fontSize >= MIN_FONT_SIZE) {
 			Rectangle2D textBounds = getBounds(g, gCostText);
 			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));

@@ -38,10 +38,6 @@ public abstract class Cell implements GridCellRenderer {
 		return value == INFINITE_COST ? "\u221e" : String.format("%.0f", factor * value);
 	}
 
-	protected int availableFontSize(Graphics2D g, float fraction) {
-		return (int) (fraction * cellSize.getAsInt());
-	}
-
 	protected Rectangle2D getBounds(Graphics2D g, String text) {
 		return g.getFontMetrics().getStringBounds(text, g);
 	}

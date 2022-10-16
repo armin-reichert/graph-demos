@@ -30,7 +30,7 @@ public class CellGH extends Cell {
 
 		// H-value (top-right, small)
 		text = formatScaledValue(hValue.apply(cell), 10);
-		fontSize = availableFontSize(g, 0.3f);
+		fontSize = (int) (0.3 * cs);
 		if (fontSize >= MIN_FONT_SIZE) {
 			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
 			g.setColor(cellTextColor.apply(cell));
@@ -40,7 +40,7 @@ public class CellGH extends Cell {
 
 		// G-value (center, large)
 		text = formatScaledValue(gValue.apply(cell), 10);
-		fontSize = availableFontSize(g, showParent.getAsBoolean() ? 0.3f : 0.5f);
+		fontSize = showParent.getAsBoolean() ? (int) (0.3 * cs) : (int) (0.5 * cs);
 		if (fontSize >= MIN_FONT_SIZE) {
 			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
 			g.setColor(cellTextColor.apply(cell));

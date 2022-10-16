@@ -32,7 +32,7 @@ public class CellFGH extends Cell {
 
 		// F-value (top-left, small)
 		text = formatScaledValue(fValue.apply(cell), 10);
-		fontSize = availableFontSize(g, 0.3f);
+		fontSize = (int) (cs * 0.25f);
 		if (fontSize >= MIN_FONT_SIZE) {
 			var font = new Font(fontFamily, Font.PLAIN, fontSize);
 			g.setFont(font);
@@ -42,7 +42,7 @@ public class CellFGH extends Cell {
 
 		// H-value (top-right, small)
 		text = formatScaledValue(hValue.apply(cell), 10);
-		fontSize = availableFontSize(g, 0.3f);
+		fontSize = (int) (cs * 0.25f);
 		if (fontSize >= MIN_FONT_SIZE) {
 			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
 			g.setColor(cellTextColor.apply(cell));
@@ -52,7 +52,7 @@ public class CellFGH extends Cell {
 
 		// G-value (center, large)
 		text = formatScaledValue(gValue.apply(cell), 10);
-		fontSize = availableFontSize(g, showParent.getAsBoolean() ? 0.3f : 0.5f);
+		fontSize = (int) (showParent.getAsBoolean() ? cs * 0.25f : cs * 0.5f);
 		if (fontSize >= MIN_FONT_SIZE) {
 			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
 			g.setColor(cellTextColor.apply(cell));

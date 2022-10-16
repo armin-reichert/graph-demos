@@ -85,7 +85,7 @@ public class MapsWindow extends JFrame {
 
 	private String formatResult(int pathFinderIndex) {
 		PathFinderResult result = model.getResultAtIndex(pathFinderIndex);
-		return String.format("Path length: %d, Cost: %.0f, Touched cells %d, Time: %.0f ms", result.getPathLength(),
+		return String.format("Path length: %d, Cost: %.2f, Touched cells %d, Time: %.0f ms", result.getPathLength(),
 				result.getCost(), result.getNumTouchedVertices(), result.getRunningTimeMillis());
 	}
 
