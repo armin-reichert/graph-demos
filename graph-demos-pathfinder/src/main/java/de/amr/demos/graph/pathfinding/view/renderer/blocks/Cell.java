@@ -22,7 +22,10 @@ import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.impl.Grid4Topology;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 
-public abstract class Cell implements GridCellRenderer {
+/**
+ * @author Armin Reichert
+ */
+public class Cell implements GridCellRenderer {
 
 	public static final int MIN_FONT_SIZE = 8;
 
@@ -34,6 +37,17 @@ public abstract class Cell implements GridCellRenderer {
 	public Function<Integer, Color> cellBackground;
 	public Function<Integer, Color> cellTextColor;
 	public String fontFamily;
+
+	private Function<Integer, Double> fnLeftUpperValue;
+	private Function<Integer, Double> fnRightUpperValue;
+	private Function<Integer, Double> fnCenterValue;
+
+	public Cell(Function<Integer, Double> fnLeftUpperValue, Function<Integer, Double> fnRightUpperValue,
+			Function<Integer, Double> fnCenterValue) {
+		this.fnLeftUpperValue = fnLeftUpperValue;
+		this.fnRightUpperValue = fnRightUpperValue;
+		this.fnCenterValue = fnCenterValue;
+	}
 
 	protected String formatScaledValue(double value, double factor) {
 		return value == INFINITE_COST ? "\u221e" : String.format("%.0f", factor * value);
@@ -54,7 +68,17 @@ public abstract class Cell implements GridCellRenderer {
 		return needle;
 	}
 
-	protected abstract void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell);
+	protected void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
+		if (fnLeftUpperValue != null) {
+			drawLeftUpperCellText(g, cell, formatScaledValue(fnLeftUpperValue.apply(cell), 10));
+		}
+		if (fnRightUpperValue != null) {
+			drawRightUpperCellText(g, cell, formatScaledValue(fnRightUpperValue.apply(cell), 10));
+		}
+		if (fnCenterValue != null) {
+			drawCenteredCelltext(g, cell, formatScaledValue(fnCenterValue.apply(cell), 10));
+		}
+	}
 
 	protected void drawLeftUpperCellText(Graphics2D g, int cell, String text) {
 		final int cs = cellSize.getAsInt();

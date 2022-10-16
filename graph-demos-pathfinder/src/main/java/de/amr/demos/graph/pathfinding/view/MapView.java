@@ -30,9 +30,6 @@ import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.blocks.BlocksMap;
-import de.amr.demos.graph.pathfinding.view.renderer.blocks.CellFGH;
-import de.amr.demos.graph.pathfinding.view.renderer.blocks.CellGH;
-import de.amr.demos.graph.pathfinding.view.renderer.blocks.CellG;
 import de.amr.demos.graph.pathfinding.view.renderer.blocks.Cell;
 import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsMapRenderer;
@@ -51,6 +48,7 @@ import de.amr.graph.pathfinder.impl.AStarSearch;
 import de.amr.graph.pathfinder.impl.BestFirstSearch;
 import de.amr.graph.pathfinder.impl.BidiAStarSearch;
 import de.amr.graph.pathfinder.impl.BidiGraphSearch;
+import de.amr.graph.pathfinder.impl.DijkstraSearch;
 import de.amr.swing.MySwing;
 
 /**
@@ -386,17 +384,21 @@ public class MapView extends JPanel {
 		var impl = getPathFinder().getClass();
 		if (impl == AStarSearch.class) {
 			var astar = (AStarSearch) getPathFinder();
-			return new CellFGH(astar::getScore, astar::getCost, astar::getEstimatedCostToTarget);
+			return new Cell(astar::getScore, astar::getEstimatedCostToTarget, astar::getCost);
 		}
 		if (impl == BidiAStarSearch.class) {
 			var bidiAstar = (BidiAStarSearch) getPathFinder();
-			return new CellFGH(bidiAstar::getScore, bidiAstar::getCost, bidiAstar::getEstimatedCost);
+			return new Cell(bidiAstar::getScore, bidiAstar::getEstimatedCost, bidiAstar::getCost);
 		}
 		if (impl == BestFirstSearch.class) {
-			var bfs = (BestFirstSearch) getPathFinder();
-			return new CellGH(bfs::getCost, bfs::getEstimatedCost);
+			var bestfs = (BestFirstSearch) getPathFinder();
+			return new Cell(null, bestfs::getEstimatedCost, bestfs::getCost);
 		}
-		return new CellG(cell -> getPathFinder().getCost(cell));
+		if (impl == DijkstraSearch.class) {
+			var dijkstra = (DijkstraSearch) getPathFinder();
+			return new Cell(null, dijkstra::getEstimatedCostToTarget, dijkstra::getCost);
+		}
+		return new Cell(null, null, cell -> getPathFinder().getCost(cell));
 	}
 
 	private Color computeCellBackground(int cell) {
