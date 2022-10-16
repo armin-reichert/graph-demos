@@ -49,15 +49,15 @@ public class Cell implements GridCellRenderer {
 		this.fnCenterValue = fnCenterValue;
 	}
 
-	protected String formatScaledValue(double value, double factor) {
+	private String formatScaledValue(double value, double factor) {
 		return value == INFINITE_COST ? "\u221e" : String.format("%.0f", factor * value);
 	}
 
-	protected Rectangle2D getBounds(Graphics2D g, String text) {
+	private Rectangle2D getBounds(Graphics2D g, String text) {
 		return g.getFontMetrics().getStringBounds(text, g);
 	}
 
-	protected Area createNeedle() {
+	private Area createNeedle() {
 		int r = cellSize.getAsInt() / 10;
 		Area needle = new Area(new Ellipse2D.Double(-r, -r, 2 * r, 2 * r));
 		Polygon p = new Polygon();
@@ -68,7 +68,7 @@ public class Cell implements GridCellRenderer {
 		return needle;
 	}
 
-	protected void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
+	private void drawCellContent(Graphics2D g, int cell) {
 		if (fnLeftUpperValue != null) {
 			drawLeftUpperCellText(g, cell, formatScaledValue(fnLeftUpperValue.apply(cell), 10));
 		}
@@ -76,23 +76,22 @@ public class Cell implements GridCellRenderer {
 			drawRightUpperCellText(g, cell, formatScaledValue(fnRightUpperValue.apply(cell), 10));
 		}
 		if (fnCenterValue != null) {
-			drawCenteredCelltext(g, cell, formatScaledValue(fnCenterValue.apply(cell), 10));
+			drawCenteredCellText(g, cell, formatScaledValue(fnCenterValue.apply(cell), 10));
 		}
 	}
 
-	protected void drawLeftUpperCellText(Graphics2D g, int cell, String text) {
+	private void drawLeftUpperCellText(Graphics2D g, int cell, String text) {
 		final int cs = cellSize.getAsInt();
-		final int margin = Math.max(cs / 20, 3);
 		var fontSize = (int) (cs * 0.25f);
 		if (fontSize >= MIN_FONT_SIZE) {
 			var font = new Font(fontFamily, Font.PLAIN, fontSize);
 			g.setFont(font);
 			g.setColor(cellTextColor.apply(cell));
-			g.drawString(text, margin, cs / 3);
+			g.drawString(text, 2, cs / 3);
 		}
 	}
 
-	protected void drawRightUpperCellText(Graphics2D g, int cell, String text) {
+	private void drawRightUpperCellText(Graphics2D g, int cell, String text) {
 		final int cs = cellSize.getAsInt();
 		var fontSize = (int) (cs * 0.25f);
 		if (fontSize >= MIN_FONT_SIZE) {
@@ -104,15 +103,14 @@ public class Cell implements GridCellRenderer {
 		}
 	}
 
-	protected void drawCenteredCelltext(Graphics2D g, int cell, String text) {
+	private void drawCenteredCellText(Graphics2D g, int cell, String text) {
 		final int cs = cellSize.getAsInt();
-		final int margin = Math.max(cs / 20, 3);
 		var fontSize = (int) (showParent.getAsBoolean() ? cs * 0.25f : cs * 0.5f);
 		if (fontSize >= MIN_FONT_SIZE) {
 			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
 			g.setColor(cellTextColor.apply(cell));
 			var textBounds = getBounds(g, text);
-			g.drawString(text, cs / 2 - (int) (textBounds.getWidth() / 2), cs - margin);
+			g.drawString(text, cs / 2 - (int) (textBounds.getWidth() / 2), cs - 2);
 		}
 	}
 
@@ -130,7 +128,7 @@ public class Cell implements GridCellRenderer {
 		}
 		if (showCost.getAsBoolean()) {
 			g.translate(x, y);
-			drawCellContent(g, grid, cell);
+			drawCellContent(g, cell);
 			g.translate(-x, -y);
 		}
 		if (showParent.getAsBoolean()) {
@@ -140,7 +138,7 @@ public class Cell implements GridCellRenderer {
 		}
 	}
 
-	protected void drawCellBackground(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
+	private void drawCellBackground(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
 		int cs = cellSize.getAsInt();
 		g.setColor(cellBackground.apply(cell));
 		g.fillRect(0, 0, cs, cs);
@@ -151,7 +149,7 @@ public class Cell implements GridCellRenderer {
 		g.drawRect(0, 0, cs, lastRow ? cs - 1 : cs);
 	}
 
-	protected void drawNeedle(Graphics2D g, GridGraph2D<?, ?> grid, int cell, int parent, Area needle) {
+	private void drawNeedle(Graphics2D g, GridGraph2D<?, ?> grid, int cell, int parent, Area needle) {
 		if (parent == Graph.NO_VERTEX) {
 			return;
 		}
