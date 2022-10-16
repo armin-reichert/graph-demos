@@ -4,7 +4,6 @@ import static de.amr.graph.pathfinder.api.Path.INFINITE_COST;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
@@ -22,7 +21,7 @@ import de.amr.graph.grid.api.GridGraph2D;
 import de.amr.graph.grid.impl.Grid4Topology;
 import de.amr.graph.grid.ui.rendering.GridCellRenderer;
 
-public abstract class MapCell implements GridCellRenderer {
+public abstract class Cell implements GridCellRenderer {
 
 	public static final int MIN_FONT_SIZE = 8;
 
@@ -39,11 +38,8 @@ public abstract class MapCell implements GridCellRenderer {
 		return value == INFINITE_COST ? "\u221e" : String.format("%.0f", factor * value);
 	}
 
-	protected int adjustFontSize(Graphics2D g, float fraction) {
-		Font baseFont = new Font(fontFamily, Font.PLAIN, 10);
-		float size = fraction * cellSize.getAsInt();
-		g.setFont(baseFont.deriveFont(size));
-		return (int) size;
+	protected int availableFontSize(Graphics2D g, float fraction) {
+		return (int) (fraction * cellSize.getAsInt());
 	}
 
 	protected Rectangle2D getBounds(Graphics2D g, String text) {

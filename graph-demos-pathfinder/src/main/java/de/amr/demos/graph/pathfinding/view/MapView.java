@@ -30,10 +30,10 @@ import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.Tile;
 import de.amr.demos.graph.pathfinding.view.renderer.blocks.BlocksMap;
-import de.amr.demos.graph.pathfinding.view.renderer.blocks.FGH_Cell;
-import de.amr.demos.graph.pathfinding.view.renderer.blocks.GH_Cell;
-import de.amr.demos.graph.pathfinding.view.renderer.blocks.G_Cell;
-import de.amr.demos.graph.pathfinding.view.renderer.blocks.MapCell;
+import de.amr.demos.graph.pathfinding.view.renderer.blocks.CellFGH;
+import de.amr.demos.graph.pathfinding.view.renderer.blocks.CellGH;
+import de.amr.demos.graph.pathfinding.view.renderer.blocks.CellG;
+import de.amr.demos.graph.pathfinding.view.renderer.blocks.Cell;
 import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsCellRenderer;
 import de.amr.demos.graph.pathfinding.view.renderer.pearls.PearlsMapRenderer;
 import de.amr.graph.core.api.Graph;
@@ -355,7 +355,7 @@ public class MapView extends JPanel {
 	private GridRenderer createMapRenderer() {
 		RenderingStyle style = controller.getStyle();
 		if (style == RenderingStyle.BLOCKS) {
-			MapCell cell = createMapCell();
+			Cell cell = createMapCell();
 			cell.parent = getPathFinder()::getParent;
 			cell.showCost = controller::isShowingCost;
 			cell.showParent = controller::isShowingParent;
@@ -382,21 +382,21 @@ public class MapView extends JPanel {
 		throw new IllegalArgumentException("Unknown style: " + style);
 	}
 
-	private MapCell createMapCell() {
+	private Cell createMapCell() {
 		var impl = getPathFinder().getClass();
 		if (impl == AStarSearch.class) {
 			var astar = (AStarSearch) getPathFinder();
-			return new FGH_Cell(astar::getScore, astar::getCost, astar::getEstimatedCostToTarget);
+			return new CellFGH(astar::getScore, astar::getCost, astar::getEstimatedCostToTarget);
 		}
 		if (impl == BidiAStarSearch.class) {
 			var bidiAstar = (BidiAStarSearch) getPathFinder();
-			return new FGH_Cell(bidiAstar::getScore, bidiAstar::getCost, bidiAstar::getEstimatedCost);
+			return new CellFGH(bidiAstar::getScore, bidiAstar::getCost, bidiAstar::getEstimatedCost);
 		}
 		if (impl == BestFirstSearch.class) {
 			var bfs = (BestFirstSearch) getPathFinder();
-			return new GH_Cell(bfs::getCost, bfs::getEstimatedCost);
+			return new CellGH(bfs::getCost, bfs::getEstimatedCost);
 		}
-		return new G_Cell(cell -> getPathFinder().getCost(cell));
+		return new CellG(cell -> getPathFinder().getCost(cell));
 	}
 
 	private Color computeCellBackground(int cell) {

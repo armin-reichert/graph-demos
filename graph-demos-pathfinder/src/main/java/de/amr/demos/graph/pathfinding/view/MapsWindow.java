@@ -90,13 +90,19 @@ public class MapsWindow extends JFrame {
 	}
 
 	public MapsWindow() {
-		getContentPane().setBackground(Color.WHITE);
+		getContentPane().setBackground(new Color(255, 255, 255));
 		setTitle("Path Finder Demo Map");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		getContentPane().setLayout(new MigLayout("", "[grow][grow]", "[][grow][]"));
 		comboLeftPathFinder = new JComboBox<>();
+		comboLeftPathFinder.setModel(
+				new DefaultComboBoxModel<>(new String[] { "Breadth-First Search", "Dijkstra Search", "AStar Search" }));
+		comboLeftPathFinder.setSelectedIndex(0);
 		getContentPane().add(comboLeftPathFinder, "cell 0 0,alignx center");
 		comboRightPathFinder = new JComboBox<>();
+		comboRightPathFinder.setModel(
+				new DefaultComboBoxModel<>(new String[] { "Breadth-First Search", "Dijkstra Search", "AStar Search" }));
+		comboRightPathFinder.setSelectedIndex(1);
 		getContentPane().add(comboRightPathFinder, "cell 1 0,alignx center");
 		panelLeftMap = new JPanel();
 		panelLeftMap.setOpaque(false);

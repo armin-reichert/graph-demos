@@ -28,5 +28,6 @@ public class BlocksMap extends ConfigurableGridRenderer implements GridRenderer 
 
 	@Override
 	public void drawPassage(Graphics2D g, GridGraph2D<?, ?> grid, int either, int other, boolean visible) {
+		// nothing to do
 	}
 }
