@@ -2,7 +2,6 @@ package de.amr.demos.graph.pathfinding.view.renderer.blocks;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
 import java.util.function.Function;
 
 import de.amr.graph.grid.api.GridGraph2D;
@@ -22,15 +21,16 @@ public class CellG extends Cell {
 
 	@Override
 	protected void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
-		int cs = cellSize.getAsInt();
-		String gCostText = formatScaledValue(gValue.apply(cell), 10);
-		int fontSize = (int) (0.5f * cs);
+		final int cs = cellSize.getAsInt();
+		final int margin = Math.max(cs / 20, 3);
+		// G-value (center, large)
+		var text = formatScaledValue(gValue.apply(cell), 10);
+		var fontSize = showParent.getAsBoolean() ? (int) (0.3 * cs) : (int) (0.5 * cs);
 		if (fontSize >= MIN_FONT_SIZE) {
-			Rectangle2D textBounds = getBounds(g, gCostText);
 			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
 			g.setColor(cellTextColor.apply(cell));
-			g.drawString(gCostText, (int) (cellSize.getAsInt() - textBounds.getWidth()) / 2,
-					(int) (cellSize.getAsInt() + textBounds.getHeight() - g.getFontMetrics().getDescent()) / 2);
+			var textBounds = getBounds(g, text);
+			g.drawString(text, cs / 2 - (int) (textBounds.getWidth() / 2), cs - margin);
 		}
 	}
 }
