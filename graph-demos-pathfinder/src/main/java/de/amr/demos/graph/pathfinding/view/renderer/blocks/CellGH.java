@@ -1,6 +1,5 @@
 package de.amr.demos.graph.pathfinding.view.renderer.blocks;
 
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.util.function.Function;
 
@@ -23,29 +22,7 @@ public class CellGH extends Cell {
 
 	@Override
 	protected void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
-		final int cs = cellSize.getAsInt();
-		final int margin = Math.max(cs / 20, 3);
-		int fontSize;
-		String text;
-
-		// H-value (top-right, small)
-		text = formatScaledValue(hValue.apply(cell), 10);
-		fontSize = (int) (0.3 * cs);
-		if (fontSize >= MIN_FONT_SIZE) {
-			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
-			g.setColor(cellTextColor.apply(cell));
-			var textBounds = getBounds(g, text);
-			g.drawString(text, (int) (cs - textBounds.getWidth()), cs / 3);
-		}
-
-		// G-value (center, large)
-		text = formatScaledValue(gValue.apply(cell), 10);
-		fontSize = showParent.getAsBoolean() ? (int) (0.3 * cs) : (int) (0.5 * cs);
-		if (fontSize >= MIN_FONT_SIZE) {
-			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
-			g.setColor(cellTextColor.apply(cell));
-			var textBounds = getBounds(g, text);
-			g.drawString(text, cs / 2 - (int) (textBounds.getWidth() / 2), cs - margin);
-		}
+		drawRightUpperCellText(g, cell, formatScaledValue(hValue.apply(cell), 10));
+		drawCenteredCelltext(g, cell, formatScaledValue(gValue.apply(cell), 10));
 	}
 }

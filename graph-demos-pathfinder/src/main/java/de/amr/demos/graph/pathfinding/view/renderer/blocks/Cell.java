@@ -4,6 +4,7 @@ import static de.amr.graph.pathfinder.api.Path.INFINITE_COST;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
@@ -54,6 +55,42 @@ public abstract class Cell implements GridCellRenderer {
 	}
 
 	protected abstract void drawCellContent(Graphics2D g, GridGraph2D<?, ?> grid, int cell);
+
+	protected void drawLeftUpperCellText(Graphics2D g, int cell, String text) {
+		final int cs = cellSize.getAsInt();
+		final int margin = Math.max(cs / 20, 3);
+		var fontSize = (int) (cs * 0.25f);
+		if (fontSize >= MIN_FONT_SIZE) {
+			var font = new Font(fontFamily, Font.PLAIN, fontSize);
+			g.setFont(font);
+			g.setColor(cellTextColor.apply(cell));
+			g.drawString(text, margin, cs / 3);
+		}
+	}
+
+	protected void drawRightUpperCellText(Graphics2D g, int cell, String text) {
+		final int cs = cellSize.getAsInt();
+		var fontSize = (int) (cs * 0.25f);
+		if (fontSize >= MIN_FONT_SIZE) {
+			var font = new Font(fontFamily, Font.PLAIN, fontSize);
+			g.setFont(font);
+			g.setColor(cellTextColor.apply(cell));
+			var textBounds = getBounds(g, text);
+			g.drawString(text, (int) (cs - textBounds.getWidth()), cs / 3);
+		}
+	}
+
+	protected void drawCenteredCelltext(Graphics2D g, int cell, String text) {
+		final int cs = cellSize.getAsInt();
+		final int margin = Math.max(cs / 20, 3);
+		var fontSize = (int) (showParent.getAsBoolean() ? cs * 0.25f : cs * 0.5f);
+		if (fontSize >= MIN_FONT_SIZE) {
+			g.setFont(new Font(fontFamily, Font.PLAIN, fontSize));
+			g.setColor(cellTextColor.apply(cell));
+			var textBounds = getBounds(g, text);
+			g.drawString(text, cs / 2 - (int) (textBounds.getWidth() / 2), cs - margin);
+		}
+	}
 
 	@Override
 	public void drawCell(Graphics2D g, GridGraph2D<?, ?> grid, int cell) {
