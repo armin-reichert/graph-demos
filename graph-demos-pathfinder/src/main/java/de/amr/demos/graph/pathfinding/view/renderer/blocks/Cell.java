@@ -13,7 +13,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
 import de.amr.demos.graph.pathfinding.model.Tile;
@@ -29,21 +29,21 @@ public class Cell implements GridCellRenderer {
 
 	public static final int MIN_FONT_SIZE = 8;
 
-	public Function<Integer, Integer> parent;
+	public IntFunction<Integer> parent;
 	public BooleanSupplier showCost;
 	public BooleanSupplier showParent;
 	public IntSupplier cellSize;
 	public Color gridBackground;
-	public Function<Integer, Color> cellBackground;
-	public Function<Integer, Color> cellTextColor;
+	public IntFunction<Color> cellBackground;
+	public IntFunction<Color> cellTextColor;
 	public String fontFamily;
 
-	private Function<Integer, Double> fnLeftUpperValue;
-	private Function<Integer, Double> fnRightUpperValue;
-	private Function<Integer, Double> fnCenterValue;
+	private IntFunction<Double> fnLeftUpperValue;
+	private IntFunction<Double> fnRightUpperValue;
+	private IntFunction<Double> fnCenterValue;
 
-	public Cell(Function<Integer, Double> fnLeftUpperValue, Function<Integer, Double> fnRightUpperValue,
-			Function<Integer, Double> fnCenterValue) {
+	public Cell(IntFunction<Double> fnLeftUpperValue, IntFunction<Double> fnRightUpperValue,
+			IntFunction<Double> fnCenterValue) {
 		this.fnLeftUpperValue = fnLeftUpperValue;
 		this.fnRightUpperValue = fnRightUpperValue;
 		this.fnCenterValue = fnCenterValue;

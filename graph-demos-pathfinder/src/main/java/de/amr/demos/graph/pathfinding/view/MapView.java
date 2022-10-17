@@ -351,8 +351,8 @@ public class MapView extends JPanel {
 	private static final Color COMPLETED_CELL_BACKGROUND = Color.ORANGE;
 
 	private GridRenderer createMapRenderer() {
-		RenderingStyle style = controller.getStyle();
-		if (style == RenderingStyle.BLOCKS) {
+		return switch (controller.getStyle()) {
+		case BLOCKS -> {
 			Cell cell = createMapCell();
 			cell.parent = getPathFinder()::getParent;
 			cell.showCost = controller::isShowingCost;
@@ -365,8 +365,9 @@ public class MapView extends JPanel {
 			BlocksMap blocksMap = new BlocksMap(cell);
 			blocksMap.fnCellSize = canvas::getCellSize;
 			blocksMap.fnGridBgColor = () -> MAP_BACKGROUND;
-			return blocksMap;
-		} else if (style == RenderingStyle.PEARLS) {
+			yield blocksMap;
+		}
+		case PEARLS -> {
 			PearlsMapRenderer pmr = new PearlsMapRenderer(new PearlsCellRendererAdapter());
 			pmr.fnCellSize = canvas::getCellSize;
 			pmr.fnGridBgColor = () -> MAP_BACKGROUND;
@@ -375,9 +376,10 @@ public class MapView extends JPanel {
 			pmr.fnPassageColor = (cell,
 					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).get()) ? SOLUTION_BACKGROUND
 							: UNVISITED_CELL_BACKGROUND;
-			return pmr;
+			yield pmr;
 		}
-		throw new IllegalArgumentException("Unknown style: " + style);
+		default -> throw new IllegalArgumentException("Unknown style: " + controller.getStyle());
+		};
 	}
 
 	private Cell createMapCell() {
