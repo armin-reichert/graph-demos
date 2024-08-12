@@ -1,30 +1,20 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static de.amr.swing.MySwing.selectComboNoAction;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.model.PathFinderModel;
 import de.amr.demos.graph.pathfinding.model.PathFinderResult;
 import de.amr.swing.MySwing;
 import net.miginfocom.swing.MigLayout;
+import org.tinylog.Logger;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+
+import static de.amr.swing.MySwing.selectComboNoAction;
 
 public class MapsWindow extends JFrame {
-
-	private static final Logger LOGGER = LogManager.getFormatterLogger();
 
 	private PathFinderModel model;
 	private PathFinderController controller;
@@ -44,7 +34,7 @@ public class MapsWindow extends JFrame {
 			var containerSize = e.getComponent().getSize();
 			int containerWidth = containerSize.width;
 			int containerHeight = containerSize.height;
-			LOGGER.info("Container resized to %s", containerSize);
+			Logger.info("Container resized to %s", containerSize);
 			var newSize = Math.min(0.45 * containerWidth, 0.85 * containerHeight);
 			resizeMapViews((int) newSize);
 		}
@@ -60,10 +50,10 @@ public class MapsWindow extends JFrame {
 
 	public void resizeMapViews(int newSize) {
 		if (resizeMapView(leftMapView, newSize)) {
-			LOGGER.info("Resized left view to %s", leftMapView.getSize());
+			Logger.info("Resized left view to %s", leftMapView.getSize());
 		}
 		if (resizeMapView(rightMapView, newSize)) {
-			LOGGER.info("Resized right view to %s", rightMapView.getSize());
+			Logger.info("Resized right view to %s", rightMapView.getSize());
 		}
 	}
 

@@ -1,17 +1,13 @@
 package de.amr.demos.graph.iterators;
 
-import static de.amr.graph.core.api.TraversalState.COMPLETED;
+import de.amr.graph.grid.ui.SwingGridSampleApp;
+import org.tinylog.Logger;
 
 import java.util.stream.IntStream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.amr.graph.grid.ui.SwingGridSampleApp;
+import static de.amr.graph.core.api.TraversalState.COMPLETED;
 
 public class FullGridApp extends SwingGridSampleApp {
-
-	private static final Logger LOGGER = LogManager.getFormatterLogger();
 
 	public static void main(String[] args) {
 		launch(new FullGridApp());
@@ -31,7 +27,7 @@ public class FullGridApp extends SwingGridSampleApp {
 			getGrid().fill();
 			getCanvas().clear();
 			watch.measure(getCanvas()::drawGrid);
-			LOGGER.info(String.format("Grid (%d cells @%d) rendered in %.2f seconds", getGrid().numVertices(), cellSize,
+			Logger.info(String.format("Grid (%d cells @%d) rendered in %.2f seconds", getGrid().numVertices(), cellSize,
 					watch.getSeconds()));
 			sleep(1000);
 		});

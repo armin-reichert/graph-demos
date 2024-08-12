@@ -1,29 +1,5 @@
 package de.amr.demos.graph.pathfinding.view;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static javax.swing.KeyStroke.getKeyStroke;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.OptionalInt;
-import java.util.function.IntSupplier;
-
-import javax.swing.Action;
-import javax.swing.ButtonGroup;
-import javax.swing.InputMap;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButtonMenuItem;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import de.amr.demos.graph.pathfinding.controller.ExecutionMode;
 import de.amr.demos.graph.pathfinding.controller.PathFinderController;
 import de.amr.demos.graph.pathfinding.controller.RenderingStyle;
@@ -44,12 +20,20 @@ import de.amr.graph.grid.ui.rendering.GridRenderer;
 import de.amr.graph.pathfinder.api.GraphSearch;
 import de.amr.graph.pathfinder.api.GraphSearchObserver;
 import de.amr.graph.pathfinder.api.ObservableGraphSearch;
-import de.amr.graph.pathfinder.impl.AStarSearch;
-import de.amr.graph.pathfinder.impl.BestFirstSearch;
-import de.amr.graph.pathfinder.impl.BidiAStarSearch;
-import de.amr.graph.pathfinder.impl.BidiGraphSearch;
-import de.amr.graph.pathfinder.impl.DijkstraSearch;
+import de.amr.graph.pathfinder.impl.*;
 import de.amr.swing.MySwing;
+import org.tinylog.Logger;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.OptionalInt;
+import java.util.function.IntSupplier;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static javax.swing.KeyStroke.getKeyStroke;
 
 /**
  * Displays the map together with the information computed during the path finder execution.
@@ -57,8 +41,6 @@ import de.amr.swing.MySwing;
  * @author Armin Reichert
  */
 public class MapView extends JPanel {
-
-	private static final Logger LOGGER = LogManager.getFormatterLogger();
 
 	private PathFinderModel model;
 	private PathFinderController controller;
@@ -73,7 +55,7 @@ public class MapView extends JPanel {
 	private JRadioButtonMenuItem rbExecutionAutomatic;
 	private JCheckBoxMenuItem cbShowCost;
 	private JCheckBoxMenuItem cbShowParent;
-	private GridCanvas canvas;
+	private final GridCanvas canvas;
 	private IntSupplier fnPathFinderIndex;
 
 	private int getPathFinderIndex() {
@@ -174,10 +156,10 @@ public class MapView extends JPanel {
 
 	// Actions
 
-	private Action actionSetSourceHere = MySwing.action("Search From Here",
+	private final Action actionSetSourceHere = MySwing.action("Search From Here",
 			e -> getController().setSource(mouse.getCellUnderMouse()));
 
-	private Action actionSetTargetHere = MySwing.action("Search To Here",
+	private final Action actionSetTargetHere = MySwing.action("Search To Here",
 			e -> getController().setTarget(mouse.getCellUnderMouse()));
 
 	public MapView() {
@@ -312,7 +294,7 @@ public class MapView extends JPanel {
 		canvas.replaceRenderer(createMapRenderer());
 		canvas.drawGrid();
 		requestFocusInWindow();
-		LOGGER.trace(() -> "(%d) MapView updated: %s".formatted(updateCnt, this));
+		Logger.trace(() -> "(%d) MapView updated: %s".formatted(updateCnt, this));
 	}
 
 	static int updateCnt;
@@ -352,33 +334,32 @@ public class MapView extends JPanel {
 
 	private GridRenderer createMapRenderer() {
 		return switch (controller.getStyle()) {
-		case BLOCKS -> {
-			Cell cell = createMapCell();
-			cell.parent = getPathFinder()::getParent;
-			cell.showCost = controller::isShowingCost;
-			cell.showParent = controller::isShowingParent;
-			cell.cellTextColor = this::computeTextColor;
-			cell.gridBackground = MAP_BACKGROUND;
-			cell.fontFamily = "Arial Narrow";
-			cell.cellSize = canvas::getCellSize;
-			cell.cellBackground = this::computeCellBackground;
-			BlocksMap blocksMap = new BlocksMap(cell);
-			blocksMap.fnCellSize = canvas::getCellSize;
-			blocksMap.fnGridBgColor = () -> MAP_BACKGROUND;
-			yield blocksMap;
-		}
-		case PEARLS -> {
-			PearlsMapRenderer pmr = new PearlsMapRenderer(new PearlsCellRendererAdapter());
-			pmr.fnCellSize = canvas::getCellSize;
-			pmr.fnGridBgColor = () -> MAP_BACKGROUND;
-			pmr.fnCellBgColor = this::computeCellBackground;
-			pmr.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
-			pmr.fnPassageColor = (cell,
-					dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).get()) ? SOLUTION_BACKGROUND
-							: UNVISITED_CELL_BACKGROUND;
-			yield pmr;
-		}
-		default -> throw new IllegalArgumentException("Unknown style: " + controller.getStyle());
+			case BLOCKS -> {
+				Cell cell = createMapCell();
+				cell.parent = getPathFinder()::getParent;
+				cell.showCost = controller::isShowingCost;
+				cell.showParent = controller::isShowingParent;
+				cell.cellTextColor = this::computeTextColor;
+				cell.gridBackground = MAP_BACKGROUND;
+				cell.fontFamily = "Arial Narrow";
+				cell.cellSize = canvas::getCellSize;
+				cell.cellBackground = this::computeCellBackground;
+				BlocksMap blocksMap = new BlocksMap(cell);
+				blocksMap.fnCellSize = canvas::getCellSize;
+				blocksMap.fnGridBgColor = () -> MAP_BACKGROUND;
+				yield blocksMap;
+			}
+			case PEARLS -> {
+				PearlsMapRenderer pmr = new PearlsMapRenderer(new PearlsCellRendererAdapter());
+				pmr.fnCellSize = canvas::getCellSize;
+				pmr.fnGridBgColor = () -> MAP_BACKGROUND;
+				pmr.fnCellBgColor = this::computeCellBackground;
+				pmr.fnPassageWidth = (u, v) -> Math.max(canvas.getCellSize() * 5 / 100, 1);
+				pmr.fnPassageColor = (cell,
+						dir) -> partOfSolution(cell) && partOfSolution(model.getMap().neighbor(cell, dir).get()) ? SOLUTION_BACKGROUND
+								: UNVISITED_CELL_BACKGROUND;
+				yield pmr;
+			}
 		};
 	}
 
@@ -419,8 +400,7 @@ public class MapView extends JPanel {
 		if (partOfSolution(cell)) {
 			return SOLUTION_BACKGROUND;
 		}
-		if (getPathFinder() instanceof BidiGraphSearch) {
-			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) getPathFinder();
+		if (getPathFinder() instanceof BidiGraphSearch<?,?> bidi) {
 			if (cell == bidi.getMeetingPoint()) {
 				return MEETING_POINT_BACKGROUND;
 			}
@@ -451,8 +431,7 @@ public class MapView extends JPanel {
 		if (partOfSolution(cell)) {
 			return SOLUTION_FOREGROUND;
 		}
-		if (getPathFinder() instanceof BidiGraphSearch) {
-			BidiGraphSearch<?, ?> bidi = (BidiGraphSearch<?, ?>) getPathFinder();
+		if (getPathFinder() instanceof BidiGraphSearch<?,?> bidi) {
 			if (cell == bidi.getMeetingPoint()) {
 				return MEETING_POINT_FOREGROUND;
 			}
