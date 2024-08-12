@@ -6,7 +6,7 @@
 		<groupId>de.amr.demos.graph</groupId>
 		<artifactId>graph-demos-all</artifactId>
 		<version>1.0</version>
-		<relativePath>..</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<dependencies>
